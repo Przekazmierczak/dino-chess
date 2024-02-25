@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Table</title>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                for (let row = 0; row < 8; row++) {
+                    for (let col = 0; col < 8; col++) {
+                        change_square(row, col);
+                    }
+                }
+            });
+
+            function change_square(row, column) {
+                fetch(`/table/square?row=${row}&column=${column}`)
+                .then(response => response.json())
+                .then(data => {
+                    document.querySelector(`#square${row}${column}`).innerHTML = `${data.piece}`
+                });
+            };
+        </script>
+    </head>
+    <body>
+        {% block body %}
+        {% endblock %}
+    </body>
+</html>
