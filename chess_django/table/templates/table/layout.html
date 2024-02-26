@@ -6,18 +6,57 @@
             document.addEventListener('DOMContentLoaded', function () {
                 for (let row = 0; row < 8; row++) {
                     for (let col = 0; col < 8; col++) {
-                        change_square(row, col);
+                        changeSquare(row, col);
                     }
                 }
             });
 
-            function change_square(row, column) {
+            function changeSquare(row, column) {
+                let image = "";
+
                 fetch(`/table/square?row=${row}&column=${column}`)
                 .then(response => response.json())
                 .then(data => {
-                    document.querySelector(`#square${row}${column}`).innerHTML = `${data.piece}`
+                    let image = getImageSource(data.piece, data.player);
+                    document.querySelector(`#square${row}${column}`).innerHTML = `${image}`;
                 });
             };
+
+            function getImageSource(piece, player) {
+                const pieceImages = {
+                    "pawn": {
+                        "white": `{% load static %}<img src="{% static 'table/Pawn_white.png' %}" alt="Example Image">`,
+                        "black": `{% load static %}<img src="{% static 'table/Pawn_black.png' %}" alt="Example Image">`
+                    },
+                    "rook": {
+                        "white": `{% load static %}<img src="{% static 'table/Rook_white.png' %}" alt="Example Image">`,
+                        "black": `{% load static %}<img src="{% static 'table/Rook_black.png' %}" alt="Example Image">`
+                    },
+                    "knight": {
+                        "white": `{% load static %}<img src="{% static 'table/Knight_white.png' %}" alt="Example Image">`,
+                        "black": `{% load static %}<img src="{% static 'table/Knight_black.png' %}" alt="Example Image">`
+                    },
+                    "bishop": {
+                        "white": `{% load static %}<img src="{% static 'table/Bishop_white.png' %}" alt="Example Image">`,
+                        "black": `{% load static %}<img src="{% static 'table/Bishop_black.png' %}" alt="Example Image">`
+                    },
+                    "queen": {
+                        "white": `{% load static %}<img src="{% static 'table/Queen_white.png' %}" alt="Example Image">`,
+                        "black": `{% load static %}<img src="{% static 'table/Queen_black.png' %}" alt="Example Image">`
+                    },
+                    "king": {
+                        "white": `{% load static %}<img src="{% static 'table/King_white.png' %}" alt="Example Image">`,
+                        "black": `{% load static %}<img src="{% static 'table/King_black.png' %}" alt="Example Image">`
+                    }
+                };
+
+                if (piece in pieceImages && player in pieceImages[piece]) {
+                    return pieceImages[piece][player];
+                } else {
+                    return ""
+                }
+            }
+
         </script>
     </head>
     <body>
