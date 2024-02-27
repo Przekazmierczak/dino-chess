@@ -102,4 +102,4 @@ for player, row in [("white", 0), ("white", 1), ("black", 6), ("black", 7)]:
         for column in range(8):
             curr_board[row][column] = Piece("pawn", player, (row, column))
 
-curr_board[4][1] = Piece("knight","black", (4,1))
+curr_board[3][1] = Piece("knight","black", (3,1))
