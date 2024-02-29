@@ -3,7 +3,6 @@ class Piece:
         self.piece = piece
         self.player = player
         self.row, self.column = location
-        self.moved = False
 
     def _is_valid_position(self, row, column):
         # Check if the given row and column are within the bounds of the board
@@ -20,7 +19,7 @@ class Piece:
             # Possible movement directions for a pawn
             directions = [(direction_by_colour, 0)]
             # Allow moving two steps forward if the pawn hasn't moved yet
-            if not self.moved:
+            if self.player == "white" and self.row == 1 or self.player == "black" and self.row == 6:
                 directions.append((direction_by_colour * 2, 0))
 
             # Check for forward movements
@@ -91,15 +90,42 @@ class Piece:
 
 
 # initiate new board
+    
+board = [["R", "N", "B", "K", "Q", "B", "N", "R"],
+         ["P", "P", "P", "P", "P", "P", "P", "P"],
+         [" ", " ", " ", " ", " ", " ", " ", " "],
+         [" ", " ", " ", " ", " ", " ", " ", " "],
+         [" ", " ", " ", " ", " ", " ", " ", " "],
+         [" ", " ", " ", " ", " ", " ", " ", " "],
+         ["p", "p", "p", "p", "p", "p", "p", "p"],
+         ["r", "n", "b", "k", "q", "b", "n", "r"]]
+
+board_piece = {
+    "R": {"piece": "rook", "player": "white"},
+    "N": {"piece": "knight", "player": "white"},
+    "B": {"piece": "bishop", "player": "white"},
+    "K": {"piece": "king", "player": "white"},
+    "Q": {"piece": "queen", "player": "white"},
+    "P": {"piece": "pawn", "player": "white"},
+    "r": {"piece": "rook", "player": "black"},
+    "n": {"piece": "knight", "player": "black"},
+    "b": {"piece": "bishop", "player": "black"},
+    "k": {"piece": "king", "player": "black"},
+    "q": {"piece": "queen", "player": "black"},
+    "p": {"piece": "pawn", "player": "black"}
+}
+
 curr_board = [[None for _ in range(8)] for _ in range(8)]
 
-for player, row in [("white", 0), ("white", 1), ("black", 6), ("black", 7)]:
-    if row == 0 or row == 7:
-        for piece, columns in [("rook", [0, 7]), ("knight", [1, 6]), ("bishop", [2, 5]), ("queen", [3]), ("king", [4])]:
-            for column in columns:
-                curr_board[row][column] = Piece(piece, player, (row, column))
-    else:
-        for column in range(8):
-            curr_board[row][column] = Piece("pawn", player, (row, column))
+ROWS = 8
+COLS = 8
 
-curr_board[3][1] = Piece("knight","black", (3,1))
+for row in range(ROWS):
+    for col in range(COLS):
+        if board[row][col] in board_piece:
+            piece = board_piece[board[row][col]]["piece"]
+            player = board_piece[board[row][col]]["player"]
+            curr_board[row][col] = Piece(piece, player, (row, col))
+
+
+# curr_board[3][1] = Piece("knight","black", (3,1))
