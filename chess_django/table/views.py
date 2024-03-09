@@ -4,8 +4,11 @@ from . import pieces
 
 # Create your views here.
 def index(request):
-    return render(request, "table/index.html", {
-        "board": pieces.curr_board
+    return render(request, "table/index.html")
+
+def table(request, table_id):
+    return render(request, "table/table_id.html", {
+        "table_id": table_id,
     })
 
 def square(request):
@@ -19,7 +22,7 @@ def square(request):
         curr_square_piece = None
         curr_square_player = None
         curr_square_moves = None
-
+ 
     return JsonResponse({
         "piece": curr_square_piece,
         "player": curr_square_player,

@@ -1,14 +1,21 @@
 {% extends "table/layout.html" %}
 
 {% block body %}
-    <h1>Table</h1>
-    <table>
-        {% for row in "01234567" %}
-        <tr>
-            {% for column in "01234567" %}
-            <td id="square{{ row }}{{ column }}"></td>
-            {% endfor %}
-        </tr>
-        {% endfor %}
-    </table>
+    What table would you like to enter?<br>
+    <input id="table-id-input" type="text" size="100"><br>
+    <input id="table-id-submit" type="button" value="Enter">
+
+    <script>
+        document.querySelector('#table-id-input').focus();
+        document.querySelector('#table-id-input').onkeyup = function(e) {
+            if (e.keyCode === 13) {  // enter, return
+                document.querySelector('#table-id-submit').click();
+            }
+        };
+
+        document.querySelector('#table-id-submit').onclick = function(e) {
+            var tableID = document.querySelector('#table-id-input').value;
+            window.location.pathname = '/table/' + tableID + '/';
+        };
+    </script>
 {% endblock %}

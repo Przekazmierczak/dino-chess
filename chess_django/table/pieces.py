@@ -88,6 +88,20 @@ class Piece:
         # Return the lists of possible moves and attacks
         return (moves, attacks)
 
+def create_board(board, board_piece):
+    curr_board = [[None for _ in range(8)] for _ in range(8)]
+
+    ROWS = 8
+    COLS = 8
+
+    for row in range(ROWS):
+        for col in range(COLS):
+            if board[row][col] in board_piece:
+                piece = board_piece[board[row][col]]["piece"]
+                player = board_piece[board[row][col]]["player"]
+                curr_board[row][col] = Piece(piece, player, (row, col))
+    
+    return curr_board
 
 # initiate new board
     
@@ -115,17 +129,4 @@ board_piece = {
     "p": {"piece": "pawn", "player": "black"}
 }
 
-curr_board = [[None for _ in range(8)] for _ in range(8)]
-
-ROWS = 8
-COLS = 8
-
-for row in range(ROWS):
-    for col in range(COLS):
-        if board[row][col] in board_piece:
-            piece = board_piece[board[row][col]]["piece"]
-            player = board_piece[board[row][col]]["player"]
-            curr_board[row][col] = Piece(piece, player, (row, col))
-
-
-# curr_board[3][1] = Piece("knight","black", (3,1))
+curr_board = create_board(board, board_piece)

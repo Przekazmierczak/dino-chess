@@ -1,0 +1,15 @@
+{% extends "table/layout.html" %}
+
+{% block body %}
+    <h1>Table: {{ table_id }}</h1>
+    <table>
+        {% for row in "01234567" %}
+        <tr>
+            {% for column in "01234567" %}
+            <td id="square{{ row }}{{ column }}"></td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </table>
+    {{ table_id|json_script:"table_id" }}
+{% endblock %}
