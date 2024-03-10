@@ -88,8 +88,24 @@ class Piece:
         # Return the lists of possible moves and attacks
         return (moves, attacks)
 
-def create_board(board, board_piece):
+def create_board(board):
+    board_piece = {
+        "R": {"piece": "rook", "player": "white"},
+        "N": {"piece": "knight", "player": "white"},
+        "B": {"piece": "bishop", "player": "white"},
+        "K": {"piece": "king", "player": "white"},
+        "Q": {"piece": "queen", "player": "white"},
+        "P": {"piece": "pawn", "player": "white"},
+        "r": {"piece": "rook", "player": "black"},
+        "n": {"piece": "knight", "player": "black"},
+        "b": {"piece": "bishop", "player": "black"},
+        "k": {"piece": "king", "player": "black"},
+        "q": {"piece": "queen", "player": "black"},
+        "p": {"piece": "pawn", "player": "black"}
+    }
+
     curr_board = [[None for _ in range(8)] for _ in range(8)]
+    json_board = [[None for _ in range(8)] for _ in range(8)]
 
     ROWS = 8
     COLS = 8
@@ -100,33 +116,29 @@ def create_board(board, board_piece):
                 piece = board_piece[board[row][col]]["piece"]
                 player = board_piece[board[row][col]]["player"]
                 curr_board[row][col] = Piece(piece, player, (row, col))
-    
-    return curr_board
+
+    for row in range(ROWS):
+        for col in range(COLS):
+            if curr_board[row][col]:
+                json_board[row][col] = {
+                    "piece": curr_board[row][col].piece, 
+                    "player": curr_board[row][col].player,
+                    "moves": curr_board[row][col].check_possible_moves(curr_board)
+                    }
+
+    return json_board
+
 
 # initiate new board
     
-board = [["R", "N", "B", "K", "Q", "B", "N", "R"],
-         ["P", "P", "P", "P", "P", "P", "P", "P"],
-         [" ", " ", " ", " ", " ", " ", " ", " "],
-         [" ", " ", " ", " ", " ", " ", " ", " "],
-         [" ", " ", " ", " ", " ", " ", " ", " "],
-         [" ", " ", " ", " ", " ", " ", " ", " "],
-         ["p", "p", "p", "p", "p", "p", "p", "p"],
-         ["r", "n", "b", "k", "q", "b", "n", "r"]]
+# board = [["R", "N", "B", "K", "Q", "B", "N", "R"],
+#          ["P", "P", "P", "P", "P", "P", "P", "P"],
+#          [" ", " ", " ", " ", " ", " ", " ", " "],
+#          [" ", " ", " ", " ", " ", " ", " ", " "],
+#          [" ", " ", " ", " ", " ", " ", " ", " "],
+#          [" ", " ", " ", " ", " ", " ", " ", " "],
+#          ["p", "p", "p", "p", "p", "p", "p", "p"],
+#          ["r", "n", "b", "k", "q", "b", "n", "r"]]
 
-board_piece = {
-    "R": {"piece": "rook", "player": "white"},
-    "N": {"piece": "knight", "player": "white"},
-    "B": {"piece": "bishop", "player": "white"},
-    "K": {"piece": "king", "player": "white"},
-    "Q": {"piece": "queen", "player": "white"},
-    "P": {"piece": "pawn", "player": "white"},
-    "r": {"piece": "rook", "player": "black"},
-    "n": {"piece": "knight", "player": "black"},
-    "b": {"piece": "bishop", "player": "black"},
-    "k": {"piece": "king", "player": "black"},
-    "q": {"piece": "queen", "player": "black"},
-    "p": {"piece": "pawn", "player": "black"}
-}
 
-curr_board = create_board(board, board_piece)
+# create_board(board)

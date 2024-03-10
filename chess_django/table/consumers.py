@@ -1,4 +1,5 @@
 import json
+from . import pieces
 
 from channels.generic.websocket import AsyncWebsocketConsumer
 
@@ -13,19 +14,25 @@ class TableConsumer(AsyncWebsocketConsumer):
 
         await self.accept()
 
-    async def disconnect(self, close_code):
-        # Leave room group
-        await self.channel_layer.group_discard(self.table_group_id, self.channel_name)
-
-    # Receive message from WebSocket
-    async def receive(self, text_data):
-        text_data_json = json.loads(text_data)
-        message = text_data_json["message"]
-
-        # Send message to room group
+        # Push actual board
+        curr_board = pieces.create_board(board)
         await self.channel_layer.group_send(
-            self.table_group_id, {"type": "new_board", "message": message}
+            self.table_group_id, {"type": "new_board", "board": curr_board}
         )
+
+    # async def disconnect(self, close_code):
+    #     # Leave room group
+    #     await self.channel_layer.group_discard(self.table_group_id, self.channel_name)
+
+    # # Receive message from WebSocket
+    # async def receive(self, text_data):
+    #     text_data_json = json.loads(text_data)
+    #     message = text_data_json["message"]
+
+    #     # Send message to room group
+    #     await self.channel_layer.group_send(
+    #         self.table_group_id, {"type": "new_board", "message": message}
+    #     )
 
     # Receive message from room group
     async def new_board(self, event):
@@ -33,3 +40,12 @@ class TableConsumer(AsyncWebsocketConsumer):
 
         # Send message to WebSocket
         await self.send(text_data=json.dumps({"board": board}))
+
+board = [["R", "N", "B", "K", "Q", "B", "N", "R"],
+         ["P", "P", "P", "P", "P", "P", "P", "P"],
+         [" ", " ", " ", " ", " ", " ", " ", " "],
+         [" ", " ", " ", " ", " ", " ", " ", " "],
+         [" ", " ", " ", " ", " ", " ", " ", " "],
+         [" ", " ", " ", " ", " ", " ", " ", " "],
+         ["p", "p", "p", "p", "p", "p", "p", "p"],
+         ["r", "n", "b", "k", "q", "b", "n", "r"]]
