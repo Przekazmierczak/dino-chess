@@ -1,8 +1,8 @@
 import json
-from . import pieces
-
 from channels.generic.websocket import AsyncWebsocketConsumer
 
+from .models import Game, Board
+from . import pieces
 
 class TableConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -15,14 +15,22 @@ class TableConsumer(AsyncWebsocketConsumer):
         await self.accept()
 
         # Push actual board
-        curr_board = pieces.create_board(board)
+        actual_board_object = pieces.create_board(board)
         await self.channel_layer.group_send(
-            self.table_group_id, {"type": "new_board", "board": curr_board}
+            self.table_group_id, {"type": "new_board", "board": actual_board_object}
         )
 
-    # async def disconnect(self, close_code):
-    #     # Leave room group
-    #     await self.channel_layer.group_discard(self.table_group_id, self.channel_name)
+    async def disconnect(self, close_code):
+        # Leave room group
+        await self.channel_layer.group_discard(self.table_group_id, self.channel_name)
+
+    async def get_board_state_from_database(self):
+        actual_game_db = await Game.objects.get(pk=self.table_id)
+        actual_board_db = await Board.objects.get(game=actual_game_db)
+        print(actual_board_db)
+        return actual_board_db
+
+
 
     # # Receive message from WebSocket
     # async def receive(self, text_data):

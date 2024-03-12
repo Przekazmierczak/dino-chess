@@ -1,12 +1,13 @@
 from django.db import models
 
 # Create your models here.
+class Game(models.Model):
+    pass
+
 class Board(models.Model):
+    game = models.ForeignKey(Game, on_delete=models.CASCADE)
     total_moves = models.IntegerField()
     board = models.TextField()
-    player = models.CharField(max_length=1)
+    turn = models.CharField(max_length=1)
     castling = models.CharField(max_length=4)
     soft_moves = models.IntegerField()
-
-class Games(models.Model):
-    game_history = models.ManyToManyField(Board)
