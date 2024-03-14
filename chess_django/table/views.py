@@ -26,7 +26,7 @@ def create_table(request):
     
     new_game = Game.objects.create()
 
-    new_board = Board.objects.create(
+    Board.objects.create(
         game = new_game,
         total_moves = 0,
         board = json.dumps({"board": starting_board}),
@@ -34,7 +34,7 @@ def create_table(request):
         castling = "----", # "kqKQ"
         soft_moves = 0
     )
-    print(new_game.id)
+
     table_id = f"{new_game.id}"
     return redirect("table", table_id=table_id)
 

@@ -24,17 +24,19 @@ td {
     max-width: 100%;
     height: auto;
 }
-/* to change */
-#square00, #square02, #square04, #square06, #square11, #square13, #square15, #square17,
-#square20, #square22, #square24, #square26, #square31, #square33, #square35, #square37,
-#square40, #square42, #square44, #square46, #square51, #square53, #square55, #square57,
-#square60, #square62, #square64, #square66, #square71, #square73, #square75, #square77 {
+
+.dark {
     background-color: rgba(0, 60, 128, 0.658);
 }
-/* to change */
-#square01, #square03, #square05, #square07, #square10, #square12, #square14, #square16,
-#square21, #square23, #square25, #square27, #square30, #square32, #square34, #square36,
-#square41, #square43, #square45, #square47, #square50, #square52, #square54, #square56,
-#square61, #square63, #square65, #square67, #square70, #square72, #square74, #square76 {
+
+.light {
     background-color: rgba(0, 81, 128, 0.24);
+}
+
+.darkGreen {
+    background-color: rgba(28, 138, 0, 0.74);
+}
+
+.lightGreen {
+    background-color: rgba(28, 138, 0, 0.411);
 }

@@ -128,17 +128,10 @@ def create_board(board):
 
     return json_board
 
+def update_board(board, move):
+    old_position_row, old_position_col = move[0]
+    new_position_row, new_position_col = move[1]
+    board[new_position_row][new_position_col] = board[old_position_row][old_position_col]
+    board[old_position_row][old_position_col] = None
 
-# initiate new board
-    
-# board = [["R", "N", "B", "K", "Q", "B", "N", "R"],
-#          ["P", "P", "P", "P", "P", "P", "P", "P"],
-#          [" ", " ", " ", " ", " ", " ", " ", " "],
-#          [" ", " ", " ", " ", " ", " ", " ", " "],
-#          [" ", " ", " ", " ", " ", " ", " ", " "],
-#          [" ", " ", " ", " ", " ", " ", " ", " "],
-#          ["p", "p", "p", "p", "p", "p", "p", "p"],
-#          ["r", "n", "b", "k", "q", "b", "n", "r"]]
-
-
-# create_board(board)
+    return board
