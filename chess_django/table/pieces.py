@@ -146,8 +146,8 @@ def update_board(board, move):
     possible_moves = block_board[old_position_row][old_position_col].check_possible_moves(block_board)
     new_position = (new_position_row, new_position_col)
 
-    if new_position in possible_moves[0]:
+    if new_position in possible_moves[0] or new_position in possible_moves[1]:
         board[new_position_row][new_position_col] = board[old_position_row][old_position_col]
         board[old_position_row][old_position_col] = None
 
-        return board
+        return board, True

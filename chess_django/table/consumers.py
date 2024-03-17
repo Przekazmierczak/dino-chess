@@ -54,16 +54,17 @@ class TableConsumer(AsyncWebsocketConsumer):
         move = text_data_json["move"]
 
         old_board = await self.get_board_state_from_database()
-        updated_board = pieces.update_board(old_board, move)
+        updated_board, correct = pieces.update_board(old_board, move)
 
-        await self.push_new_board_to_database(updated_board)
+        if correct:
+            await self.push_new_board_to_database(updated_board)
 
-        updated_json_board = pieces.create_json_board(updated_board)
+            updated_json_board = pieces.create_json_board(updated_board)
 
-        # Send message to room group
-        await self.channel_layer.group_send(
-            self.table_group_id, {"type": "new_board", "board": updated_json_board}
-        )
+            # Send message to room group
+            await self.channel_layer.group_send(
+                self.table_group_id, {"type": "new_board", "board": updated_json_board}
+            )
 
     # Receive message from room group
     async def new_board(self, event):

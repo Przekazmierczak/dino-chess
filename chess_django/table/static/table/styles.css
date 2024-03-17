@@ -44,4 +44,12 @@ td {
 
 .lightGreen {
     background-color: rgba(28, 138, 0, 0.411);
+
+}
+.darkRed {
+    background-color: rgba(206, 0, 0, 0.829);
+}
+
+.lightRed {
+    background-color: rgba(206, 0, 0, 0.281);
 }

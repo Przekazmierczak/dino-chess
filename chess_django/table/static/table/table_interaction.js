@@ -1,3 +1,5 @@
+let moveListeners = [];
+
 document.addEventListener('DOMContentLoaded', function () {
     colorBoard();
     
@@ -28,9 +30,53 @@ document.addEventListener('DOMContentLoaded', function () {
 
 });
 
+function uploadBoard(board, row, col, tableSocket) {
+    const boardSquare = board[row][col];
+    const {piece, player, moves} = boardSquare
+    
+    const image = getImageSource(piece, player);
+    const htmlSquare = document.querySelector(`#square${row}${col}`);
+    htmlSquare.innerHTML = `${image}`;
+    htmlSquare.addEventListener("click", function() {
+        colorBoard();
+        removeMoveListeners();
+        moves[0].forEach(move => addPossibleMove(move, row, col, tableSocket, "move"));
+        moves[1].forEach(move => addPossibleMove(move, row, col, tableSocket, "attack"));
+    });
+};
+
+function addPossibleMove(move, oldRow, oldCol, tableSocket, type) {
+    const row = move[0]
+    const col = move[1]
+    const htmlPossibleMove = document.querySelector(`#square${row}${col}`);
+    if (htmlPossibleMove.classList.contains('dark')) {
+        htmlPossibleMove.classList.remove('dark');
+        if (type === "move") {
+            htmlPossibleMove.classList.add('darkGreen');
+        } else {
+            htmlPossibleMove.classList.add('darkRed');
+        }
+    } else {
+        htmlPossibleMove.classList.remove('light');
+        if (type === "move") {
+            htmlPossibleMove.classList.add('lightGreen');
+        } else {
+            htmlPossibleMove.classList.add('lightRed');
+        }
+    }
+    let moveListener = function() {
+        const move = [[oldRow, oldCol], [row, col]];
+        tableSocket.send(JSON.stringify({
+            'move': move
+        }));
+    }
+    htmlPossibleMove.addEventListener("click", moveListener);
+    moveListeners.push({element: htmlPossibleMove, listener: moveListener});
+}
+
 function clearBoard() {
     colorBoard();
-    removeListeners();
+    removeAllListeners();
     removePieces();
 }
 
@@ -38,11 +84,11 @@ function colorBoard() {
     for (let row = 0; row < 8; row++){
         for (let col = 0; col < 8; col++) {
             const htmlSquare = document.querySelector(`#square${row}${col}`);
-            if (htmlSquare.classList.contains('darkGreen')) {
-                htmlSquare.classList.remove('darkGreen')
-            }
-            if (htmlSquare.classList.contains('lightGreen')) {
-                htmlSquare.classList.remove('lightGreen')
+            const colors = ['darkGreen', 'lightGreen', 'darkRed', 'lightRed'];
+            for (let i = 0; i < colors.length; i++) {
+                if (htmlSquare.classList.contains(colors[i])) {
+                    htmlSquare.classList.remove(colors[i]);
+                }
             }
             if ((row + col) % 2 == 0) {
                 htmlSquare.classList.add('dark');
@@ -53,7 +99,7 @@ function colorBoard() {
     }
 }
 
-function removeListeners() {
+function removeAllListeners() {
     for(let row = 0; row < 8; row++) {
         for (let col = 0; col < 8; col++) {
             let htmlSquare = document.querySelector(`#square${row}${col}`);
@@ -72,40 +118,11 @@ function removePieces() {
     }
 }
 
-    
-function uploadBoard(board, row, col, tableSocket) {
-    const boardSquare = board[row][col];
-    const {piece, player, moves} = boardSquare
-    
-    const image = getImageSource(piece, player);
-    const htmlSquare = document.querySelector(`#square${row}${col}`);
-    htmlSquare.innerHTML = `${image}`;
-    htmlSquare.addEventListener("click", function() {
-        console.log(moves);
-        colorBoard();
-        moves[0].forEach(move => addPossibleMove(move, row, col, tableSocket));
+function removeMoveListeners() {
+    moveListeners.forEach(function(item) {
+        item.element.removeEventListener("click", item.listener);
     });
-};
-
-function addPossibleMove(move, oldRow, oldCol, tableSocket) {
-    const row = move[0]
-    const col = move[1]
-    const htmlPossibleMove = document.querySelector(`#square${row}${col}`);
-    if (htmlPossibleMove.classList.contains('dark')) {
-        htmlPossibleMove.classList.remove('dark');
-        htmlPossibleMove.classList.add('darkGreen');
-    } else {
-        htmlPossibleMove.classList.remove('light');
-        htmlPossibleMove.classList.add('lightGreen');
-    }
-    htmlPossibleMove.addEventListener("click", function() {
-        const move = [[oldRow, oldCol], [row, col]]
-        console.log(move)
-        tableSocket.send(JSON.stringify({
-            'move': move
-        }));
-    })
-
+    moveListeners = [];
 }
 
 function getImageSource(piece, player) {
@@ -135,11 +152,10 @@ function getImageSource(piece, player) {
             "black": "King_black"
         }
     };
-
+    
     if (piece in pieceImages && player in pieceImages[piece]) {
         return `<img src="/static/table/pieces_images/${pieceImages[piece][player]}.png" class="pieceImage" alt="${pieceImages[piece][player]}">`;
     } else {
         return ""
     }
 }
-
