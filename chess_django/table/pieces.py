@@ -88,7 +88,7 @@ class Piece:
         # Return the lists of possible moves and attacks
         return (moves, attacks)
 
-def create_board(board):
+def create_block_board(board):
     board_piece = {
         "R": {"piece": "rook", "player": "white"},
         "N": {"piece": "knight", "player": "white"},
@@ -104,34 +104,50 @@ def create_board(board):
         "p": {"piece": "pawn", "player": "black"}
     }
 
-    curr_board = [[None for _ in range(8)] for _ in range(8)]
-    json_board = [[None for _ in range(8)] for _ in range(8)]
-
     ROWS = 8
     COLS = 8
+
+    block_board = [[None for _ in range(ROWS)] for _ in range(COLS)]
+
 
     for row in range(ROWS):
         for col in range(COLS):
             if board[row][col] in board_piece:
                 piece = board_piece[board[row][col]]["piece"]
                 player = board_piece[board[row][col]]["player"]
-                curr_board[row][col] = Piece(piece, player, (row, col))
+                block_board[row][col] = Piece(piece, player, (row, col))
+    
+    return block_board
+
+def create_json_board(board):
+    ROWS = 8
+    COLS = 8
+
+    block_board = create_block_board(board)
+
+    json_board = [[None for _ in range(ROWS)] for _ in range(COLS)]
 
     for row in range(ROWS):
         for col in range(COLS):
-            if curr_board[row][col]:
+            if block_board[row][col]:
                 json_board[row][col] = {
-                    "piece": curr_board[row][col].piece, 
-                    "player": curr_board[row][col].player,
-                    "moves": curr_board[row][col].check_possible_moves(curr_board)
+                    "piece": block_board[row][col].piece, 
+                    "player": block_board[row][col].player,
+                    "moves": block_board[row][col].check_possible_moves(block_board)
                     }
 
     return json_board
 
 def update_board(board, move):
+    block_board = create_block_board(board)
     old_position_row, old_position_col = move[0]
     new_position_row, new_position_col = move[1]
-    board[new_position_row][new_position_col] = board[old_position_row][old_position_col]
-    board[old_position_row][old_position_col] = None
 
-    return board
+    possible_moves = block_board[old_position_row][old_position_col].check_possible_moves(block_board)
+    new_position = (new_position_row, new_position_col)
+
+    if new_position in possible_moves[0]:
+        board[new_position_row][new_position_col] = board[old_position_row][old_position_col]
+        board[old_position_row][old_position_col] = None
+
+        return board

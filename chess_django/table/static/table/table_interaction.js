@@ -12,9 +12,10 @@ document.addEventListener('DOMContentLoaded', function () {
     );
     
     tableSocket.onmessage = function(e) {
-        console.log("received updated board");
         const board = JSON.parse(e.data);
-
+        console.log(board)
+        clearBoard();
+        
         for (let row = 0; row < 8; row++) {
             for (let col = 0; col < 8; col++) {
                 if (board.board[row][col] !== null) {
@@ -22,9 +23,16 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             }
         }
+        console.log("received updated board");
     }; 
 
 });
+
+function clearBoard() {
+    colorBoard();
+    removeListeners();
+    removePieces();
+}
 
 function colorBoard() {
     for (let row = 0; row < 8; row++){
@@ -44,6 +52,26 @@ function colorBoard() {
         }
     }
 }
+
+function removeListeners() {
+    for(let row = 0; row < 8; row++) {
+        for (let col = 0; col < 8; col++) {
+            let htmlSquare = document.querySelector(`#square${row}${col}`);
+            let newElement = htmlSquare.cloneNode(true);
+            htmlSquare.parentNode.replaceChild(newElement, htmlSquare);
+        }
+    }
+}
+
+function removePieces() {
+    for(let row = 0; row < 8; row++) {
+        for (let col = 0; col < 8; col++) {
+            let htmlSquare = document.querySelector(`#square${row}${col}`);
+            htmlSquare.innerHTML = "";
+        }
+    }
+}
+
     
 function uploadBoard(board, row, col, tableSocket) {
     const boardSquare = board[row][col];

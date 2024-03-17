@@ -24,7 +24,7 @@ class TableConsumer(AsyncWebsocketConsumer):
 
     async def send_actual_board(self):
         actual_board_array = await self.get_board_state_from_database()
-        actual_board_object = pieces.create_board(actual_board_array)
+        actual_board_object = pieces.create_json_board(actual_board_array)
         await self.send(text_data=json.dumps({"board": actual_board_object}))
 
 
@@ -33,7 +33,19 @@ class TableConsumer(AsyncWebsocketConsumer):
         actual_game_db = Game.objects.get(pk=self.table_id)
         actual_board_db = Board.objects.filter(game=actual_game_db).latest('id')
         return json.loads(actual_board_db.board)['board']
+    
+    @sync_to_async
+    def push_new_board_to_database(self, updated_board):
+        game = Game.objects.get(pk=self.table_id)
 
+        Board.objects.create(
+            game = game,
+            total_moves = 0,
+            board = json.dumps({"board": updated_board}),
+            turn = "w",
+            castling = "----", # "kqKQ"
+            soft_moves = 0
+        )
 
 
     # # Receive message from WebSocket
@@ -43,11 +55,14 @@ class TableConsumer(AsyncWebsocketConsumer):
 
         old_board = await self.get_board_state_from_database()
         updated_board = pieces.update_board(old_board, move)
-        actual_board_object = pieces.create_board(updated_board)
+
+        await self.push_new_board_to_database(updated_board)
+
+        updated_json_board = pieces.create_json_board(updated_board)
 
         # Send message to room group
         await self.channel_layer.group_send(
-            self.table_group_id, {"type": "new_board", "board": actual_board_object}
+            self.table_group_id, {"type": "new_board", "board": updated_json_board}
         )
 
     # Receive message from room group

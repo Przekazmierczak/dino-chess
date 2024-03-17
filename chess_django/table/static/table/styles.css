@@ -18,11 +18,16 @@ table, td {
 td {
     width: 80px;
     height: 80px;
+    position: relative;
 }
 
 .pieceImage {
-    max-width: 100%;
-    height: auto;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    height: 90%;
 }
 
 .dark {
