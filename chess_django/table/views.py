@@ -29,8 +29,8 @@ def create_table(request):
     Board.objects.create(
         game = new_game,
         total_moves = 0,
-        board = json.dumps({"board": starting_board}),
-        turn = "w",
+        board = json.dumps(starting_board),
+        turn = "white",
         castling = "----", # "kqKQ"
         soft_moves = 0
     )

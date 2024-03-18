@@ -23,26 +23,31 @@ class TableConsumer(AsyncWebsocketConsumer):
 
 
     async def send_actual_board(self):
-        actual_board_array = await self.get_board_state_from_database()
-        actual_board_object = pieces.create_json_board(actual_board_array)
-        await self.send(text_data=json.dumps({"board": actual_board_object}))
+        actual_state = await self.get_state_from_database()
+        actual_board_json = json.loads(actual_state.board)
+        actual_turn = actual_state.turn
+        actual_board_object = pieces.create_json_board(actual_board_json)
+        await self.send(text_data=json.dumps({
+            "board": actual_board_object,
+            "turn": actual_turn
+            }))
 
 
     @sync_to_async
-    def get_board_state_from_database(self):
+    def get_state_from_database(self):
         actual_game_db = Game.objects.get(pk=self.table_id)
         actual_board_db = Board.objects.filter(game=actual_game_db).latest('id')
-        return json.loads(actual_board_db.board)['board']
+        return actual_board_db
     
     @sync_to_async
-    def push_new_board_to_database(self, updated_board):
+    def push_new_board_to_database(self, updated_board, turn):
         game = Game.objects.get(pk=self.table_id)
 
         Board.objects.create(
             game = game,
             total_moves = 0,
-            board = json.dumps({"board": updated_board}),
-            turn = "w",
+            board = json.dumps(updated_board),
+            turn = turn,
             castling = "----", # "kqKQ"
             soft_moves = 0
         )
@@ -53,22 +58,31 @@ class TableConsumer(AsyncWebsocketConsumer):
         text_data_json = json.loads(text_data)
         move = text_data_json["move"]
 
-        old_board = await self.get_board_state_from_database()
-        updated_board, correct = pieces.update_board(old_board, move)
+        prev_state = await self.get_state_from_database()
+        prev_board = json.loads(prev_state.board)
+
+        turn = prev_state.turn
+        next_turn = "black" if turn == "white" else "white"
+
+        updated_board, correct = pieces.update_board(prev_board, move)
 
         if correct:
-            await self.push_new_board_to_database(updated_board)
+            await self.push_new_board_to_database(updated_board, next_turn)
 
             updated_json_board = pieces.create_json_board(updated_board)
 
             # Send message to room group
             await self.channel_layer.group_send(
-                self.table_group_id, {"type": "new_board", "board": updated_json_board}
+                self.table_group_id, {"type": "new_board", "board": updated_json_board, "turn": next_turn}
             )
 
     # Receive message from room group
     async def new_board(self, event):
         board = event["board"]
+        turn = event["turn"]
 
         # Send message to WebSocket
-        await self.send(text_data=json.dumps({"board": board}))
+        await self.send(text_data=json.dumps({
+            "board": board,
+            "turn": turn
+            }))

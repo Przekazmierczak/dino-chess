@@ -14,14 +14,14 @@ document.addEventListener('DOMContentLoaded', function () {
     );
     
     tableSocket.onmessage = function(e) {
-        const board = JSON.parse(e.data);
-        console.log(board)
+        const state = JSON.parse(e.data);
+        console.log(state)
         clearBoard();
         
         for (let row = 0; row < 8; row++) {
             for (let col = 0; col < 8; col++) {
-                if (board.board[row][col] !== null) {
-                    uploadBoard(board.board, row, col, tableSocket);
+                if (state.board[row][col] !== null) {
+                    uploadBoard(state, row, col, tableSocket);
                 }
             }
         }
@@ -30,19 +30,22 @@ document.addEventListener('DOMContentLoaded', function () {
 
 });
 
-function uploadBoard(board, row, col, tableSocket) {
-    const boardSquare = board[row][col];
+function uploadBoard(state, row, col, tableSocket) {
+    const boardSquare = state.board[row][col];
+    const turn = state.turn;
     const {piece, player, moves} = boardSquare
     
     const image = getImageSource(piece, player);
     const htmlSquare = document.querySelector(`#square${row}${col}`);
     htmlSquare.innerHTML = `${image}`;
-    htmlSquare.addEventListener("click", function() {
-        colorBoard();
-        removeMoveListeners();
-        moves[0].forEach(move => addPossibleMove(move, row, col, tableSocket, "move"));
-        moves[1].forEach(move => addPossibleMove(move, row, col, tableSocket, "attack"));
-    });
+    if (turn === player) {
+        htmlSquare.addEventListener("click", function() {
+            colorBoard();
+            removeMoveListeners();
+            moves[0].forEach(move => addPossibleMove(move, row, col, tableSocket, "move"));
+            moves[1].forEach(move => addPossibleMove(move, row, col, tableSocket, "attack"));
+        });
+    }
 };
 
 function addPossibleMove(move, oldRow, oldCol, tableSocket, type) {
