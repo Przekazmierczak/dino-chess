@@ -8,10 +8,11 @@ class Piece:
         # Check if the given row and column are within the bounds of the board
         return 0 <= row < 8 and 0 <= column < 8
 
-    def check_possible_moves(self, board):
+    def check_piece_possible_moves(self, class_board):
         # Initialize lists to store possible moves and attacks
         moves = []
         attacks = []
+        board = class_board.board
 
         if self.piece == "pawn":
             # Determine the direction of movement based on the player's color
@@ -88,66 +89,69 @@ class Piece:
         # Return the lists of possible moves and attacks
         return (moves, attacks)
 
-def create_block_board(board):
-    board_piece = {
-        "R": {"piece": "rook", "player": "white"},
-        "N": {"piece": "knight", "player": "white"},
-        "B": {"piece": "bishop", "player": "white"},
-        "K": {"piece": "king", "player": "white"},
-        "Q": {"piece": "queen", "player": "white"},
-        "P": {"piece": "pawn", "player": "white"},
-        "r": {"piece": "rook", "player": "black"},
-        "n": {"piece": "knight", "player": "black"},
-        "b": {"piece": "bishop", "player": "black"},
-        "k": {"piece": "king", "player": "black"},
-        "q": {"piece": "queen", "player": "black"},
-        "p": {"piece": "pawn", "player": "black"}
-    }
+class Board:
+    def __init__(self, json_board, turn):
+        self.ROWS, self.COLS = 8, 8
+        self.turn = turn
+        self.json_board = json_board
+        self.board, self.white_king, self.black_king = self.create_class(json_board)
 
-    ROWS = 8
-    COLS = 8
+    def create_class(self, board):
+        board_piece = {
+            "R": {"piece": "rook", "player": "white"},
+            "N": {"piece": "knight", "player": "white"},
+            "B": {"piece": "bishop", "player": "white"},
+            "K": {"piece": "king", "player": "white"},
+            "Q": {"piece": "queen", "player": "white"},
+            "P": {"piece": "pawn", "player": "white"},
+            "r": {"piece": "rook", "player": "black"},
+            "n": {"piece": "knight", "player": "black"},
+            "b": {"piece": "bishop", "player": "black"},
+            "k": {"piece": "king", "player": "black"},
+            "q": {"piece": "queen", "player": "black"},
+            "p": {"piece": "pawn", "player": "black"}
+        }
 
-    block_board = [[None for _ in range(ROWS)] for _ in range(COLS)]
+        class_board = [[None for _ in range(self.ROWS)] for _ in range(self.COLS)]
+        
+        for row in range(self.ROWS):
+            for col in range(self.COLS):
+                if board[row][col] in board_piece:
+                    piece = board_piece[board[row][col]]["piece"]
+                    player = board_piece[board[row][col]]["player"]
+                    class_board[row][col] = Piece(piece, player, (row, col))
+                    if piece == "king" and player == "white":
+                        white_king_position = (row, col)
+                    if piece == "king" and player == "black":
+                        black_king_position = (row, col)
+        
+        return class_board, white_king_position, black_king_position
+
+    def create_json_class(self):
+        json_class = [[None for _ in range(self.ROWS)] for _ in range(self.COLS)]
+
+        for row in range(self.ROWS):
+            for col in range(self.COLS):
+                if self.board[row][col]:
+                    json_class[row][col] = {
+                        "piece": self.board[row][col].piece, 
+                        "player": self.board[row][col].player,
+                        "moves": self.board[row][col].check_piece_possible_moves(self)
+                        }
+
+        return json_class
 
 
-    for row in range(ROWS):
-        for col in range(COLS):
-            if board[row][col] in board_piece:
-                piece = board_piece[board[row][col]]["piece"]
-                player = board_piece[board[row][col]]["player"]
-                block_board[row][col] = Piece(piece, player, (row, col))
-    
-    return block_board
+    def create_new_json_board(self, move):
+        old_position_row, old_position_col = move[0]
+        new_position_row, new_position_col = move[1]
 
-def create_json_board(board):
-    ROWS = 8
-    COLS = 8
+        possible_moves = self.board[old_position_row][old_position_col].check_piece_possible_moves(self)
+        new_position = (new_position_row, new_position_col)
 
-    block_board = create_block_board(board)
+        if new_position in possible_moves[0] or new_position in possible_moves[1]:
+            new_json_board = self.json_board
+            new_json_board[new_position_row][new_position_col] = new_json_board[old_position_row][old_position_col]
+            new_json_board[old_position_row][old_position_col] = None
 
-    json_board = [[None for _ in range(ROWS)] for _ in range(COLS)]
-
-    for row in range(ROWS):
-        for col in range(COLS):
-            if block_board[row][col]:
-                json_board[row][col] = {
-                    "piece": block_board[row][col].piece, 
-                    "player": block_board[row][col].player,
-                    "moves": block_board[row][col].check_possible_moves(block_board)
-                    }
-
-    return json_board
-
-def update_board(board, move):
-    block_board = create_block_board(board)
-    old_position_row, old_position_col = move[0]
-    new_position_row, new_position_col = move[1]
-
-    possible_moves = block_board[old_position_row][old_position_col].check_possible_moves(block_board)
-    new_position = (new_position_row, new_position_col)
-
-    if new_position in possible_moves[0] or new_position in possible_moves[1]:
-        board[new_position_row][new_position_col] = board[old_position_row][old_position_col]
-        board[old_position_row][old_position_col] = None
-
-        return board, True
+            return new_json_board, True

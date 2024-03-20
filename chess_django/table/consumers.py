@@ -26,7 +26,7 @@ class TableConsumer(AsyncWebsocketConsumer):
         actual_state = await self.get_state_from_database()
         actual_board_json = json.loads(actual_state.board)
         actual_turn = actual_state.turn
-        actual_board_object = pieces.create_json_board(actual_board_json)
+        actual_board_object = pieces.Board(actual_board_json, actual_turn).create_json_class()
         await self.send(text_data=json.dumps({
             "board": actual_board_object,
             "turn": actual_turn
@@ -61,15 +61,15 @@ class TableConsumer(AsyncWebsocketConsumer):
         prev_state = await self.get_state_from_database()
         prev_board = json.loads(prev_state.board)
 
-        turn = prev_state.turn
-        next_turn = "black" if turn == "white" else "white"
+        prev_turn = prev_state.turn
+        next_turn = "black" if prev_turn == "white" else "white"
 
-        updated_board, correct = pieces.update_board(prev_board, move)
+        updated_board, correct = pieces.Board(prev_board, prev_turn).create_new_json_board(move)
 
         if correct:
             await self.push_new_board_to_database(updated_board, next_turn)
 
-            updated_json_board = pieces.create_json_board(updated_board)
+            updated_json_board = pieces.Board(updated_board, next_turn).create_json_class()
 
             # Send message to room group
             await self.channel_layer.group_send(
