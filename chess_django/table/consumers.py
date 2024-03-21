@@ -57,6 +57,7 @@ class TableConsumer(AsyncWebsocketConsumer):
     async def receive(self, text_data):
         text_data_json = json.loads(text_data)
         move = text_data_json["move"]
+        print(move)
 
         prev_state = await self.get_state_from_database()
         prev_board = json.loads(prev_state.board)

@@ -122,6 +122,7 @@ function removePieces() {
 }
 
 function removeMoveListeners() {
+    console.log(moveListeners)
     moveListeners.forEach(function(item) {
         item.element.removeEventListener("click", item.listener);
     });

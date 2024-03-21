@@ -12,7 +12,13 @@ class Piece:
         # Initialize lists to store possible moves and attacks
         moves = []
         attacks = []
+        # [[location of checking piece][extra location to prevent check]]
+        check = []
+        # [[location of pinned piece][extra location that piece can still move]]
+        pin = []
+
         board = class_board.board
+        opponent_king = class_board.white_king if class_board.turn == "white" else class_board.black_king
 
         if self.piece == "pawn":
             # Determine the direction of movement based on the player's color
@@ -40,8 +46,11 @@ class Piece:
                 new_row = self.row + direction[0]
                 new_column = self.column + direction[1]
                 # Check if the new position is valid and contains an opponent's piece
-                if self._is_valid_position(new_row, new_column) and board[new_row][new_column] is not None and board[new_row][new_column].player is not self.player:
+                if self._is_valid_position(new_row, new_column) and board[new_row][new_column] is not None and board[new_row][new_column].player is not self.player: 
                     attacks.append((new_row, new_column))
+                    # Check whether the current piece is putting the opponent's king in check
+                    if (new_row, new_column) == opponent_king:
+                        check.append([(self.row, self.column)], [])
 
         elif self.piece in ["rook", "bishop", "queen"]:
             # Possible movement directions for rooks, bishops, and queens
@@ -54,6 +63,8 @@ class Piece:
             # Check for possible moves and attacks in each direction until blocked
             for direction in directions:
                 distance = 1
+                curr_direction = []
+                absolute_pin_check = False
                 while True:
                     new_row = self.row + distance * direction[0]
                     new_column = self.column + distance * direction[1]
@@ -62,10 +73,22 @@ class Piece:
                         break
                     # If the position is not empty, check if it's an opponent's piece
                     if board[new_row][new_column] is not None:
-                        if board[new_row][new_column].player is not self.player:
+                        if board[new_row][new_column].player is not self.player and not absolute_pin_check:
                             attacks.append(((new_row, new_column)))
-                        break
+                            # Check whether the current piece is putting the opponent's king in check
+                            if (new_row, new_column) == opponent_king:
+                                check.append([(self.row, self.column), curr_direction])
+                                break
+                            # Check if the current piece is putting the attacked piece in absolute pin
+                            absolute_pin_check = True
+                        elif absolute_pin_check:
+                            if (new_row, new_column) == opponent_king:
+                                pin.append([(attacks[-1]), curr_direction])
+                            break
+                        else:
+                            break
                     moves.append((new_row, new_column))
+                    curr_direction.append((new_row, new_column))
                     distance += 1
 
         elif self.piece in ["knight", "king"]:
@@ -85,6 +108,9 @@ class Piece:
                         moves.append((new_row, new_column))
                     elif board[new_row][new_column].player is not self.player:
                         attacks.append((new_row, new_column))
+                        # Check whether the current piece is putting the opponent's king in check
+                        if (new_row, new_column) == opponent_king:
+                            check.append([(self.row, self.column), []])
 
         # Return the lists of possible moves and attacks
         return (moves, attacks)
@@ -95,6 +121,7 @@ class Board:
         self.turn = turn
         self.json_board = json_board
         self.board, self.white_king, self.black_king = self.create_class(json_board)
+        self.add_moves()
 
     def create_class(self, board):
         board_piece = {
@@ -126,6 +153,27 @@ class Board:
                         black_king_position = (row, col)
         
         return class_board, white_king_position, black_king_position
+    
+    def add_moves(self):
+        possible_moves = [[None for _ in range(self.ROWS)] for _ in range(self.COLS)]
+        opponents_attacks = set()
+        
+        for row in range(self.ROWS):
+            for col in range(self.COLS):
+                curr_piece = self.board[row][col]
+                if curr_piece and curr_piece.player != self.turn:
+                    possible_moves = curr_piece.check_piece_possible_moves(self)
+                    # flatting
+                    if curr_piece.piece == "pawn":
+                        for position in possible_moves[1]:
+                            opponents_attacks.add(position)
+                    else:
+                        for type in possible_moves:
+                            for position in type:
+                                opponents_attacks.add(position)
+
+        # print(opponents_attacks)
+        pass
 
     def create_json_class(self):
         json_class = [[None for _ in range(self.ROWS)] for _ in range(self.COLS)]
