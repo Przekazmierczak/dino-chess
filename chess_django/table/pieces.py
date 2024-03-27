@@ -30,6 +30,7 @@ class Piece:
         # [[location of pinned piece][extra location that piece can still move]]
 
         board = class_board.board
+        opponent = True if class_board.turn != self.player else False
         opponent_king = class_board.white_king if class_board.turn == "white" else class_board.black_king
 
         checking_positions = self._flatting_checkin_pieces(checkin_pieces)
@@ -43,36 +44,64 @@ class Piece:
             if self.player == "white" and self.row == 1 or self.player == "black" and self.row == 6:
                 directions.append((direction_by_colour * 2, 0))
 
-            # Check for forward movements
-            can_move_second_time = True
-            for direction in directions:
-                new_row = self.row + direction[0]
-                new_column = self.column + direction[1]
-                # Check if the new position is valid and empty
-                if self._is_valid_position(new_row, new_column) and board[new_row][new_column] is None and can_move_second_time:
-                    # Check whether the current piece is not absolute pinned
-                    if self._is_not_pinned((self.row, self.column), (new_row, new_column), class_board, pinned_pieces):
-                        # Check if player king is checked, if move protect the king
-                        if not checkin_pieces or (new_row, new_column) in checking_positions:
-                            moves.append((new_row, new_column))
-                else:
-                    can_move_second_time = False
+            # OPPONENT
+            if opponent:
+                # Check for forward movements
+                can_move_second_time = True
+                for direction in directions:
+                    new_row = self.row + direction[0]
+                    new_column = self.column + direction[1]
+                    # Check if the new position is valid and empty
+                    if self._is_valid_position(new_row, new_column) and board[new_row][new_column] is None and can_move_second_time:
+                        moves.append((new_row, new_column))
+                    else:
+                        can_move_second_time = False
 
-            # Check for diagonal attacks
-            directions = [(direction_by_colour, 1), (direction_by_colour, -1)]
-            for direction in directions:
-                new_row = self.row + direction[0]
-                new_column = self.column + direction[1]
-                # Check if the new position is valid and contains an opponent's piece
-                if self._is_valid_position(new_row, new_column) and board[new_row][new_column] is not None and board[new_row][new_column].player is not self.player: 
-                    # Check whether the current piece is not absolute pinned
-                    if self._is_not_pinned((self.row, self.column), (new_row, new_column), class_board, pinned_pieces):
-                        # Check if player king is checked, if move protect the king
-                        if not checkin_pieces or (new_row, new_column) in checking_positions:
+                # Check for diagonal attacks
+                directions = [(direction_by_colour, 1), (direction_by_colour, -1)]
+                for direction in directions:
+                    new_row = self.row + direction[0]
+                    new_column = self.column + direction[1]
+                    # Check if the new position is valid and contains an opponent's piece
+                    if self._is_valid_position(new_row, new_column) and board[new_row][new_column] is not None: 
+                        if board[new_row][new_column].player is not self.player:
                             attacks.append((new_row, new_column))
-                    # Check whether the current piece is putting the opponent's king in check
-                    if (new_row, new_column) == opponent_king:
-                        checkin_pieces[(self.row, self.column)] = []
+                        # Check whether the current piece is putting the opponent's king in check
+                        if (new_row, new_column) == opponent_king:
+                            checkin_pieces[(self.row, self.column)] = []
+                    if self._is_valid_position(new_row, new_column):
+                        opponents_attacks.add((new_row, new_column))
+            
+            # PLAYER
+            else:
+                # Check for forward movements
+                can_move_second_time = True
+                for direction in directions:
+                    new_row = self.row + direction[0]
+                    new_column = self.column + direction[1]
+                    # Check if the new position is valid and empty
+                    if self._is_valid_position(new_row, new_column) and board[new_row][new_column] is None and can_move_second_time:
+                        # Check whether the current piece is not absolute pinned
+                        if self._is_not_pinned((self.row, self.column), (new_row, new_column), class_board, pinned_pieces):
+                            # Check if player king is checked, if move protect the king
+                            if not checkin_pieces or (new_row, new_column) in checking_positions:
+                                moves.append((new_row, new_column))
+                    else:
+                        can_move_second_time = False
+
+                # Check for diagonal attacks
+                directions = [(direction_by_colour, 1), (direction_by_colour, -1)]
+                for direction in directions:
+                    new_row = self.row + direction[0]
+                    new_column = self.column + direction[1]
+                    # Check if the new position is valid and contains an opponent's piece
+                    if self._is_valid_position(new_row, new_column) and board[new_row][new_column] is not None: 
+                        # Check whether the current piece is not absolute pinned
+                        if self._is_not_pinned((self.row, self.column), (new_row, new_column), class_board, pinned_pieces):
+                            # Check if player king is checked, if move protect the king
+                            if not checkin_pieces or (new_row, new_column) in checking_positions:
+                                if board[new_row][new_column].player is not self.player:
+                                    attacks.append((new_row, new_column))
 
         elif self.piece in ["rook", "bishop", "queen"]:
             # Possible movement directions for rooks, bishops, and queens
@@ -82,46 +111,84 @@ class Piece:
                 directions = [(1, 1), (1, -1), (-1, 1), (-1, -1)]
             elif self.piece == "queen":
                 directions = [(1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1)]
+
             # Check for possible moves and attacks in each direction until blocked
-            for direction in directions:
-                distance = 1
-                curr_direction = []
-                absolute_pin_check = False
-                while True:
-                    new_row = self.row + distance * direction[0]
-                    new_column = self.column + distance * direction[1]
-                    # Check if the new position is valid
-                    if not self._is_valid_position(new_row, new_column):
-                        break
-                    # If the position is not empty, check if it's an opponent's piece
-                    if board[new_row][new_column] is not None:
-                        if board[new_row][new_column].player is not self.player and not absolute_pin_check:
-                            # Check whether the current piece is not absolute pinned
-                            if self._is_not_pinned((self.row, self.column), (new_row, new_column), class_board, pinned_pieces):
-                                # Check if player king is checked, if move protect the king
-                                if not checkin_pieces or (new_row, new_column) in checking_positions:
-                                    attacks.append(((new_row, new_column)))
-                            # Check whether the current piece is putting the opponent's king in check
-                            if (new_row, new_column) == opponent_king:
-                                checkin_pieces[(self.row, self.column)] = curr_direction
+            # OPPONENT
+            if opponent:
+                for direction in directions:
+                    distance = 1
+                    curr_direction = []
+                    absolute_pin_check = False
+                    if_check = False
+                    while True:
+                        new_row = self.row + distance * direction[0]
+                        new_column = self.column + distance * direction[1]
+                        # Check if the new position is valid
+                        if not self._is_valid_position(new_row, new_column):
+                            break
+                        # If the position is not empty, check if it's an opponent's piece
+                        if board[new_row][new_column] is not None:
+                            if board[new_row][new_column].player is not self.player and not absolute_pin_check and not if_check:
+                                attacks.append(((new_row, new_column)))
+                                opponents_attacks.add((new_row, new_column))
+                                # Check whether the current piece is putting the opponent's king in check
+                                if (new_row, new_column) == opponent_king:
+                                    checkin_pieces[(self.row, self.column)] = curr_direction
+                                    if_check = True
+                                # Check if the current piece is putting the attacked piece in absolute pin
+                                else:
+                                    absolute_pin_check = True
+                            # If the attacked location is occupied by a self piece, add the attack position and break.
+                            elif board[new_row][new_column].player is self.player and not absolute_pin_check and not if_check:
+                                opponents_attacks.add((new_row, new_column))
                                 break
-                            # Check if the current piece is putting the attacked piece in absolute pin
-                            absolute_pin_check = True
-                        elif absolute_pin_check:
-                            if (new_row, new_column) == opponent_king:
-                                pinned_pieces[(attacks[-1])] = [(self.row, self.column)] + curr_direction
-                            break
+                            # If the next piece behind the attacked opponent's piece is his king, the attacked piece is absolutely pinned
+                            elif absolute_pin_check:
+                                if (new_row, new_column) == opponent_king:
+                                    pinned_pieces[(attacks[-1])] = [(self.row, self.column)] + curr_direction
+                                break
+                            else:
+                                break
                         else:
+                            if not absolute_pin_check and not if_check:
+                                moves.append((new_row, new_column))
+                                # The current piece belongs to the opponent so add location to attacks
+                                opponents_attacks.add((new_row, new_column))
+                            if if_check:
+                                # The current piece belongs to the opponent so add location to attacks
+                                opponents_attacks.add((new_row, new_column))
+                            if not if_check:
+                                curr_direction.append((new_row, new_column))
+                        distance += 1
+            
+            # PLAYER
+            else:
+                for direction in directions:
+                    distance = 1
+                    while True:
+                        new_row = self.row + distance * direction[0]
+                        new_column = self.column + distance * direction[1]
+                        # Check if the new position is valid
+                        if not self._is_valid_position(new_row, new_column):
                             break
-                    else:
-                        if not absolute_pin_check:
+                        # If the position is not empty, check if it's an opponent's piece
+                        if board[new_row][new_column] is not None:
+                            if board[new_row][new_column].player is not self.player:
+                                # Check whether the current piece is not absolute pinned
+                                if self._is_not_pinned((self.row, self.column), (new_row, new_column), class_board, pinned_pieces):
+                                    # Check if player king is checked, if move protect the king
+                                    if not checkin_pieces or (new_row, new_column) in checking_positions:
+                                        attacks.append(((new_row, new_column)))
+                                        break
+                            else:
+                                break
+                        else:
                             # Check whether the current piece is not absolute pinned
                             if self._is_not_pinned((self.row, self.column), (new_row, new_column), class_board, pinned_pieces):
                                 # Check if player king is checked, if move protect the king
                                 if not checkin_pieces or (new_row, new_column) in checking_positions:
                                     moves.append((new_row, new_column))
-                        curr_direction.append((new_row, new_column))
-                    distance += 1
+                        distance += 1
 
         elif self.piece in ["knight", "king"]:
             # Possible movement directions for knights and kings
@@ -129,37 +196,66 @@ class Piece:
                 directions = [(2, 1), (-2, 1), (2, -1), (-2, -1), (1, 2), (-1, 2), (1, -2), (-1, -2)]
             elif self.piece == "king":
                 directions = [(1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1)]
+
             # Check for possible moves and attacks in each direction
-            for direction in directions:
-                new_row = self.row + direction[0]
-                new_column = self.column + direction[1]
-                # Check if the new position is valid
-                if self._is_valid_position(new_row, new_column):
-                    if self.piece == "knight":
-                        # If the position is empty, it's a possible move, otherwise, it might be an attack
-                        if board[new_row][new_column] is None:
-                            # Check whether the current piece is not absolute pinned
-                            if self._is_not_pinned((self.row, self.column), (new_row, new_column), class_board, pinned_pieces):
-                                # Check if player king is checked, if move protect the king
-                                if not checkin_pieces or (new_row, new_column) in checking_positions:
-                                    moves.append((new_row, new_column))
-                        elif board[new_row][new_column].player is not self.player:
-                            # Check whether the current piece is not absolute pinned
-                            if self._is_not_pinned((self.row, self.column), (new_row, new_column), class_board, pinned_pieces):
-                                # Check if player king is checked, if move protect the king
-                                if not checkin_pieces or (new_row, new_column) in checking_positions:
-                                    attacks.append((new_row, new_column))
-                            # Check whether the current piece is putting the opponent's king in check
-                            if (new_row, new_column) == opponent_king:
-                                checkin_pieces[(self.row, self.column)] = []
-                    elif self.piece == "king":
-                        # If the position is empty, it's a possible move, otherwise, it might be an attack
-                        if board[new_row][new_column] is None:
-                            # Check if the king is not moving to attacked position
-                            if (new_row, new_column) not in opponents_attacks:
+            # OPPONENT
+            if opponent:
+                for direction in directions:
+                    new_row = self.row + direction[0]
+                    new_column = self.column + direction[1]
+                    # Check if the new position is valid
+                    if self._is_valid_position(new_row, new_column):
+                        if self.piece == "knight":
+                            # If the position is empty, it's a possible move, otherwise, it might be an attack
+                            if board[new_row][new_column] is None:
                                 moves.append((new_row, new_column))
-                        elif board[new_row][new_column].player is not self.player:
-                            attacks.append((new_row, new_column))
+                                # The current piece belongs to the opponent so add location to attacks
+                                opponents_attacks.add((new_row, new_column))
+                            elif board[new_row][new_column].player is not self.player:
+                                attacks.append((new_row, new_column))
+                                # The current piece belongs to the opponent so add location to attacks
+                                opponents_attacks.add((new_row, new_column))
+                                # Check whether the current piece is putting the opponent's king in check
+                                if (new_row, new_column) == opponent_king:
+                                    checkin_pieces[(self.row, self.column)] = []
+                        elif self.piece == "king":
+                            # If the position is empty, it's a possible move, otherwise, it might be an attack
+                            if board[new_row][new_column] is None:
+                                moves.append((new_row, new_column))
+                            elif board[new_row][new_column].player is not self.player:
+                                attacks.append((new_row, new_column))
+            
+            # PLAYER
+            else:
+                for direction in directions:
+                    new_row = self.row + direction[0]
+                    new_column = self.column + direction[1]
+                    # Check if the new position is valid
+                    if self._is_valid_position(new_row, new_column):
+                        if self.piece == "knight":
+                            # If the position is empty, it's a possible move, otherwise, it might be an attack
+                            if board[new_row][new_column] is None:
+                                # Check whether the current piece is not absolute pinned
+                                if self._is_not_pinned((self.row, self.column), (new_row, new_column), class_board, pinned_pieces):
+                                    # Check if player king is checked, if move protect the king
+                                    if not checkin_pieces or (new_row, new_column) in checking_positions:
+                                        moves.append((new_row, new_column))
+                            elif board[new_row][new_column].player is not self.player:
+                                # Check whether the current piece is not absolute pinned
+                                if self._is_not_pinned((self.row, self.column), (new_row, new_column), class_board, pinned_pieces):
+                                    # Check if player king is checked, if move protect the king
+                                    if not checkin_pieces or (new_row, new_column) in checking_positions:
+                                        attacks.append((new_row, new_column))
+                        elif self.piece == "king":
+                            # If the position is empty, it's a possible move, otherwise, it might be an attack
+                            if board[new_row][new_column] is None:
+                                # Check if the king is not moving to attacked position
+                                if (new_row, new_column) not in opponents_attacks:
+                                    moves.append((new_row, new_column))
+                            elif board[new_row][new_column].player is not self.player:
+                                # Check if the king is not attacking to attacked position
+                                if (new_row, new_column) not in opponents_attacks:
+                                    attacks.append((new_row, new_column))
 
         # Return the lists of possible moves and attacks
         return moves, attacks
@@ -215,14 +311,6 @@ class Board:
                 curr_piece = self.board[row][col]
                 if curr_piece and curr_piece.player != self.turn:
                     possible_moves[row][col] = curr_piece.check_piece_possible_moves(self, opponents_attacks, checkin_pieces, pinned_pieces)
-                    # flatting
-                    if curr_piece.piece == "pawn":
-                        for position in possible_moves[row][col][1]:
-                            opponents_attacks.add(position)
-                    else:
-                        for type in possible_moves[row][col]:
-                            for position in type:
-                                opponents_attacks.add(position)
 
         # Player
         for row in range(self.ROWS):
@@ -231,6 +319,7 @@ class Board:
                 if curr_piece and curr_piece.player == self.turn:
                     possible_moves[row][col] = curr_piece.check_piece_possible_moves(self, opponents_attacks, checkin_pieces, pinned_pieces)
 
+        print(checkin_pieces)
         return possible_moves
 
     def create_json_class(self):
