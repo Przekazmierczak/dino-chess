@@ -266,6 +266,11 @@ class Board:
         self.turn = turn
         self.json_board = json_board
         self.board, self.white_king, self.black_king = self.create_class(json_board)
+        print(self.turn)
+        print(self.json_board)
+        print(self.board)
+        print(self.white_king)
+        print(self.black_king)
         self.moves = self.add_moves()
 
     def create_class(self, board):
@@ -319,7 +324,6 @@ class Board:
                 if curr_piece and curr_piece.player == self.turn:
                     possible_moves[row][col] = curr_piece.check_piece_possible_moves(self, opponents_attacks, checkin_pieces, pinned_pieces)
 
-        print(checkin_pieces)
         return possible_moves
 
     def create_json_class(self):
