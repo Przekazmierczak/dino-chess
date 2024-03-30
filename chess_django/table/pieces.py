@@ -31,7 +31,6 @@ class Piece:
 
         board = class_board.board
         opponent = True if class_board.turn != self.player else False
-        opponent_king = class_board.white_king if class_board.turn == "white" else class_board.black_king
 
         checking_positions = self._flatting_checkin_pieces(checkin_pieces)
 
@@ -67,7 +66,7 @@ class Piece:
                         if board[new_row][new_column].player is not self.player:
                             attacks.append((new_row, new_column))
                         # Check whether the current piece is putting the opponent's king in check
-                        if (new_row, new_column) == opponent_king:
+                        if board[new_row][new_column].piece == "king" and board[new_row][new_column].player is not self.player:
                             checkin_pieces[(self.row, self.column)] = []
                     if self._is_valid_position(new_row, new_column):
                         opponents_attacks.add((new_row, new_column))
@@ -132,7 +131,7 @@ class Piece:
                                 attacks.append(((new_row, new_column)))
                                 opponents_attacks.add((new_row, new_column))
                                 # Check whether the current piece is putting the opponent's king in check
-                                if (new_row, new_column) == opponent_king:
+                                if board[new_row][new_column].piece == "king" and board[new_row][new_column].player is not self.player:
                                     checkin_pieces[(self.row, self.column)] = curr_direction
                                     if_check = True
                                 # Check if the current piece is putting the attacked piece in absolute pin
@@ -144,7 +143,7 @@ class Piece:
                                 break
                             # If the next piece behind the attacked opponent's piece is his king, the attacked piece is absolutely pinned
                             elif absolute_pin_check:
-                                if (new_row, new_column) == opponent_king:
+                                if board[new_row][new_column].piece == "king" and board[new_row][new_column].player is not self.player:
                                     pinned_pieces[(attacks[-1])] = [(self.row, self.column)] + curr_direction
                                 break
                             else:
@@ -216,7 +215,7 @@ class Piece:
                                 # The current piece belongs to the opponent so add location to attacks
                                 opponents_attacks.add((new_row, new_column))
                                 # Check whether the current piece is putting the opponent's king in check
-                                if (new_row, new_column) == opponent_king:
+                                if board[new_row][new_column].piece == "king" and board[new_row][new_column].player is not self.player:
                                     checkin_pieces[(self.row, self.column)] = []
                         elif self.piece == "king":
                             # If the position is empty, it's a possible move, otherwise, it might be an attack
@@ -265,12 +264,7 @@ class Board:
         self.ROWS, self.COLS = 8, 8
         self.turn = turn
         self.json_board = json_board
-        self.board, self.white_king, self.black_king = self.create_class(json_board)
-        print(self.turn)
-        print(self.json_board)
-        print(self.board)
-        print(self.white_king)
-        print(self.black_king)
+        self.board = self.create_class(json_board)
         self.moves = self.add_moves()
 
     def create_class(self, board):
@@ -297,12 +291,8 @@ class Board:
                     piece = board_piece[board[row][col]]["piece"]
                     player = board_piece[board[row][col]]["player"]
                     class_board[row][col] = Piece(piece, player, (row, col))
-                    if piece == "king" and player == "white":
-                        white_king_position = (row, col)
-                    if piece == "king" and player == "black":
-                        black_king_position = (row, col)
         
-        return class_board, white_king_position, black_king_position
+        return class_board
     
     def add_moves(self):
         possible_moves = [[None for _ in range(self.ROWS)] for _ in range(self.COLS)]
