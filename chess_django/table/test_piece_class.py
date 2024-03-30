@@ -159,11 +159,9 @@ class AbsolutePin(unittest.TestCase):
         cls.pieces_positions = [("pawn", "black", (2, 5)),
                                 ("rook", "white", (3, 0)),
                                 ("knight", "black", (3, 2)),
-                                ("bishop", "white", (1, 6)),
-                                ("bishop", "black", (5, 2)),
+                                ("bishop", "white", (1, 6)), ("bishop", "black", (5, 2)),
                                 ("queen", "white", (7, 0)),
-                                ("king", "white", (0, 0)),
-                                ("king", "black", (3, 4))]
+                                ("king", "white", (0, 0)), ("king", "black", (3, 4))]
 
         for piece_position in cls.pieces_positions:
             piece, player, position = piece_position
@@ -209,16 +207,12 @@ class Check(unittest.TestCase):
         cls.possible_moves = [[None for _ in range(ROWS)] for _ in range(COLS)]
         cls.turn, cls.opponents_attacks, cls.checkin_pieces, cls.pinned_pieces = "black", set(), {}, {}
 
-        cls.pieces_positions = [("pawn", "black", (4, 0)),
-                                ("pawn", "black", (4, 2)),
-                                ("pawn", "black", (3, 7)),
+        cls.pieces_positions = [("pawn", "black", (4, 0)), ("pawn", "black", (4, 2)), ("pawn", "black", (3, 7)),
                                 ("rook", "black", (7, 5)),
                                 ("knight", "black", (1, 2)),
                                 ("bishop", "black", (1, 3)),
-                                ("queen", "white", (3, 1)),
-                                ("queen", "black", (7, 1)),
-                                ("king", "white", (0, 0)),
-                                ("king", "black", (3, 6))]
+                                ("queen", "white", (3, 1)), ("queen", "black", (7, 1)),
+                                ("king", "white", (0, 0)), ("king", "black", (3, 6))]
 
         for piece_position in cls.pieces_positions:
             piece, player, position = piece_position
@@ -284,17 +278,12 @@ class DoubleCheck(unittest.TestCase):
         cls.possible_moves = [[None for _ in range(ROWS)] for _ in range(COLS)]
         cls.turn, cls.opponents_attacks, cls.checkin_pieces, cls.pinned_pieces = "black", set(), {}, {}
 
-        cls.pieces_positions = [("pawn", "black", (4, 0)),
-                                ("pawn", "black", (4, 2)),
-                                ("pawn", "black", (3, 7)),
-                                ("rook", "white", (0, 6)),
-                                ("rook", "black", (7, 5)),
+        cls.pieces_positions = [("pawn", "black", (4, 0)), ("pawn", "black", (4, 2)), ("pawn", "black", (3, 7)),
+                                ("rook", "white", (0, 6)), ("rook", "black", (7, 5)),
                                 ("knight", "black", (1, 2)),
                                 ("bishop", "black", (1, 3)),
-                                ("queen", "white", (3, 1)),
-                                ("queen", "black", (7, 1)),
-                                ("king", "white", (0, 0)),
-                                ("king", "black", (3, 6))]
+                                ("queen", "white", (3, 1)), ("queen", "black", (7, 1)),
+                                ("king", "white", (0, 0)), ("king", "black", (3, 6))]
 
         for piece_position in cls.pieces_positions:
             piece, player, position = piece_position
