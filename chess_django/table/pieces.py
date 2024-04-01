@@ -184,9 +184,7 @@ class Piece:
                                     # Check if player king is checked, if move protect the king
                                     if not checkin_pieces or (new_row, new_column) in checking_positions:
                                         attacks.append(((new_row, new_column)))
-                                        break
-                            else:
-                                break
+                            break
                         else:
                             # Check whether the current piece is not absolute pinned
                             if self._is_not_pinned((self.row, self.column), (new_row, new_column), class_board, pinned_pieces):
@@ -200,7 +198,7 @@ class Piece:
             if self.piece == "knight":
                 directions = [(2, 1), (-2, 1), (2, -1), (-2, -1), (1, 2), (-1, 2), (1, -2), (-1, -2)]
             elif self.piece == "king":
-                directions = [(1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1)]
+                directions = [(1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1), (0, -2), (0, 3)]
 
             # Check for possible moves and attacks in each direction
             # OPPONENT
@@ -224,8 +222,11 @@ class Piece:
                                 if board[new_row][new_column].piece == "king" and board[new_row][new_column].player is not self.player:
                                     checkin_pieces[(self.row, self.column)] = []
                         elif self.piece == "king":
+                            # Skip castling
+                            if direction == (0, -2) or direction == (0, 3):
+                                continue
                             # If the position is empty, it's a possible move, otherwise, it might be an attack
-                            if board[new_row][new_column] is None:
+                            elif board[new_row][new_column] is None:
                                 moves.append((new_row, new_column))
                             elif board[new_row][new_column].player is not self.player:
                                 attacks.append((new_row, new_column))
@@ -252,13 +253,27 @@ class Piece:
                                     if not checkin_pieces or (new_row, new_column) in checking_positions:
                                         attacks.append((new_row, new_column))
                         elif self.piece == "king":
+                            # Castling
+                            if direction == (0, -2):
+                                if (self.player == "white" and castling[0] == "K") or (self.player == "black" and castling[2] == "k"):
+                                    if (not checking_positions
+                                        and board[self.row][0] and board[self.row][0].piece == "rook"
+                                        and board[self.row][1] == None and board[self.row][2] == None):
+                                            moves.append((new_row, new_column))
+                            elif direction == (0, 3):
+                                if (self.player == "white" and castling[1] == "Q") or (self.player == "black" and castling[3] == "q"):
+                                    if (not checking_positions
+                                        and board[self.row][7] and board[self.row][7].piece == "rook"
+                                        and board[self.row][4] == None and board[self.row][5] == None and board[self.row][6] == None):
+                                            moves.append((new_row, new_column))
+
                             # If the position is empty, it's a possible move, otherwise, it might be an attack
-                            if board[new_row][new_column] is None:
+                            elif board[new_row][new_column] is None:
                                 # Check if the king is not moving to attacked position
                                 if (new_row, new_column) not in opponents_attacks:
                                     moves.append((new_row, new_column))
                             elif board[new_row][new_column].player is not self.player:
-                                # Check if the king is not attacking to attacked position
+                                # Check if the king is not trying to attack attacked position
                                 if (new_row, new_column) not in opponents_attacks:
                                     attacks.append((new_row, new_column))
 
@@ -348,31 +363,72 @@ class Board:
 
 
     def create_new_json_board(self, move):
-        old_position_row, old_position_col = move[0]
-        new_position_row, new_position_col = move[1]
+        old_position = tuple(move[0])
+        new_position = tuple(move[1])
 
-        possible_moves = self.moves[old_position_row][old_position_col]
-        new_position = (new_position_row, new_position_col)
+        old_position_row, old_position_col = old_position
+        new_position_row, new_position_col = new_position
 
-        # Check if current move create enpassant possibility
-        if self.board[old_position_row][old_position_col].piece == "pawn" and abs(old_position_row - new_position_row) == 2:
-            enpassant_row = (old_position_row + new_position_row) // 2
-            enpassant_col = old_position_col
-            enpassant = str(enpassant_row) + str(enpassant_col)
-        else:
-            enpassant = "__"
+        possible_moves, possible_attacks = self.moves[old_position_row][old_position_col]
 
-        if new_position in possible_moves[0] or new_position in possible_moves[1]:
+
+        if new_position in possible_moves or new_position in possible_attacks:
             new_json_board = self.json_board
-            new_json_board[new_position_row][new_position_col] = new_json_board[old_position_row][old_position_col]
-            new_json_board[old_position_row][old_position_col] = None
 
-            # Check if current move is enpassant, then correctly remove the pawn
+            # Check if any castling options are left
+            if self.castling != "____":
+                # Convert the castling string to a list for manipulation
+                castling_list = list(self.castling)
+
+                # Define the starting positions of kings and rooks for castling
+                starting_positions = {(0, 3): [0, 1], # The white king
+                                      (7, 3): [2, 3], # The black king
+                                      (0, 0): [0], # The white rook on the king side
+                                      (0, 7): [1], # The white rook on the queen side
+                                      (7, 0): [2], # The black rook on the king side
+                                      (7, 7): [3]} # The black rook on the queen side
+                
+                # Combine old and new positions for comparison
+                move_positions = [old_position, new_position]
+                
+                # Iterate through new and old positions
+                for move_position in move_positions:
+                    # Check if the move position corresponds to a starting position for castling
+                    if move_position in starting_positions:
+                        # Iterate through the indices corresponding to the castling options
+                        for element in starting_positions[move_position]:
+                            # Update the castling option to indicate that the rook or king has moved
+                            castling_list[element] = "_"
+                
+                # Update the castling attribute with the modified list
+                self.castling = castling_list[0] + castling_list[1] + castling_list[2] + castling_list[3]
+            
+            # Check if the current move is a castling, then correctly move the rook
+            if self.board[old_position_row][old_position_col].piece == "king" and abs(old_position_col - new_position_col) > 1:
+                if abs(old_position_col - new_position_col) == 2:
+                    new_json_board[old_position_row][2] = new_json_board[old_position_row][0]
+                    new_json_board[old_position_row][0] = None
+                else:
+                    new_json_board[old_position_row][5] = new_json_board[old_position_row][7]
+                    new_json_board[old_position_row][7] = None
+
+            # Check if current move create enpassant possibility
+            if self.board[old_position_row][old_position_col].piece and self.board[old_position_row][old_position_col].piece == "pawn" and abs(old_position_row - new_position_row) == 2:
+                enpassant_row = (old_position_row + new_position_row) // 2
+                enpassant_col = old_position_col
+                enpassant = str(enpassant_row) + str(enpassant_col)
+            else:
+                enpassant = "__"
+
+            # Check if the current move is an en passant capture, then correctly remove the pawn
             if new_position == self.enpassant:
                 if new_position_row == 2:
                     new_json_board[3][new_position_col] = None
                 else:
                     new_json_board[4][new_position_col] = None
+            
+            new_json_board[new_position_row][new_position_col] = new_json_board[old_position_row][old_position_col]
+            new_json_board[old_position_row][old_position_col] = None
 
-            return new_json_board, enpassant
+            return new_json_board, self.castling, enpassant
         return False
