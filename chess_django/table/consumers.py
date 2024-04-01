@@ -39,7 +39,7 @@ class TableConsumer(AsyncWebsocketConsumer):
         return actual_board_db
     
     @sync_to_async
-    def push_new_board_to_database(self, updated_board, turn, enpassant):
+    def push_new_board_to_database(self, updated_board, turn, castling, enpassant):
         game = Game.objects.get(pk=self.table_id)
 
         Board.objects.create(
@@ -47,7 +47,7 @@ class TableConsumer(AsyncWebsocketConsumer):
             total_moves = 0,
             board = json.dumps(updated_board),
             turn = turn,
-            castling = "kqKQ",
+            castling = castling,
             enpassant = enpassant,
             soft_moves = 0
         )
@@ -61,15 +61,15 @@ class TableConsumer(AsyncWebsocketConsumer):
         prev_state = await self.get_state_from_database()
         prev_board = json.loads(prev_state.board)
 
-        next_board, next_enpassant = pieces.Board(prev_board, prev_state.turn, prev_state.castling, prev_state.enpassant).create_new_json_board(move)
+        next_board, next_castling, next_enpassant = pieces.Board(prev_board, prev_state.turn, prev_state.castling, prev_state.enpassant).create_new_json_board(move)
         next_turn = "black" if prev_state.turn == "white" else "white"
         next_total_moves = prev_state.total_moves + 1
         next_soft_moves = prev_state.soft_moves + 1
 
         if next_board:
-            await self.push_new_board_to_database(next_board, next_turn, next_enpassant)
-            # CHANGE PREV TO NEXT STATE!
-            updated_json_board = pieces.Board(next_board, next_turn, prev_state.castling, next_enpassant).create_json_class()
+            await self.push_new_board_to_database(next_board, next_turn, next_castling, next_enpassant)
+
+            updated_json_board = pieces.Board(next_board, next_turn, next_castling, next_enpassant).create_json_class()
 
             # Send message to room group
             await self.channel_layer.group_send(
