@@ -31,7 +31,7 @@ def create_table(request):
         total_moves = 0,
         board = json.dumps(starting_board),
         turn = "white",
-        castling = "kqKQ",
+        castling = "KQkq",
         enpassant = "__",
         soft_moves = 0
     )
