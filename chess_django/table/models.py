@@ -10,4 +10,5 @@ class Board(models.Model):
     board = models.TextField()
     turn = models.CharField(max_length=1)
     castling = models.CharField(max_length=4)
+    enpassant = models.CharField(max_length=2)
     soft_moves = models.IntegerField()

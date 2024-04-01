@@ -22,12 +22,10 @@ class Piece:
                     checking_positions.add(value)
         return checking_positions
 
-    def check_piece_possible_moves(self, class_board, opponents_attacks, checkin_pieces, pinned_pieces):
+    def check_piece_possible_moves(self, class_board, opponents_attacks, checkin_pieces, pinned_pieces, castling, enpassant):
         # Initialize lists to store possible moves and attacks
         moves = []
         attacks = []
-        # [[location of checking piece][extra location to prevent check]]
-        # [[location of pinned piece][extra location that piece can still move]]
 
         board = class_board.board
         opponent = True if class_board.turn != self.player else False
@@ -101,6 +99,14 @@ class Piece:
                             if not checkin_pieces or (new_row, new_column) in checking_positions:
                                 if board[new_row][new_column].player is not self.player:
                                     attacks.append((new_row, new_column))
+                    
+                    # Check enpassant
+                    if self._is_valid_position(new_row, new_column) and (new_row, new_column) == enpassant:
+                        # Check whether the current piece is not absolute pinned
+                        if self._is_not_pinned((self.row, self.column), (new_row, new_column), class_board, pinned_pieces):
+                            # Check if player king is checked, if move protect the king
+                            if not checkin_pieces or (new_row, new_column) in checking_positions:
+                                attacks.append((new_row, new_column))
 
         elif self.piece in ["rook", "bishop", "queen"]:
             # Possible movement directions for rooks, bishops, and queens
@@ -260,9 +266,17 @@ class Piece:
         return moves, attacks
 
 class Board:
-    def __init__(self, json_board, turn):
+    def __init__(self, json_board, turn, castling, enpassant):
         self.ROWS, self.COLS = 8, 8
         self.turn = turn
+        self.castling = castling
+        
+        if enpassant == "__":
+            self.enpassant = None
+        else:
+            row, col = int(enpassant[0]), int(enpassant[1])
+            self.enpassant = (row, col)
+
         self.json_board = json_board
         self.board = self.create_class(json_board)
         self.moves = self.add_moves()
@@ -297,7 +311,9 @@ class Board:
     def add_moves(self):
         possible_moves = [[None for _ in range(self.ROWS)] for _ in range(self.COLS)]
         opponents_attacks = set()
+        # [[location of checking piece][extra location to prevent check]]
         checkin_pieces = {}
+        # [[location of pinned piece][extra location that piece can still move]]
         pinned_pieces = {}
         
         # Opponent
@@ -305,14 +321,14 @@ class Board:
             for col in range(self.COLS):
                 curr_piece = self.board[row][col]
                 if curr_piece and curr_piece.player != self.turn:
-                    possible_moves[row][col] = curr_piece.check_piece_possible_moves(self, opponents_attacks, checkin_pieces, pinned_pieces)
+                    possible_moves[row][col] = curr_piece.check_piece_possible_moves(self, opponents_attacks, checkin_pieces, pinned_pieces, self.castling, self.enpassant)
 
         # Player
         for row in range(self.ROWS):
             for col in range(self.COLS):
                 curr_piece = self.board[row][col]
                 if curr_piece and curr_piece.player == self.turn:
-                    possible_moves[row][col] = curr_piece.check_piece_possible_moves(self, opponents_attacks, checkin_pieces, pinned_pieces)
+                    possible_moves[row][col] = curr_piece.check_piece_possible_moves(self, opponents_attacks, checkin_pieces, pinned_pieces, self.castling, self.enpassant)
 
         return possible_moves
 
@@ -338,9 +354,25 @@ class Board:
         possible_moves = self.moves[old_position_row][old_position_col]
         new_position = (new_position_row, new_position_col)
 
+        # Check if current move create enpassant possibility
+        if self.board[old_position_row][old_position_col].piece == "pawn" and abs(old_position_row - new_position_row) == 2:
+            enpassant_row = (old_position_row + new_position_row) // 2
+            enpassant_col = old_position_col
+            enpassant = str(enpassant_row) + str(enpassant_col)
+        else:
+            enpassant = "__"
+
         if new_position in possible_moves[0] or new_position in possible_moves[1]:
             new_json_board = self.json_board
             new_json_board[new_position_row][new_position_col] = new_json_board[old_position_row][old_position_col]
             new_json_board[old_position_row][old_position_col] = None
 
-            return new_json_board, True
+            # Check if current move is enpassant, then correctly remove the pawn
+            if new_position == self.enpassant:
+                if new_position_row == 2:
+                    new_json_board[3][new_position_col] = None
+                else:
+                    new_json_board[4][new_position_col] = None
+
+            return new_json_board, enpassant
+        return False
