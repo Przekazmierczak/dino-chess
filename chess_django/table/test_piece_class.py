@@ -351,7 +351,7 @@ class Castling1(unittest.TestCase):
         cls.possible_moves = [[None for _ in range(ROWS)] for _ in range(COLS)]
 
         cls.pieces_positions = [("rook", "black", (7, 0)), ("rook", "black", (7, 7)),
-                                 ("king", "white", (0, 3)), ("king", "black", (7, 3))]
+                                ("king", "white", (0, 3)), ("king", "black", (7, 3))]
         
         for piece_position in cls.pieces_positions:
             piece, player, position = piece_position
@@ -391,7 +391,7 @@ class Castling2(unittest.TestCase):
         cls.possible_moves = [[None for _ in range(ROWS)] for _ in range(COLS)]
 
         cls.pieces_positions = [("rook", "black", (7, 0)), ("rook", "black", (7, 7)),
-                                 ("king", "white", (0, 3)), ("king", "black", (7, 3))]
+                                ("king", "white", (0, 3)), ("king", "black", (7, 3))]
         
         for piece_position in cls.pieces_positions:
             piece, player, position = piece_position
@@ -432,8 +432,8 @@ class Castling3(unittest.TestCase):
         cls.possible_moves = [[None for _ in range(ROWS)] for _ in range(COLS)]
 
         cls.pieces_positions = [("rook", "black", (7, 0)), ("rook", "black", (7, 7)),
-                                 ("knight", "black", (7, 1)), ("knight", "black", (7, 6)),
-                                 ("king", "white", (0, 3)), ("king", "black", (7, 3))]
+                                ("knight", "black", (7, 1)), ("knight", "black", (7, 6)),
+                                ("king", "white", (0, 3)), ("king", "black", (7, 3))]
         
         for piece_position in cls.pieces_positions:
             piece, player, position = piece_position
@@ -473,8 +473,8 @@ class Castling4(unittest.TestCase):
         cls.possible_moves = [[None for _ in range(ROWS)] for _ in range(COLS)]
 
         cls.pieces_positions = [("rook", "black", (7, 0)), ("rook", "black", (7, 7)),
-                                 ("bishop", "white", (5, 5)),
-                                 ("king", "white", (0, 3)), ("king", "black", (7, 3))]
+                                ("bishop", "white", (5, 5)),
+                                ("king", "white", (0, 3)), ("king", "black", (7, 3))]
         
         for piece_position in cls.pieces_positions:
             piece, player, position = piece_position
@@ -503,6 +503,47 @@ class Castling4(unittest.TestCase):
         """Examine the movements of the king located on square (7, 3) - Castling 4 test."""
         self.assertEqual(self.get_moves(7, 3), ({(7, 2), (6, 2), (6, 3), (7, 4)}, set()))
 
+class Castling5(unittest.TestCase):
+
+    # initiate test board
+    @classmethod
+    def setUpClass(cls):
+        cls.turn, cls.opponents_attacks, cls.checkin_pieces, cls.pinned_pieces, cls.enpassant = "black", set(), {}, {}, None
+        cls.castling = "KQkq"
+        cls.board = [[None for _ in range(ROWS)] for _ in range(COLS)]
+        cls.possible_moves = [[None for _ in range(ROWS)] for _ in range(COLS)]
+
+        cls.pieces_positions = [("rook", "white", (4, 1)), ("rook", "black", (7, 0)), ("rook", "black", (7, 7)),
+                                ("bishop", "white", (5, 6)),
+                                ("king", "white", (0, 3)), ("king", "black", (7, 3))]
+        
+        for piece_position in cls.pieces_positions:
+            piece, player, position = piece_position
+            row, col = position
+            cls.board[row][col] = Piece(piece, player, (row, col))
+        
+        # Opponent
+        for row in range(ROWS):
+            for col in range(COLS):
+                curr_piece = cls.board[row][col]
+                if curr_piece and curr_piece.player != cls.turn:
+                    cls.possible_moves[row][col] = cls.get_moves(cls, row, col)
+
+        # Player
+        for row in range(ROWS):
+            for col in range(COLS):
+                curr_piece = cls.board[row][col]
+                if curr_piece and curr_piece.player == cls.turn:
+                    cls.possible_moves[row][col] = cls.get_moves(cls, row, col)
+
+    def get_moves(self, row, col):
+        moves, attacks = self.board[row][col].check_piece_possible_moves(self, self.opponents_attacks, self.checkin_pieces, self.pinned_pieces, self.castling, self.enpassant)
+        return (set(moves), set(attacks))
+
+    def test_castling_5_king_7_3(self):
+        """Examine the movements of the king located on square (7, 3) - Castling 5 test."""
+        self.assertEqual(self.get_moves(7, 3), ({(7, 2), (6, 2), (6, 3), (6, 4)}, set()))
+
 class Enpassant1(unittest.TestCase):
 
     # initiate test board
@@ -514,7 +555,7 @@ class Enpassant1(unittest.TestCase):
         cls.possible_moves = [[None for _ in range(ROWS)] for _ in range(COLS)]
 
         cls.pieces_positions = [("pawn", "white", (3, 4)), ("pawn", "black", (3, 3)),
-                                 ("king", "white", (0, 0)), ("king", "black", (7, 7))]
+                                ("king", "white", (0, 0)), ("king", "black", (7, 7))]
         
         for piece_position in cls.pieces_positions:
             piece, player, position = piece_position
@@ -554,7 +595,7 @@ class Enpassant2(unittest.TestCase):
         cls.possible_moves = [[None for _ in range(ROWS)] for _ in range(COLS)]
 
         cls.pieces_positions = [("pawn", "white", (3, 4)), ("pawn", "black", (3, 3)),
-                                 ("king", "white", (0, 0)), ("king", "black", (7, 7))]
+                                ("king", "white", (0, 0)), ("king", "black", (7, 7))]
         
         for piece_position in cls.pieces_positions:
             piece, player, position = piece_position
