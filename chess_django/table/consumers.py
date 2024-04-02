@@ -36,17 +36,22 @@ class TableConsumer(AsyncWebsocketConsumer):
     def get_state_from_database(self):
         actual_game_db = Game.objects.get(pk=self.table_id)
         actual_board_db = Board.objects.filter(game=actual_game_db).latest('id')
+
+        actual_board_db.turn = "white" if actual_board_db.turn == "w" else "black"
+        
         return actual_board_db
     
     @sync_to_async
     def push_new_board_to_database(self, updated_board, turn, castling, enpassant):
         game = Game.objects.get(pk=self.table_id)
 
+        db_turn = "w" if turn == "white" else "b"
+
         Board.objects.create(
             game = game,
             total_moves = 0,
             board = json.dumps(updated_board),
-            turn = turn,
+            turn = db_turn,
             castling = castling,
             enpassant = enpassant,
             soft_moves = 0
