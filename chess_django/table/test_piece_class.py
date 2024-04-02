@@ -378,7 +378,7 @@ class Castling1(unittest.TestCase):
 
     def test_castling_1_king_7_3(self):
         """Examine the movements of the king located on square (7, 3) - Castling 1 test."""
-        self.assertEqual(self.get_moves(7, 3), ({(7, 2), (6, 2), (6, 3), (6, 4), (7, 4), (7, 6)}, set()))
+        self.assertEqual(self.get_moves(7, 3), ({(7, 2), (6, 2), (6, 3), (6, 4), (7, 4), (7, 5)}, set()))
 
 class Castling2(unittest.TestCase):
 
