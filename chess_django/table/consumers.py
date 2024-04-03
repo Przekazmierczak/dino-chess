@@ -25,10 +25,11 @@ class TableConsumer(AsyncWebsocketConsumer):
     async def send_actual_board(self):
         actual_state = await self.get_state_from_database()
         actual_board_json = json.loads(actual_state.board)
-        actual_board_object = pieces.Board(actual_board_json, actual_state.turn, actual_state.castling, actual_state.enpassant).create_json_class()
+        actual_board_object, winner = pieces.Board(actual_board_json, actual_state.turn, actual_state.castling, actual_state.enpassant).create_json_class()
         await self.send(text_data=json.dumps({
             "board": actual_board_object,
-            "turn": actual_state.turn
+            "turn": actual_state.turn,
+            "winner": winner
             }))
 
 
@@ -42,8 +43,12 @@ class TableConsumer(AsyncWebsocketConsumer):
         return actual_board_db
     
     @sync_to_async
-    def push_new_board_to_database(self, updated_board, turn, castling, enpassant):
+    def push_new_board_to_database(self, updated_board, turn, castling, enpassant, winner):
         game = Game.objects.get(pk=self.table_id)
+        if winner:
+            db_winner = {"white": "w", "black": "b"}.get(winner, "d")
+            game.winner = db_winner
+            game.save()
 
         db_turn = "w" if turn == "white" else "b"
 
@@ -72,22 +77,24 @@ class TableConsumer(AsyncWebsocketConsumer):
         next_soft_moves = prev_state.soft_moves + 1
 
         if next_board:
-            await self.push_new_board_to_database(next_board, next_turn, next_castling, next_enpassant)
+            updated_json_board, winner = pieces.Board(next_board, next_turn, next_castling, next_enpassant).create_json_class()
 
-            updated_json_board = pieces.Board(next_board, next_turn, next_castling, next_enpassant).create_json_class()
+            await self.push_new_board_to_database(next_board, next_turn, next_castling, next_enpassant, winner)
 
             # Send message to room group
             await self.channel_layer.group_send(
-                self.table_group_id, {"type": "new_board", "board": updated_json_board, "turn": next_turn}
+                self.table_group_id, {"type": "new_board", "board": updated_json_board, "turn": next_turn, "winner": winner}
             )
 
     # Receive message from room group
     async def new_board(self, event):
         board = event["board"]
         turn = event["turn"]
+        winner = event["winner"]
 
         # Send message to WebSocket
         await self.send(text_data=json.dumps({
             "board": board,
-            "turn": turn
+            "turn": turn,
+            "winner": winner
             }))

@@ -17,7 +17,14 @@ document.addEventListener('DOMContentLoaded', function () {
         const state = JSON.parse(e.data);
         console.log(state)
         clearBoard();
-        
+        if (state.winner !== null) {
+            htmlWinner = document.getElementById("winner");
+            if (state.winner === "draw") {
+                htmlWinner.innerHTML = `<p>It's a draw!</p>`;
+            } else {
+                htmlWinner.innerHTML = `<p>${state.winner} has won!</p>`;
+            }
+        }
         for (let row = 0; row < 8; row++) {
             for (let col = 0; col < 8; col++) {
                 if (state.board[row][col] !== null) {
@@ -38,7 +45,7 @@ function uploadBoard(state, row, col, tableSocket) {
     const image = getImageSource(piece, player);
     const htmlSquare = document.querySelector(`#square${row}${col}`);
     htmlSquare.innerHTML = `${image}`;
-    if (turn === player) {
+    if (turn === player && state.winner === null) {
         htmlSquare.addEventListener("click", function() {
             colorBoard();
             removeMoveListeners();

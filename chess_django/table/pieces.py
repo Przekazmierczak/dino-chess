@@ -294,7 +294,7 @@ class Board:
 
         self.json_board = json_board
         self.board = self.create_class(json_board)
-        self.moves = self.add_moves()
+        self.moves, self.winner = self.add_moves()
 
     def create_class(self, board):
         board_piece = {
@@ -352,13 +352,13 @@ class Board:
                             end = False
         
         # Check if the game is finished
-        # if end:
-        #     if checkin_pieces:
-        #         winner = "w" if self.turn == "b" else "b"
-        #     else:
-        #         winner ="d"
-        # print(winner)
-        return possible_moves
+        if end:
+            if checkin_pieces:
+                winner = "white" if self.turn == "black" else "black"
+            else:
+                winner ="draw"
+
+        return possible_moves, winner
 
     def create_json_class(self):
         json_class = [[None for _ in range(self.ROWS)] for _ in range(self.COLS)]
@@ -372,7 +372,7 @@ class Board:
                         "moves": self.moves[row][col]
                         }
 
-        return json_class
+        return json_class, self.winner
 
 
     def create_new_json_board(self, move):
