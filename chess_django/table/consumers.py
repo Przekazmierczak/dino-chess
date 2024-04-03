@@ -67,11 +67,12 @@ class TableConsumer(AsyncWebsocketConsumer):
     async def receive(self, text_data):
         text_data_json = json.loads(text_data)
         move = text_data_json["move"]
+        promotion = text_data_json["promotion"]
 
         prev_state = await self.get_state_from_database()
         prev_board = json.loads(prev_state.board)
 
-        next_board, next_castling, next_enpassant = pieces.Board(prev_board, prev_state.turn, prev_state.castling, prev_state.enpassant).create_new_json_board(move)
+        next_board, next_castling, next_enpassant = pieces.Board(prev_board, prev_state.turn, prev_state.castling, prev_state.enpassant).create_new_json_board(move, promotion)
         next_turn = "black" if prev_state.turn == "white" else "white"
         next_total_moves = prev_state.total_moves + 1
         next_soft_moves = prev_state.soft_moves + 1

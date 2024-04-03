@@ -49,15 +49,17 @@ function uploadBoard(state, row, col, tableSocket) {
         htmlSquare.addEventListener("click", function() {
             colorBoard();
             removeMoveListeners();
-            moves[0].forEach(move => addPossibleMove(move, row, col, tableSocket, "move"));
-            moves[1].forEach(move => addPossibleMove(move, row, col, tableSocket, "attack"));
+            const iFpromotion = moves[2]
+            moves[0].forEach(move => addPossibleMove(move, row, col, tableSocket, iFpromotion, "move"));
+            moves[1].forEach(move => addPossibleMove(move, row, col, tableSocket, iFpromotion, "attack"));
         });
     }
 };
 
-function addPossibleMove(move, oldRow, oldCol, tableSocket, type) {
+function addPossibleMove(move, oldRow, oldCol, tableSocket, iFpromotion, type) {
     const row = move[0]
     const col = move[1]
+    
     const htmlPossibleMove = document.querySelector(`#square${row}${col}`);
     if (htmlPossibleMove.classList.contains('dark')) {
         htmlPossibleMove.classList.remove('dark');
@@ -74,10 +76,22 @@ function addPossibleMove(move, oldRow, oldCol, tableSocket, type) {
             htmlPossibleMove.classList.add('lightRed');
         }
     }
+    pushMove(oldRow, oldCol, row, col, htmlPossibleMove, iFpromotion, tableSocket);
+}
+
+function pushMove(oldRow, oldCol, row, col, htmlPossibleMove, iFpromotion, tableSocket) {
     let moveListener = function() {
         const move = [[oldRow, oldCol], [row, col]];
+        let promotion
+
+        if (iFpromotion === false) {
+            promotion = null
+        } else {
+            promotion = prompt("What promotion?");
+        }
         tableSocket.send(JSON.stringify({
-            'move': move
+            'move': move,
+            'promotion': promotion
         }));
     }
     htmlPossibleMove.addEventListener("click", moveListener);

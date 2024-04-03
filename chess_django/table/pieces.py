@@ -26,6 +26,7 @@ class Piece:
         # Initialize lists to store possible moves and attacks
         moves = []
         attacks = []
+        promotion = False
 
         board = class_board.board
         opponent = True if class_board.turn != self.player else False
@@ -40,6 +41,10 @@ class Piece:
             # Allow moving two steps forward if the pawn hasn't moved yet
             if self.player == "white" and self.row == 1 or self.player == "black" and self.row == 6:
                 directions.append((direction_by_colour * 2, 0))
+            
+            # Check if the move will create a promotion
+            if self.player == "white" and self.row == 6 or self.player == "black" and self.row == 1:
+                promotion = True
 
             # OPPONENT
             if opponent:
@@ -278,23 +283,25 @@ class Piece:
                                     attacks.append((new_row, new_column))
 
         # Return the lists of possible moves and attacks
-        return moves, attacks
+        return moves, attacks, promotion
 
 class Board:
     def __init__(self, json_board, turn, castling, enpassant):
         self.ROWS, self.COLS = 8, 8
         self.turn = turn
         self.castling = castling
-        
-        if enpassant == "__":
-            self.enpassant = None
-        else:
-            row, col = int(enpassant[0]), int(enpassant[1])
-            self.enpassant = (row, col)
+        self.enpassant = self.unpack_db(enpassant)
 
         self.json_board = json_board
         self.board = self.create_class(json_board)
         self.moves, self.winner = self.add_moves()
+
+    def unpack_db(self, value):
+        if value == "__":
+            return None
+        else:
+            row, col = int(value[0]), int(value[1])
+            return (row, col)
 
     def create_class(self, board):
         board_piece = {
@@ -347,7 +354,7 @@ class Board:
                 if curr_piece and curr_piece.player == self.turn:
                     possible_moves[row][col] = curr_piece.check_piece_possible_moves(self, opponents_attacks, checkin_pieces, pinned_pieces, self.castling, self.enpassant)
                     if end:
-                        moves, attacks = possible_moves[row][col]
+                        moves, attacks, _ = possible_moves[row][col]
                         if moves or attacks:
                             end = False
         
@@ -375,18 +382,19 @@ class Board:
         return json_class, self.winner
 
 
-    def create_new_json_board(self, move):
+    def create_new_json_board(self, move, promotion):
         old_position = tuple(move[0])
         new_position = tuple(move[1])
 
         old_position_row, old_position_col = old_position
         new_position_row, new_position_col = new_position
 
-        possible_moves, possible_attacks = self.moves[old_position_row][old_position_col]
+        possible_moves, possible_attacks, possible_promotion = self.moves[old_position_row][old_position_col]
+        enpassant = "__"
 
-
-        if new_position in possible_moves or new_position in possible_attacks:
-            new_json_board = self.json_board
+        new_json_board = self.json_board
+        
+        if (new_position in possible_moves or new_position in possible_attacks) and not possible_promotion:
 
             # Check if any castling options are left
             if self.castling != "____":
@@ -426,12 +434,10 @@ class Board:
                     new_json_board[old_position_row][7] = None
 
             # Check if current move create enpassant possibility
-            if self.board[old_position_row][old_position_col].piece and self.board[old_position_row][old_position_col].piece == "pawn" and abs(old_position_row - new_position_row) == 2:
+            if self.board[old_position_row][old_position_col].piece == "pawn" and abs(old_position_row - new_position_row) == 2:
                 enpassant_row = (old_position_row + new_position_row) // 2
                 enpassant_col = old_position_col
                 enpassant = str(enpassant_row) + str(enpassant_col)
-            else:
-                enpassant = "__"
 
             # Check if the current move is an en passant capture, then correctly remove the pawn
             if new_position == self.enpassant:
@@ -440,7 +446,20 @@ class Board:
                 else:
                     new_json_board[4][new_position_col] = None
             
+            # Check if the current move is not creating a promotion
+            # if (self.board[old_position_row][old_position_col].piece == "pawn" 
+            #     and (self.board[old_position_row][old_position_col].player == "white" and new_position_row == 7
+            #         or self.board[old_position_row][old_position_col].player == "black" and new_position_row == 0)):
+            #     promotion = True
+
             new_json_board[new_position_row][new_position_col] = new_json_board[old_position_row][old_position_col]
+            new_json_board[old_position_row][old_position_col] = None
+
+            return new_json_board, self.castling, enpassant
+        
+        elif (new_position in possible_moves or new_position in possible_attacks) and possible_promotion and promotion:
+
+            new_json_board[new_position_row][new_position_col] = promotion
             new_json_board[old_position_row][old_position_col] = None
 
             return new_json_board, self.castling, enpassant
