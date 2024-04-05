@@ -13,4 +13,18 @@
     </table>
     {{ table_id|json_script:"table_id" }}
     <h1 id="winner"></h1>
+    <div class="modal-promotion" id="modal_promotion">
+        <div class="modal">
+            <p>
+                <table id="modal_table">
+                    <tr>
+                        <td id="modal_queen" class="modal_td"></td>
+                        <td id="modal_rook" class="modal_td"></td>
+                        <td id="modal_knight" class="modal_td"></td>
+                        <td id="modal_bishop" class="modal_td"></td>
+                    </tr>
+                </table>
+            </p>
+        </div>
+    </div>
 {% endblock %}

@@ -393,7 +393,7 @@ class Board:
         enpassant = "__"
 
         new_json_board = self.json_board
-        
+
         if (new_position in possible_moves or new_position in possible_attacks) and not possible_promotion:
 
             # Check if any castling options are left
@@ -445,12 +445,6 @@ class Board:
                     new_json_board[3][new_position_col] = None
                 else:
                     new_json_board[4][new_position_col] = None
-            
-            # Check if the current move is not creating a promotion
-            # if (self.board[old_position_row][old_position_col].piece == "pawn" 
-            #     and (self.board[old_position_row][old_position_col].player == "white" and new_position_row == 7
-            #         or self.board[old_position_row][old_position_col].player == "black" and new_position_row == 0)):
-            #     promotion = True
 
             new_json_board[new_position_row][new_position_col] = new_json_board[old_position_row][old_position_col]
             new_json_board[old_position_row][old_position_col] = None

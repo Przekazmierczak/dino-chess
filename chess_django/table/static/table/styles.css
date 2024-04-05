@@ -53,3 +53,42 @@ td {
 .lightRed {
     background-color: rgba(206, 0, 0, 0.281);
 }
+
+.modal-promotion {
+    background-color: rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    opacity: 0;
+    pointer-events: none;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 100vw;
+}
+
+.modal-promotion.show {
+    pointer-events: auto;
+    opacity: 1;
+}
+
+.modal {
+    background-color: #fff;
+    border-radius: 5px;
+    padding: 30px 50px;
+    width: 600px;
+    max-width: 100%;
+    text-align: center;
+}
+
+.modal_td {
+    width: 120px;
+    height: 120px;
+    position: relative;
+}
+
+#modal_table {
+    margin-left: auto;
+    margin-right: auto;
+}

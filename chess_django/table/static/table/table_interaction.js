@@ -11,19 +11,19 @@ document.addEventListener('DOMContentLoaded', function () {
         + '/ws/table/'
         + tableID
         + '/'
-    );
-    
-    tableSocket.onmessage = function(e) {
-        const state = JSON.parse(e.data);
-        console.log(state)
-        clearBoard();
-        if (state.winner !== null) {
-            htmlWinner = document.getElementById("winner");
-            if (state.winner === "draw") {
-                htmlWinner.innerHTML = `<p>It's a draw!</p>`;
-            } else {
-                htmlWinner.innerHTML = `<p>${state.winner} has won!</p>`;
-            }
+        );
+        
+        tableSocket.onmessage = function(e) {
+            const state = JSON.parse(e.data);
+            console.log(state)
+            clearBoard();
+            if (state.winner !== null) {
+                htmlWinner = document.getElementById("winner");
+                if (state.winner === "draw") {
+                    htmlWinner.innerHTML = `<p>It's a draw!</p>`;
+                } else {
+                    htmlWinner.innerHTML = `<p>${state.winner} has won!</p>`;
+                }
         }
         for (let row = 0; row < 8; row++) {
             for (let col = 0; col < 8; col++) {
@@ -34,7 +34,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         console.log("received updated board");
     }; 
-
 });
 
 function uploadBoard(state, row, col, tableSocket) {
@@ -85,14 +84,49 @@ function pushMove(oldRow, oldCol, row, col, htmlPossibleMove, iFpromotion, table
         let promotion
 
         if (iFpromotion === false) {
-            promotion = null
+            tableSocket.send(JSON.stringify({
+                'move': move,
+                'promotion': null
+            }));
         } else {
-            promotion = prompt("What promotion?");
+            modal_promotion.classList.add("show");
+            const promotionObject = {
+                queen: ["modal_queen", "Queen_white", "Q", "Queen_black", "q"],
+                rook: ["modal_rook", "Rook_white", "R", "Rook_black", "r"],
+                knight: ["modal_knight", "Knight_white", "N",  "Knight_black", "n"],
+                bishop: ["modal_bishop", "Bishop_white", "B", "Bishop_black", "b"],
+            }
+            function pickPiece(pickedPiece) {
+                promotion = pickedPiece;
+                modal_promotion.classList.remove("show");
+                tableSocket.send(JSON.stringify({
+                    'move': move,
+                    'promotion': promotion
+                }));
+            }
+            for (const piece in promotionObject) {
+                if (Object.hasOwnProperty.call(promotionObject, piece)) {
+                    const list = promotionObject[piece];
+                    let curr_piece = document.getElementById(list[0]);
+                    // Remove previous listeners
+                    let removeListeners = curr_piece.cloneNode(true);
+                    curr_piece.parentNode.replaceChild(removeListeners, curr_piece);
+                    curr_piece = removeListeners
+
+                    if (oldRow === 6) {
+                        curr_piece.innerHTML = `<img src="/static/table/pieces_images/${list[1]}.png" class="pieceImage" alt=${list[1]}></img>`
+                        curr_piece.addEventListener("click", function() {
+                            pickPiece(list[2])
+                        });
+                    } else {
+                        curr_piece.innerHTML = `<img src="/static/table/pieces_images/${list[3]}.png" class="pieceImage" alt=${list[3]}></img>`
+                        curr_piece.addEventListener("click", function() {
+                            pickPiece(list[4])
+                        });
+                    }
+                }
+            }
         }
-        tableSocket.send(JSON.stringify({
-            'move': move,
-            'promotion': promotion
-        }));
     }
     htmlPossibleMove.addEventListener("click", moveListener);
     moveListeners.push({element: htmlPossibleMove, listener: moveListener});
