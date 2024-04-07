@@ -157,12 +157,12 @@ class Add_moves1(unittest.TestCase):
         cls.board = Board(cls.json_board, cls.turn, cls.castling, cls.enpassant)
     
     def test_add_moves1(self):
-        possible_moves = [[({(1, 0), (1, 1), (0, 1)}, set(), False), None, None, None, None, None, None, None],
+        possible_moves = [[(set(), set(), False), None, None, None, None, None, None, None],
                           [None, None, None, None, None, None, None, None],
                           [None, None, None, None, None, None, None, None],
                           [None, None, None, None, None, None, None, None],
                           [None, None, None, None, None, None, None, None],
-                          [None, None, None, None, None, None, None, ({(6, 7)}, set(), False)],
+                          [None, None, None, None, None, None, None, (set(), set(), False)],
                           [None, (set(), set(), True), None, None, None, None, None, None],
                           [None, ({(6, 0), (6, 2)}, {(6, 1)}, False), None, None, None, None, None, None]]
         """Examine the correctness of the add_moves function - test 1"""
@@ -198,18 +198,14 @@ class Add_moves2(unittest.TestCase):
         cls.board = Board(cls.json_board, cls.turn, cls.castling, cls.enpassant)
     
     def test_add_moves2(self):
-        possible_moves = [[({(1, 0), (1, 1), (0, 1)}, set(), False), None, None, None, None, None, None, None],
+        possible_moves = [[(set(), set(), False), None, None, None, None, None, None, None],
                           [None, None, None, None, None, None, None, None],
                           [None, None, None, None, None, None, None, None],
                           [None, None, None, None, None, None, None, None],
                           [None, None, None, None, None, None, None, None],
                           [None, None, None, None, None, None, None, None],
-                          [None, None, None, None, None, None, None,
-                           ({(0, 7), (1, 7), (2, 7), (3, 7), (4, 7), (5, 7), (7, 7),
-                            (6, 0), (6, 1), (6, 2), (6, 3), (6, 4), (6, 5), (6, 6)}, set(), False)],
-                          [None, (set(), set(), False), None, None, None, None,
-                           ({(0, 6), (1, 6), (2, 6), (3, 6), (4, 6), (5, 6), (6, 6),
-                             (7, 2), (7, 3), (7, 4), (7, 5), (7, 7)}, {(7, 1)}, False), None]]
+                          [None, None, None, None, None, None, None, (set(), set(), False)],
+                          [None, (set(), set(), False), None, None, None, None, (set(), set(), False), None]]
         """Examine the correctness of the add_moves function - test 2"""
         test_moves = self.board.add_moves()
         moves, winner = test_moves
@@ -243,15 +239,13 @@ class Add_moves3(unittest.TestCase):
         cls.board = Board(cls.json_board, cls.turn, cls.castling, cls.enpassant)
     
     def test_add_moves3(self):
-        possible_moves = [[({(1, 0), (1, 1), (0, 1)}, set(), False), None, None, None, None, None, None, None],
+        possible_moves = [[(set(), set(), False), None, None, None, None, None, None, None],
                           [None, None, None, None, None, None, None, None],
                           [None, None, None, None, None, None, None, None],
                           [None, None, None, None, None, None, None, None],
                           [None, None, None, None, None, None, None, None],
                           [None, None, None, None, None, None, None, None],
-                          [(set(), set(), True), None, None, None, None, None, None,
-                           ({(0, 7), (1, 7), (2, 7), (3, 7), (4, 7), (5, 7), (7, 7),
-                            (6, 1), (6, 2), (6, 3), (6, 4), (6, 5), (6, 6)}, set(), False)],
+                          [(set(), set(), True), None, None, None, None, None, None, (set(), set(), False)],
                           [(set(), set(), False), None, None, None, None, None, None , None]]
         """Examine the correctness of the add_moves function - test 3"""
         test_moves = self.board.add_moves()
@@ -298,14 +292,14 @@ class Create_json_class(unittest.TestCase):
                         [None, None, None, None, None, None, None, None],
                         [None, None, None, None, None, None, None, None],
                         [None, None, None, None, None, None, None, None],
-                        [{'piece': 'pawn', 'player': 'black', 'moves': ({(5, 0), (4, 0)}, set(), False)}, {'piece': 'pawn', 'player': 'black', 'moves': ({(5, 1), (4, 1)}, set(), False)},
-                         {'piece': 'pawn', 'player': 'black', 'moves': ({(5, 2), (4, 2)}, set(), False)}, {'piece': 'pawn', 'player': 'black', 'moves': ({(5, 3), (4, 3)}, set(), False)},
-                         {'piece': 'pawn', 'player': 'black', 'moves': ({(5, 4), (4, 4)}, set(), False)}, {'piece': 'pawn', 'player': 'black', 'moves': ({(5, 5), (4, 5)}, set(), False)},
-                         {'piece': 'pawn', 'player': 'black', 'moves': ({(5, 6), (4, 6)}, set(), False)}, {'piece': 'pawn', 'player': 'black', 'moves': ({(5, 7), (4, 7)}, set(), False)}],
-                        [{'piece': 'rook', 'player': 'black', 'moves': (set(), set(), False)}, {'piece': 'knight', 'player': 'black', 'moves': ({(5, 2), (5, 0)}, set(), False)},
+                        [{'piece': 'pawn', 'player': 'black', 'moves': (set(), set(), False)}, {'piece': 'pawn', 'player': 'black', 'moves': (set(), set(), False)},
+                         {'piece': 'pawn', 'player': 'black', 'moves': (set(), set(), False)}, {'piece': 'pawn', 'player': 'black', 'moves': (set(), set(), False)},
+                         {'piece': 'pawn', 'player': 'black', 'moves': (set(), set(), False)}, {'piece': 'pawn', 'player': 'black', 'moves': (set(), set(), False)},
+                         {'piece': 'pawn', 'player': 'black', 'moves': (set(), set(), False)}, {'piece': 'pawn', 'player': 'black', 'moves': (set(), set(), False)}],
+                        [{'piece': 'rook', 'player': 'black', 'moves': (set(), set(), False)}, {'piece': 'knight', 'player': 'black', 'moves': (set(), set(), False)},
                          {'piece': 'bishop', 'player': 'black', 'moves': (set(), set(), False)}, {'piece': 'king', 'player': 'black', 'moves': (set(), set(), False)},
                          {'piece': 'queen', 'player': 'black', 'moves': (set(), set(), False)}, {'piece': 'bishop', 'player': 'black', 'moves': (set(), set(), False)},
-                         {'piece': 'knight', 'player': 'black', 'moves': ({(5, 7), (5, 5)}, set(), False)}, {'piece': 'rook', 'player': 'black', 'moves': (set(), set(), False)}]]
+                         {'piece': 'knight', 'player': 'black', 'moves': (set(), set(), False)}, {'piece': 'rook', 'player': 'black', 'moves': (set(), set(), False)}]]
         
         json_class, winner = self.board.create_json_class()
         for row in range(ROWS):
