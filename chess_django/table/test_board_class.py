@@ -165,7 +165,7 @@ class Add_moves1(unittest.TestCase):
                           [None, None, None, None, None, None, None, ({(6, 7)}, set(), False)],
                           [None, (set(), set(), True), None, None, None, None, None, None],
                           [None, ({(6, 0), (6, 2)}, {(6, 1)}, False), None, None, None, None, None, None]]
-        """Examine the correctness of the add_moves function - version 1"""
+        """Examine the correctness of the add_moves function - test 1"""
         test_moves = self.board.add_moves()
         moves, winner = test_moves
 
@@ -210,7 +210,7 @@ class Add_moves2(unittest.TestCase):
                           [None, (set(), set(), False), None, None, None, None,
                            ({(0, 6), (1, 6), (2, 6), (3, 6), (4, 6), (5, 6), (6, 6),
                              (7, 2), (7, 3), (7, 4), (7, 5), (7, 7)}, {(7, 1)}, False), None]]
-        """Examine the correctness of the add_moves function - version 2"""
+        """Examine the correctness of the add_moves function - test 2"""
         test_moves = self.board.add_moves()
         moves, winner = test_moves
 
@@ -253,7 +253,7 @@ class Add_moves3(unittest.TestCase):
                            ({(0, 7), (1, 7), (2, 7), (3, 7), (4, 7), (5, 7), (7, 7),
                             (6, 1), (6, 2), (6, 3), (6, 4), (6, 5), (6, 6)}, set(), False)],
                           [(set(), set(), False), None, None, None, None, None, None , None]]
-        """Examine the correctness of the add_moves function - version 3"""
+        """Examine the correctness of the add_moves function - test 3"""
         test_moves = self.board.add_moves()
         moves, winner = test_moves
 
@@ -314,6 +314,229 @@ class Create_json_class(unittest.TestCase):
                     json_class[row][col]['moves'] = (set(json_class[row][col]['moves'][0]), set(json_class[row][col]['moves'][1]), json_class[row][col]['moves'][2])
 
         self.assertEqual((json_class, winner), (result_board, None))
+
+class NewJsonBoard1(unittest.TestCase):
+
+    # initiate test board
+    @classmethod
+    def setUpClass(cls):
+        cls.json_board = [["K", " ", " ", " ", " ", " ", " ", " "],
+                          [" ", " ", " ", " ", " ", " ", " ", " "],
+                          [" ", " ", " ", " ", " ", " ", " ", " "],
+                          [" ", " ", " ", " ", " ", " ", " ", " "],
+                          [" ", " ", " ", " ", " ", " ", " ", " "],
+                          [" ", " ", " ", " ", " ", " ", " ", " "],
+                          [" ", " ", " ", " ", " ", " ", " ", " "],
+                          [" ", " ", " ", " ", " ", " ", " ", "k"]]
+        cls.turn = "white"
+        cls.castling = "____"
+        cls.enpassant = "__"
+
+        cls.board = Board(cls.json_board, cls.turn, cls.castling, cls.enpassant)
+    
+    def test_create_new_json_board1(self):
+        """Examine the correctness of the create_new_json_board function - test 1"""
+        new_board = [[" ", " ", " ", " ", " ", " ", " ", " "],
+                     ["K", " ", " ", " ", " ", " ", " ", " "],
+                     [" ", " ", " ", " ", " ", " ", " ", " "],
+                     [" ", " ", " ", " ", " ", " ", " ", " "],
+                     [" ", " ", " ", " ", " ", " ", " ", " "],
+                     [" ", " ", " ", " ", " ", " ", " ", " "],
+                     [" ", " ", " ", " ", " ", " ", " ", " "],
+                     [" ", " ", " ", " ", " ", " ", " ", "k"]]
+
+        self.assertEqual(self.board.create_new_json_board([[0, 0], [1, 0]], False), (new_board, "____", "__"))
+
+class NewJsonBoard2(unittest.TestCase):
+
+    # initiate test board
+    @classmethod
+    def setUpClass(cls):
+        cls.json_board = [["K", " ", " ", " ", " ", " ", " ", " "],
+                          [" ", " ", " ", " ", " ", " ", " ", "r"],
+                          [" ", " ", " ", " ", " ", " ", " ", " "],
+                          [" ", " ", " ", " ", " ", " ", " ", " "],
+                          [" ", " ", " ", " ", " ", " ", " ", " "],
+                          [" ", " ", " ", " ", " ", " ", " ", " "],
+                          [" ", " ", " ", " ", " ", " ", " ", " "],
+                          [" ", " ", " ", " ", " ", " ", " ", "k"]]
+        cls.turn = "white"
+        cls.castling = "____"
+        cls.enpassant = "__"
+
+        cls.board = Board(cls.json_board, cls.turn, cls.castling, cls.enpassant)
+    
+    def test_create_new_json_board2(self):
+        """Examine the correctness of the create_new_json_board function - test 2"""
+        self.assertEqual(self.board.create_new_json_board([[0, 0], [1, 0]], False), (False))
+
+class NewJsonBoard3(unittest.TestCase):
+
+    # initiate test board
+    @classmethod
+    def setUpClass(cls):
+        cls.json_board = [["K", " ", " ", " ", " ", " ", " ", " "],
+                          ["P", " ", " ", " ", " ", " ", " ", " "],
+                          [" ", " ", " ", " ", " ", " ", " ", " "],
+                          [" ", " ", " ", " ", " ", " ", " ", " "],
+                          [" ", " ", " ", " ", " ", " ", " ", " "],
+                          [" ", " ", " ", " ", " ", " ", " ", " "],
+                          [" ", " ", " ", " ", " ", " ", " ", " "],
+                          [" ", " ", " ", " ", " ", " ", " ", "k"]]
+        cls.turn = "white"
+        cls.castling = "____"
+        cls.enpassant = "__"
+
+        cls.board = Board(cls.json_board, cls.turn, cls.castling, cls.enpassant)
+    
+    def test_create_new_json_board3(self):
+        """Examine the correctness of the create_new_json_board function - test 3"""
+        new_board = [["K", " ", " ", " ", " ", " ", " ", " "],
+                     [" ", " ", " ", " ", " ", " ", " ", " "],
+                     [" ", " ", " ", " ", " ", " ", " ", " "],
+                     ["P", " ", " ", " ", " ", " ", " ", " "],
+                     [" ", " ", " ", " ", " ", " ", " ", " "],
+                     [" ", " ", " ", " ", " ", " ", " ", " "],
+                     [" ", " ", " ", " ", " ", " ", " ", " "],
+                     [" ", " ", " ", " ", " ", " ", " ", "k"]]
+
+        self.assertEqual(self.board.create_new_json_board([[1, 0], [3, 0]], False), (new_board, "____", "20"))
+
+class NewJsonBoard4(unittest.TestCase):
+
+    # initiate test board
+    @classmethod
+    def setUpClass(cls):
+        cls.json_board = [["K", " ", " ", " ", " ", " ", " ", " "],
+                          [" ", " ", " ", " ", " ", " ", " ", " "],
+                          [" ", " ", " ", " ", " ", " ", " ", " "],
+                          [" ", " ", " ", " ", " ", " ", " ", " "],
+                          ["P", "p", " ", " ", " ", " ", " ", " "],
+                          [" ", " ", " ", " ", " ", " ", " ", " "],
+                          [" ", " ", " ", " ", " ", " ", " ", " "],
+                          [" ", " ", " ", " ", " ", " ", " ", "k"]]
+        cls.turn = "white"
+        cls.castling = "____"
+        cls.enpassant = "51"
+
+        cls.board = Board(cls.json_board, cls.turn, cls.castling, cls.enpassant)
+    
+    def test_create_new_json_board4(self):
+        """Examine the correctness of the create_new_json_board function - test 4"""
+        new_board = [["K", " ", " ", " ", " ", " ", " ", " "],
+                     [" ", " ", " ", " ", " ", " ", " ", " "],
+                     [" ", " ", " ", " ", " ", " ", " ", " "],
+                     [" ", " ", " ", " ", " ", " ", " ", " "],
+                     [" ", " ", " ", " ", " ", " ", " ", " "],
+                     [" ", "P", " ", " ", " ", " ", " ", " "],
+                     [" ", " ", " ", " ", " ", " ", " ", " "],
+                     [" ", " ", " ", " ", " ", " ", " ", "k"]]
+
+        self.assertEqual(self.board.create_new_json_board([[4, 0], [5, 1]], False), (new_board, "____", "__"))
+
+class NewJsonBoard5(unittest.TestCase):
+
+    # initiate test board
+    @classmethod
+    def setUpClass(cls):
+        cls.json_board = [["R", " ", " ", "K", " ", " ", " ", "R"],
+                          [" ", " ", " ", " ", " ", " ", " ", " "],
+                          [" ", " ", " ", " ", " ", " ", " ", " "],
+                          [" ", " ", " ", " ", " ", " ", " ", " "],
+                          [" ", " ", " ", " ", " ", " ", " ", " "],
+                          [" ", " ", " ", " ", " ", " ", " ", " "],
+                          [" ", " ", " ", " ", " ", " ", " ", " "],
+                          [" ", " ", " ", " ", " ", " ", " ", "k"]]
+        cls.turn = "white"
+        cls.castling = "KQkq"
+        cls.enpassant = "__"
+
+        cls.board = Board(cls.json_board, cls.turn, cls.castling, cls.enpassant)
+    
+    def test_create_new_json_board5(self):
+        """Examine the correctness of the create_new_json_board function - test 5"""
+        new_board = [[" ", " ", " ", "K", " ", " ", " ", "R"],
+                     ["R", " ", " ", " ", " ", " ", " ", " "],
+                     [" ", " ", " ", " ", " ", " ", " ", " "],
+                     [" ", " ", " ", " ", " ", " ", " ", " "],
+                     [" ", " ", " ", " ", " ", " ", " ", " "],
+                     [" ", " ", " ", " ", " ", " ", " ", " "],
+                     [" ", " ", " ", " ", " ", " ", " ", " "],
+                     [" ", " ", " ", " ", " ", " ", " ", "k"]]
+
+        self.assertEqual(self.board.create_new_json_board([[0, 0], [1, 0]], False), (new_board, "_Qkq", "__"))
+
+class NewJsonBoard6(unittest.TestCase):
+
+    # initiate test board
+    @classmethod
+    def setUpClass(cls):
+        cls.json_board = [["R", " ", " ", "K", " ", " ", " ", "R"],
+                          [" ", " ", " ", " ", " ", " ", " ", " "],
+                          [" ", " ", " ", " ", " ", " ", " ", " "],
+                          [" ", " ", " ", " ", " ", " ", " ", " "],
+                          [" ", " ", " ", " ", " ", " ", " ", " "],
+                          [" ", " ", " ", " ", " ", " ", " ", " "],
+                          [" ", " ", " ", " ", " ", " ", " ", " "],
+                          [" ", " ", " ", " ", " ", " ", " ", "k"]]
+        cls.turn = "white"
+        cls.castling = "KQkq"
+        cls.enpassant = "__"
+
+        cls.board = Board(cls.json_board, cls.turn, cls.castling, cls.enpassant)
+    
+    def test_create_new_json_board6(self):
+        """Examine the correctness of the create_new_json_board function - test 6"""
+        new_board = [["R", " ", " ", " ", " ", " ", " ", "R"],
+                     [" ", " ", " ", "K", " ", " ", " ", " "],
+                     [" ", " ", " ", " ", " ", " ", " ", " "],
+                     [" ", " ", " ", " ", " ", " ", " ", " "],
+                     [" ", " ", " ", " ", " ", " ", " ", " "],
+                     [" ", " ", " ", " ", " ", " ", " ", " "],
+                     [" ", " ", " ", " ", " ", " ", " ", " "],
+                     [" ", " ", " ", " ", " ", " ", " ", "k"]]
+
+        self.assertEqual(self.board.create_new_json_board([[0, 3], [1, 3]], False), (new_board, "__kq", "__"))
+
+class NewJsonBoard789(unittest.TestCase):
+
+    # initiate test board
+    @classmethod
+    def setUpClass(cls):
+        cls.json_board = [["K", " ", " ", " ", " ", " ", " ", " "],
+                          [" ", " ", " ", " ", " ", " ", " ", " "],
+                          [" ", " ", " ", " ", " ", " ", " ", " "],
+                          [" ", " ", " ", " ", " ", " ", " ", " "],
+                          [" ", " ", " ", " ", " ", " ", " ", " "],
+                          [" ", " ", " ", " ", " ", " ", " ", " "],
+                          ["P", " ", " ", " ", " ", " ", " ", " "],
+                          [" ", " ", " ", " ", " ", " ", " ", "k"]]
+        cls.turn = "white"
+        cls.castling = "____"
+        cls.enpassant = "__"
+
+        cls.board = Board(cls.json_board, cls.turn, cls.castling, cls.enpassant)
+    
+    def test_create_new_json_board7(self):
+        """Examine the correctness of the create_new_json_board function - test 7"""
+        new_board = [["K", " ", " ", " ", " ", " ", " ", " "],
+                     [" ", " ", " ", " ", " ", " ", " ", " "],
+                     [" ", " ", " ", " ", " ", " ", " ", " "],
+                     [" ", " ", " ", " ", " ", " ", " ", " "],
+                     [" ", " ", " ", " ", " ", " ", " ", " "],
+                     [" ", " ", " ", " ", " ", " ", " ", " "],
+                     [" ", " ", " ", " ", " ", " ", " ", " "],
+                     ["Q", " ", " ", " ", " ", " ", " ", "k"]]
+
+        self.assertEqual(self.board.create_new_json_board([[6, 0], [7, 0]], "Q"), (new_board, "____", "__"))
+    
+    def test_create_new_json_board8(self):
+        """Examine the correctness of the create_new_json_board function - test 8"""
+        self.assertEqual(self.board.create_new_json_board([[6, 0], [7, 0]], False), (False))
+
+    def test_create_new_json_board9(self):
+        """Examine the correctness of the create_new_json_board function - test 9"""
+        self.assertEqual(self.board.create_new_json_board([[6, 0], [7, 0]], "q"), (False))
 
 
 if __name__ == '__main__':
