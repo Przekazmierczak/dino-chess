@@ -223,6 +223,13 @@ class Piece:
                                 # Check whether the current piece is putting the opponent's king in check
                                 if board[new_row][new_column].piece == "king" and board[new_row][new_column].player is not self.player:
                                     checkin_pieces[(self.row, self.column)] = []
+                        
+                        elif self.piece == "king":
+                            # Skip castling
+                            if direction == (0, -2) or direction == (0, 2):
+                                continue
+                            # If the position is empty, it's a possible move, otherwise, it might be an attack
+                            attacked_positions.add((new_row, new_column))
             
             # PLAYER
             else:
