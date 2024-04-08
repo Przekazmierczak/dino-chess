@@ -27,6 +27,15 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         for (let row = 0; row < 8; row++) {
             for (let col = 0; col < 8; col++) {
+                // PUT INTO FUNCTION ----
+                const boardSquare = document.querySelector(`#square${row}${col}`);
+                boardSquare.addEventListener("mouseover", function(event) {
+                    event.target.classList.add("mouseover");
+                });
+                boardSquare.addEventListener("mouseleave", function(event) {
+                    event.target.classList.remove("mouseover");
+                });
+                // ------
                 if (state.board[row][col] !== null) {
                     uploadBoard(state, row, col, tableSocket);
                 }
@@ -48,6 +57,15 @@ function uploadBoard(state, row, col, tableSocket) {
         htmlSquare.addEventListener("click", function() {
             colorBoard();
             removeMoveListeners();
+            // PUT INTO FUNCTION ----
+            if (htmlSquare.classList.contains('dark')) {
+                htmlSquare.classList.remove('dark');
+                htmlSquare.classList.add('marked');
+            } else {
+                htmlSquare.classList.remove('light');
+                htmlSquare.classList.add('marked');
+            }
+            // ------
             const iFpromotion = moves[2]
             moves[0].forEach(move => addPossibleMove(move, row, col, tableSocket, iFpromotion, "move"));
             moves[1].forEach(move => addPossibleMove(move, row, col, tableSocket, iFpromotion, "attack"));

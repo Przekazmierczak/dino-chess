@@ -11,7 +11,7 @@ h1 {
 }
 
 table, td {
-    border: 2px solid black;
+    border: 2px solid rgb(107, 37, 37);
     border-collapse: collapse;
 }
 
@@ -19,6 +19,10 @@ td {
     width: 80px;
     height: 80px;
     position: relative;
+}
+
+td.mouseover {
+    box-shadow: inset 0 0 0 3px rgb(0, 100, 255);
 }
 
 .pieceImage {
@@ -30,6 +34,10 @@ td {
     height: 90%;
 }
 
+.marked {
+    background-color: rgb(0, 160, 0);
+}
+
 .dark {
     background-color: rgba(0, 60, 128, 0.658);
 }
@@ -39,19 +47,19 @@ td {
 }
 
 .darkGreen {
-    background-color: rgba(28, 138, 0, 0.74);
+    background-color: rgba(28, 138, 0, 0.75);
 }
 
 .lightGreen {
-    background-color: rgba(28, 138, 0, 0.411);
+    background-color: rgba(28, 138, 0, 0.65);
 
 }
 .darkRed {
-    background-color: rgba(206, 0, 0, 0.829);
+    background-color: rgba(206, 0, 0, 0.75);
 }
 
 .lightRed {
-    background-color: rgba(206, 0, 0, 0.281);
+    background-color: rgba(206, 0, 0, 0.65);
 }
 
 .modal-promotion {
