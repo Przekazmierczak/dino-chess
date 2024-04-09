@@ -25,6 +25,14 @@ td.mouseover {
     box-shadow: inset 0 0 0 3px rgb(0, 100, 255);
 }
 
+.draggableElement {
+    cursor: grab;
+}
+
+.dragging {
+    cursor: grabbing;
+}
+
 .pieceImage {
     position: absolute;
     top: 50%;

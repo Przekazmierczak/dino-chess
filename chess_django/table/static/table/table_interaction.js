@@ -27,15 +27,8 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         for (let row = 0; row < 8; row++) {
             for (let col = 0; col < 8; col++) {
-                // PUT INTO FUNCTION ----
-                const boardSquare = document.querySelector(`#square${row}${col}`);
-                boardSquare.addEventListener("mouseover", function(event) {
-                    event.target.classList.add("mouseover");
-                });
-                boardSquare.addEventListener("mouseleave", function(event) {
-                    event.target.classList.remove("mouseover");
-                });
-                // ------
+                mouseOver(row, col);
+                removeDraggable(row, col);
                 if (state.board[row][col] !== null) {
                     uploadBoard(state, row, col, tableSocket);
                 }
@@ -44,6 +37,24 @@ document.addEventListener('DOMContentLoaded', function () {
         console.log("received updated board");
     }; 
 });
+
+function removeDraggable(row, col){
+    const boardSquare = document.querySelector(`#square${row}${col}`);
+    boardSquare.removeAttribute("draggable");
+    if (boardSquare.classList.contains("draggableElement")) {
+        boardSquare.classList.remove("draggableElement");
+    }
+}
+
+function mouseOver(row, col) {
+    const boardSquare = document.querySelector(`#square${row}${col}`);
+    boardSquare.addEventListener("mouseover", function(event) {
+        event.target.classList.add("mouseover");
+    });
+    boardSquare.addEventListener("mouseleave", function(event) {
+        event.target.classList.remove("mouseover");
+    });
+}
 
 function uploadBoard(state, row, col, tableSocket) {
     const boardSquare = state.board[row][col];
@@ -54,24 +65,44 @@ function uploadBoard(state, row, col, tableSocket) {
     const htmlSquare = document.querySelector(`#square${row}${col}`);
     htmlSquare.innerHTML = `${image}`;
     if (turn === player && state.winner === null) {
+        
+        // PUT INTO FUNCTION ---------
+        htmlSquare.setAttribute("draggable", "true");
+        htmlSquare.classList.add("draggableElement");
+    
+        // let img = new Image();
+        // img.src = "/static/table/pieces_images/Queen_white.png";
+
+        htmlSquare.addEventListener('dragstart', (event) => {
+            htmlSquare.classList.add("dragging");
+            // event.dataTransfer.setDragImage(img, 100, 100);
+            htmlSquare.click();
+        });
+        htmlSquare.addEventListener("dragend", () => {
+            htmlSquare.classList.remove("dragging");
+        });
+        // --------------------
+
         htmlSquare.addEventListener("click", function() {
             colorBoard();
             removeMoveListeners();
-            // PUT INTO FUNCTION ----
-            if (htmlSquare.classList.contains('dark')) {
-                htmlSquare.classList.remove('dark');
-                htmlSquare.classList.add('marked');
-            } else {
-                htmlSquare.classList.remove('light');
-                htmlSquare.classList.add('marked');
-            }
-            // ------
+            addMarked(htmlSquare)
             const iFpromotion = moves[2]
             moves[0].forEach(move => addPossibleMove(move, row, col, tableSocket, iFpromotion, "move"));
             moves[1].forEach(move => addPossibleMove(move, row, col, tableSocket, iFpromotion, "attack"));
         });
     }
 };
+
+function addMarked(element) {
+    if (element.classList.contains('dark')) {
+        element.classList.remove('dark');
+        element.classList.add('marked');
+    } else {
+        element.classList.remove('light');
+        element.classList.add('marked');
+    }
+}
 
 function addPossibleMove(move, oldRow, oldCol, tableSocket, iFpromotion, type) {
     const row = move[0]
@@ -146,8 +177,19 @@ function pushMove(oldRow, oldCol, row, col, htmlPossibleMove, iFpromotion, table
             }
         }
     }
+    
+    let dropListener= function(event) {
+        event.preventDefault();
+        moveListener(event);
+    }
+
     htmlPossibleMove.addEventListener("click", moveListener);
-    moveListeners.push({element: htmlPossibleMove, listener: moveListener});
+    htmlPossibleMove.addEventListener("dragover", function(event) {
+        event.preventDefault();
+    });
+    htmlPossibleMove.addEventListener("drop", dropListener);
+
+    moveListeners.push({element: htmlPossibleMove, clickListener: moveListener, dropListener: dropListener});
 }
 
 function clearBoard() {
@@ -197,7 +239,8 @@ function removePieces() {
 function removeMoveListeners() {
     console.log(moveListeners)
     moveListeners.forEach(function(item) {
-        item.element.removeEventListener("click", item.listener);
+        item.element.removeEventListener("click", item.clickListener);
+        item.element.removeEventListener("drop", item.dropListener);
     });
     moveListeners = [];
 }
