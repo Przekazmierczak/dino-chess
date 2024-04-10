@@ -1,16 +1,30 @@
 {% extends "table/layout.html" %}
 
 {% block body %}
-    <h1>Table: {{ table_id }}</h1>
-    <table>
-        {% for row in "01234567" %}
-        <tr>
-            {% for column in "01234567" %}
-            <td id="square{{ row }}{{ column }}"></td>
+<div class="container">
+    <div class="description">
+        <div>Table: {{ table_id }}</div>
+        <div>Moves:</div>
+    </div>
+    <div class="board">
+        <div class="player-time">
+            <span class="player">Player 1</span>
+            <span class="time">Time:</span>
+        </div>
+        <table>
+            {% for row in "01234567" %}
+            <tr>
+                {% for column in "01234567" %}
+                <td id="square{{ row }}{{ column }}"></td>
+                {% endfor %}
+            </tr>
             {% endfor %}
-        </tr>
-        {% endfor %}
-    </table>
+        </table>
+        <div class="player-time">
+            <span class="player">Player 1</span>
+            <span class="time">Time:</span>
+        </div>
+    </div>
     {{ table_id|json_script:"table_id" }}
     <h1 id="winner"></h1>
     <div class="modal-promotion" id="modal_promotion">
@@ -27,4 +41,5 @@
             </p>
         </div>
     </div>
+</div>
 {% endblock %}

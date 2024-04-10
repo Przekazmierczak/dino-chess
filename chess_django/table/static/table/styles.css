@@ -1,23 +1,67 @@
 html, body {
-    height: 100%;
-    margin: 0;
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
-h1 {
-    color: red;
+.container {
+    /* background-color: rgba(128, 128, 128, 0.144); */
+    display: flex;
+    height: 90vh;
+    max-width: 1000px;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.description{
+    /* background-color: rgba(127, 127, 192, 0.178); */
+    font-size: 4vh;
+}
+
+.player-time {
+    /* background-color: rgba(255, 0, 0, 0.192); */
+    display: flex;
+    justify-content: space-between;
+    width: 85%;
+}
+
+.player {
+    font-size: 4vh;
+    color: rgb(0, 153, 255);
+}
+
+.time {
+    font-size: 4vh;
+    color: rgb(0, 153, 255);
+}
+
+.board {
+    /* background-color: aquamarine; */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    height: 90vw;
+    width: 90vw;
+    max-height: 800px;
+    max-width: 800px;
+
+}
+
+table {
+    height: 85%;
+    width: 85%;
 }
 
 table, td {
-    border: 2px solid rgb(107, 37, 37);
+    border: 0px;
     border-collapse: collapse;
 }
 
 td {
-    width: 80px;
-    height: 80px;
+    width: 12%;
+    height: 12%;
     position: relative;
 }
 
@@ -55,11 +99,11 @@ td.mouseover {
 }
 
 .darkGreen {
-    background-color: rgba(28, 138, 0, 0.75);
+    background-color: rgba(28, 138, 0, 0.70);
 }
 
 .lightGreen {
-    background-color: rgba(28, 138, 0, 0.65);
+    background-color: rgba(28, 138, 0, 0.50);
 
 }
 .darkRed {
