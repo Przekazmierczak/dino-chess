@@ -13,17 +13,24 @@ document.addEventListener('DOMContentLoaded', function () {
         + '/'
         );
         
-        tableSocket.onmessage = function(e) {
-            const state = JSON.parse(e.data);
-            console.log(state)
-            clearBoard();
-            if (state.winner !== null) {
-                htmlWinner = document.getElementById("winner");
-                if (state.winner === "draw") {
-                    htmlWinner.innerHTML = `<p>It's a draw!</p>`;
-                } else {
-                    htmlWinner.innerHTML = `<p>${state.winner} has won!</p>`;
-                }
+    tableSocket.onmessage = function(e) {
+        const state = JSON.parse(e.data);
+        console.log(state)
+        clearBoard();
+        if (state.winner !== null) {
+            modal_winner.classList.add("show");
+            htmlWinner = document.getElementById("winner");
+            if (state.winner === "draw") {
+                htmlWinner.innerHTML = `<p>It's a draw!</p>`;
+            } else {
+                htmlWinner.innerHTML = `<p>${state.winner} has won!</p>`;
+            }
+        }
+        if (state.checking !== null) {
+            state.checking.forEach(function(element) {
+                const boardSquare = document.querySelector(`#square${element[0]}${element[1]}`);
+                boardSquare.classList.add("checking")
+            });
         }
         for (let row = 0; row < 8; row++) {
             for (let col = 0; col < 8; col++) {
@@ -196,6 +203,7 @@ function clearBoard() {
     colorBoard();
     removeAllListeners();
     removePieces();
+    removeChecking();
 }
 
 function colorBoard() {
@@ -232,6 +240,17 @@ function removePieces() {
         for (let col = 0; col < 8; col++) {
             let htmlSquare = document.querySelector(`#square${row}${col}`);
             htmlSquare.innerHTML = "";
+        }
+    }
+}
+
+function removeChecking() {
+    for(let row = 0; row < 8; row++) {
+        for (let col = 0; col < 8; col++) {
+            let htmlSquare = document.querySelector(`#square${row}${col}`);
+            if (htmlSquare.classList.contains("checking")) {
+                htmlSquare.classList.remove("checking");
+            }
         }
     }
 }

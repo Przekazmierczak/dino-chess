@@ -297,7 +297,7 @@ class Board:
 
         self.json_board = json_board
         self.board = self.create_class(json_board)
-        self.moves, self.winner = self.add_moves()
+        self.moves, self.winner, self.checking = self.add_moves()
 
     def unpack_db(self, value):
         if value == "__":
@@ -352,6 +352,8 @@ class Board:
         end = True
         # Variable to store the winner of the game
         winner = None
+        # Variable to store pieces that are checking the king
+        mark_checking = None
         
         # Iterate over opponent's pieces
         for row in range(self.ROWS):
@@ -380,8 +382,14 @@ class Board:
                 winner = "white" if self.turn == "black" else "black"
             else:
                 winner ="draw"
+        
+        # Check if any pieces are checking the king, then add them to the list
+        if checkin_pieces:
+            mark_checking = []
+            for element in checkin_pieces:
+                mark_checking.append(element)
 
-        return possible_moves, winner
+        return possible_moves, winner, mark_checking
 
     def create_json_class(self):
         # Initialize an empty 2D array to store JSON representation of the board
@@ -399,7 +407,7 @@ class Board:
                         "moves": self.moves[row][col] # Possible moves for the piece
                         }
 
-        return json_class, self.winner
+        return json_class, self.winner, self.checking
 
 
     def create_new_json_board(self, move, promotion):
@@ -415,6 +423,9 @@ class Board:
         enpassant = "__"
 
         new_json_board = self.json_board
+
+        # Mark as correct if input is correct
+        correct = False
 
         if (new_position in possible_moves or new_position in possible_attacks) and not possible_promotion:
 
@@ -472,7 +483,8 @@ class Board:
             new_json_board[new_position_row][new_position_col] = new_json_board[old_position_row][old_position_col]
             new_json_board[old_position_row][old_position_col] = " "
 
-            return new_json_board, self.castling, enpassant
+            # Input is correct
+            correct = True
         
         # Check if the move is valid and involves promotion
         elif (new_position in possible_moves or new_position in possible_attacks) and possible_promotion:
@@ -483,7 +495,8 @@ class Board:
                 new_json_board[new_position_row][new_position_col] = promotion
                 new_json_board[old_position_row][old_position_col] = " "
 
-                return new_json_board, self.castling, enpassant
+                # Input is correct
+                correct = True
             
         # If the move is invalid or not made by the correct player, return False
-        return False
+        return new_json_board, self.castling, enpassant if correct else False

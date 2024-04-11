@@ -25,11 +25,12 @@ class TableConsumer(AsyncWebsocketConsumer):
     async def send_actual_board(self):
         actual_state = await self.get_state_from_database()
         actual_board_json = json.loads(actual_state.board)
-        actual_board_object, winner = pieces.Board(actual_board_json, actual_state.turn, actual_state.castling, actual_state.enpassant).create_json_class()
+        actual_board_object, winner, checking = pieces.Board(actual_board_json, actual_state.turn, actual_state.castling, actual_state.enpassant).create_json_class()
         await self.send(text_data=json.dumps({
             "board": actual_board_object,
             "turn": actual_state.turn,
-            "winner": winner
+            "winner": winner,
+            "checking": checking
             }))
 
 
@@ -78,13 +79,13 @@ class TableConsumer(AsyncWebsocketConsumer):
         next_soft_moves = prev_state.soft_moves + 1
 
         if next_board:
-            updated_json_board, winner = pieces.Board(next_board, next_turn, next_castling, next_enpassant).create_json_class()
+            updated_json_board, winner, checking = pieces.Board(next_board, next_turn, next_castling, next_enpassant).create_json_class()
 
             await self.push_new_board_to_database(next_board, next_turn, next_castling, next_enpassant, winner)
 
             # Send message to room group
             await self.channel_layer.group_send(
-                self.table_group_id, {"type": "new_board", "board": updated_json_board, "turn": next_turn, "winner": winner}
+                self.table_group_id, {"type": "new_board", "board": updated_json_board, "turn": next_turn, "winner": winner, "checking": checking}
             )
 
     # Receive message from room group
@@ -92,10 +93,12 @@ class TableConsumer(AsyncWebsocketConsumer):
         board = event["board"]
         turn = event["turn"]
         winner = event["winner"]
+        checking = event["checking"]
 
         # Send message to WebSocket
         await self.send(text_data=json.dumps({
             "board": board,
             "turn": turn,
-            "winner": winner
+            "winner": winner,
+            "checking": checking
             }))
