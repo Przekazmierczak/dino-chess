@@ -167,7 +167,7 @@ class Add_moves1(unittest.TestCase):
                           [None, ({(6, 0), (6, 2)}, {(6, 1)}, False), None, None, None, None, None, None]]
         """Examine the correctness of the add_moves function - test 1"""
         test_moves = self.board.add_moves()
-        moves, winner = test_moves
+        moves, winner, checking = test_moves
 
         new_moves = [[None] * ROWS for _ in range(COLS)]
         for row in range(ROWS):
@@ -177,6 +177,7 @@ class Add_moves1(unittest.TestCase):
 
         self.assertEqual(new_moves, possible_moves)
         self.assertEqual(winner, None)
+        self.assertEqual(checking, None)
 
 class Add_moves2(unittest.TestCase):
 
@@ -208,7 +209,7 @@ class Add_moves2(unittest.TestCase):
                           [None, (set(), set(), False), None, None, None, None, (set(), set(), False), None]]
         """Examine the correctness of the add_moves function - test 2"""
         test_moves = self.board.add_moves()
-        moves, winner = test_moves
+        moves, winner, checking = test_moves
 
         new_moves = [[None] * ROWS for _ in range(COLS)]
         for row in range(ROWS):
@@ -218,6 +219,7 @@ class Add_moves2(unittest.TestCase):
 
         self.assertEqual(new_moves, possible_moves)
         self.assertEqual(winner, "white")
+        self.assertEqual(checking, [(7, 6)])
 
 class Add_moves3(unittest.TestCase):
 
@@ -249,7 +251,7 @@ class Add_moves3(unittest.TestCase):
                           [(set(), set(), False), None, None, None, None, None, None , None]]
         """Examine the correctness of the add_moves function - test 3"""
         test_moves = self.board.add_moves()
-        moves, winner = test_moves
+        moves, winner, checking = test_moves
 
         for row in range(ROWS):
             for col in range(COLS):
@@ -258,6 +260,7 @@ class Add_moves3(unittest.TestCase):
 
         self.assertEqual(moves, possible_moves)
         self.assertEqual(winner, "draw")
+        self.assertEqual(checking, None)
 
 class Create_json_class(unittest.TestCase):
 
@@ -275,6 +278,7 @@ class Create_json_class(unittest.TestCase):
         cls.turn = "white"
         cls.castling = "____"
         cls.enpassant = "__"
+        cls.checking = None
 
         cls.board = Board(cls.json_board, cls.turn, cls.castling, cls.enpassant)
     
@@ -301,13 +305,13 @@ class Create_json_class(unittest.TestCase):
                          {'piece': 'queen', 'player': 'black', 'moves': (set(), set(), False)}, {'piece': 'bishop', 'player': 'black', 'moves': (set(), set(), False)},
                          {'piece': 'knight', 'player': 'black', 'moves': (set(), set(), False)}, {'piece': 'rook', 'player': 'black', 'moves': (set(), set(), False)}]]
         
-        json_class, winner = self.board.create_json_class()
+        json_class, winner, checking = self.board.create_json_class()
         for row in range(ROWS):
             for col in range(COLS):
                 if self.json_board[row][col] != " ":
                     json_class[row][col]['moves'] = (set(json_class[row][col]['moves'][0]), set(json_class[row][col]['moves'][1]), json_class[row][col]['moves'][2])
 
-        self.assertEqual((json_class, winner), (result_board, None))
+        self.assertEqual((json_class, winner, checking), (result_board, None, None))
 
 class NewJsonBoard1(unittest.TestCase):
 
