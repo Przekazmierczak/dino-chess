@@ -499,4 +499,4 @@ class Board:
                 correct = True
             
         # If the move is invalid or not made by the correct player, return False
-        return new_json_board, self.castling, enpassant if correct else False
+        return (new_json_board, self.castling, enpassant) if correct else False

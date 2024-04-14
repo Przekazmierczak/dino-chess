@@ -74,10 +74,8 @@ td {
 }
 
 .pieceImage {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    display: block;
+    margin: auto;
     width: 90%;
     height: 90%;
 }
@@ -180,4 +178,20 @@ td.checking {
 #modal_table {
     margin-left: auto;
     margin-right: auto;
+}
+
+.rotate {
+    transform: rotate(180deg);
+}
+
+.rotate .pieceImage {
+    transform: rotate(-180deg);
+}
+
+.rotate .player-time {
+    transform: rotate(-180deg);
+}
+
+.container2 {
+    display: grid;
 }

@@ -1,8 +1,9 @@
 let moveListeners = [];
+let style = "dino";
 
 document.addEventListener('DOMContentLoaded', function () {
     colorBoard();
-    
+
     const tableID = JSON.parse(document.getElementById('table_id').textContent);
     
     const tableSocket = new WebSocket(
@@ -13,39 +14,76 @@ document.addEventListener('DOMContentLoaded', function () {
         + '/'
         );
         
-    tableSocket.onmessage = function(e) {
-        const state = JSON.parse(e.data);
-        console.log(state)
+        tableSocket.onmessage = function(e) {
+            const state = JSON.parse(e.data);
+            console.log(state)
         clearBoard();
-        if (state.winner !== null) {
-            modal_winner.classList.add("show");
-            htmlWinner = document.getElementById("winner");
-            if (state.winner === "draw") {
-                htmlWinner.innerHTML = `<p>It's a draw!</p>`;
-            } else {
-                htmlWinner.innerHTML = `<p>${state.winner} has won!</p>`;
-            }
-        }
-        if (state.checking !== null) {
-            state.checking.forEach(function(element) {
-                const boardSquare = document.querySelector(`#square${element[0]}${element[1]}`);
-                boardSquare.classList.add("checking")
-            });
-        }
-        for (let row = 0; row < 8; row++) {
-            for (let col = 0; col < 8; col++) {
-                mouseOver(row, col);
-                removeDraggable(row, col);
-                if (state.board[row][col] !== null) {
-                    uploadBoard(state, row, col, tableSocket);
-                }
-            }
-        }
+        winner(state);
+        checking(state);
+        uploadBoard(tableSocket, state);
+
         console.log("received updated board");
+
+        // ------------------ BUTTONS REMOVE LATER ------------------------
+        const board = document.querySelector(".board");
+        const rotateButton = document.getElementById("button_rotate");
+        const dinoButton = document.getElementById("button_dino");
+        
+        rotateButton.addEventListener("click", function() {
+            if (board.classList.contains("rotate")) {
+                board.classList.remove("rotate");
+            } else {
+                board.classList.add("rotate");
+            }
+        })
+        
+        dinoButton.addEventListener("click", function() {
+            if (style === "classic") {
+                style = "dino";
+            } else {
+                style = "classic";
+            }
+            uploadBoard(tableSocket, state);
+        })
+        // ------------------ BUTTONS REMOVE LATER ------------------------
+
     }; 
 });
 
-function removeDraggable(row, col){
+function winner(state) {
+    if (state.winner !== null) {
+        modal_winner.classList.add("show");
+        htmlWinner = document.getElementById("winner");
+        if (state.winner === "draw") {
+            htmlWinner.innerHTML = `<p>It's a draw!</p>`;
+        } else {
+            htmlWinner.innerHTML = `<p>${state.winner} has won!</p>`;
+        }
+    }
+}
+
+function checking(state) {
+    if (state.checking !== null) {
+        state.checking.forEach(function(element) {
+            const boardSquare = document.querySelector(`#square${element[0]}${element[1]}`);
+            boardSquare.classList.add("checking")
+        });
+    }
+}
+
+function uploadBoard(tableSocket, state) {
+    for (let row = 0; row < 8; row++) {
+        for (let col = 0; col < 8; col++) {
+            mouseOver(row, col);
+            removeDraggable(row, col);
+            if (state.board[row][col] !== null) {
+                uploadSquare(state, row, col, tableSocket);
+            }
+        }
+    }
+}
+
+function removeDraggable(row, col) {
     const boardSquare = document.querySelector(`#square${row}${col}`);
     boardSquare.removeAttribute("draggable");
     if (boardSquare.classList.contains("draggableElement")) {
@@ -63,7 +101,7 @@ function mouseOver(row, col) {
     });
 }
 
-function uploadBoard(state, row, col, tableSocket) {
+function uploadSquare(state, row, col, tableSocket) {
     const boardSquare = state.board[row][col];
     const turn = state.turn;
     const {piece, player, moves} = boardSquare
@@ -292,9 +330,17 @@ function getImageSource(piece, player) {
         }
     };
     
-    if (piece in pieceImages && player in pieceImages[piece]) {
-        return `<img src="/static/table/pieces_images/${pieceImages[piece][player]}.png" class="pieceImage" alt="${pieceImages[piece][player]}">`;
+    if (style === "classic") {
+        if (piece in pieceImages && player in pieceImages[piece]) {
+            return `<img src="/static/table/pieces_images/${pieceImages[piece][player]}.png" class="pieceImage" alt="${pieceImages[piece][player]}">`;
+        } else {
+            return ""
+        }
     } else {
-        return ""
+        if (piece in pieceImages && player in pieceImages[piece]) {
+            return `<img src="/static/table/pieces_images/d${pieceImages[piece][player]}.png" class="pieceImage" alt="${pieceImages[piece][player]}">`;
+        } else {
+            return ""
+        }
     }
 }
