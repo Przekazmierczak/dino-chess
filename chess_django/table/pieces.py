@@ -424,11 +424,14 @@ class Board:
 
         new_json_board = self.json_board
 
+        soft_move = True
+        if new_position in possible_attacks or self.board[old_position_row][old_position_col].piece == "pawn":
+            soft_move = False
+
         # Mark as correct if input is correct
         correct = False
 
         if (new_position in possible_moves or new_position in possible_attacks) and not possible_promotion:
-
             # Check if any castling options are left
             if self.castling != "____":
                 # Convert the castling string to a list for manipulation
@@ -499,4 +502,4 @@ class Board:
                 correct = True
             
         # If the move is invalid or not made by the correct player, return False
-        return (new_json_board, self.castling, enpassant) if correct else False
+        return (new_json_board, self.castling, enpassant, soft_move) if correct else False

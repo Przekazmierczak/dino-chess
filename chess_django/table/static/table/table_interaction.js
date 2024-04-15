@@ -20,6 +20,7 @@ document.addEventListener('DOMContentLoaded', function () {
         clearBoard();
         winner(state);
         checking(state);
+        updateMoves(state);
         uploadBoard(tableSocket, state);
 
         console.log("received updated board");
@@ -69,6 +70,11 @@ function checking(state) {
             boardSquare.classList.add("checking")
         });
     }
+}
+
+function updateMoves(state) {
+    const moves = document.getElementById("moves");
+    moves.innerHTML = `Moves: ${state.total_moves}`;
 }
 
 function uploadBoard(tableSocket, state) {
