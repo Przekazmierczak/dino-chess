@@ -23,11 +23,11 @@ class TableConsumer(AsyncWebsocketConsumer):
 
 
     async def send_actual_board(self):
-        actual_state, actual_game = await self.get_state_from_database()
+        actual_state, actual_game, _ = await self.get_state_from_database()
         actual_board_json = json.loads(actual_state.board)
         actual_board_object, winner, checking = pieces.Board(actual_board_json, actual_state.turn, actual_state.castling, actual_state.enpassant).create_json_class()
 
-        # ------------- CHANGE (DON'T CALL THE BOARD CLASS IF THERE IS A WINNER!) ----------------
+        # ------------- CHANGE IT IN FUTURE (DON'T CALL THE BOARD CLASS IF THERE IS A WINNER!) ----------------
         if actual_game.winner:
             winner = {"w": "white", "b": "black"}.get(actual_game.winner, "draw")
         # ----------------------------------------------------------------------------------------
@@ -46,10 +46,13 @@ class TableConsumer(AsyncWebsocketConsumer):
     def get_state_from_database(self):
         actual_game_db = Game.objects.get(pk=self.table_id)
         actual_board_db = Board.objects.filter(game=actual_game_db).latest('id')
+        prev_boards_db = Board.objects.filter(game=actual_game_db)
+
+        prev_boards = list(prev_boards_db)
 
         actual_board_db.turn = "white" if actual_board_db.turn == "w" else "black"
         
-        return actual_board_db, actual_game_db
+        return actual_board_db, actual_game_db, prev_boards
     
     @sync_to_async
     def push_new_board_to_database(self, updated_board, turn, castling, enpassant, winner, total_moves, self_moves):
@@ -72,13 +75,13 @@ class TableConsumer(AsyncWebsocketConsumer):
         )
 
 
-    # # Receive message from WebSocket
+    # Receive message from WebSocket
     async def receive(self, text_data):
         text_data_json = json.loads(text_data)
         move = text_data_json["move"]
         promotion = text_data_json["promotion"]
 
-        prev_state, actual_game = await self.get_state_from_database()
+        prev_state, _, prev_boards = await self.get_state_from_database()
         prev_board = json.loads(prev_state.board)
 
         next_board, next_castling, next_enpassant, soft_move = pieces.Board(prev_board, prev_state.turn, prev_state.castling, prev_state.enpassant).create_new_json_board(move, promotion)
@@ -89,6 +92,17 @@ class TableConsumer(AsyncWebsocketConsumer):
         if next_board:
             updated_json_board, winner, checking = pieces.Board(next_board, next_turn, next_castling, next_enpassant).create_json_class()
 
+            # Threefold repetition
+            repetition = 1
+            next_turn_short = "w" if next_turn == "white" else "b"
+            for prev_board in prev_boards:
+                if (prev_board.board, prev_board.turn, prev_board.castling, prev_board.enpassant) == (json.dumps(next_board), next_turn_short, next_castling, next_enpassant):
+                    repetition += 1
+                if repetition >= 3:
+                    winner = "draw"
+                    break
+
+            # 50 move rule
             if next_soft_moves == 100:
                 winner = "draw"
             await self.push_new_board_to_database(next_board, next_turn, next_castling, next_enpassant, winner, next_total_moves, next_soft_moves)
