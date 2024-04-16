@@ -343,7 +343,7 @@ class NewJsonBoard1(unittest.TestCase):
                      [" ", " ", " ", " ", " ", " ", " ", " "],
                      [" ", " ", " ", " ", " ", " ", " ", "k"]]
 
-        self.assertEqual(self.board.create_new_json_board([[0, 0], [1, 0]], False), (new_board, "____", "__"))
+        self.assertEqual(self.board.create_new_json_board([[0, 0], [1, 0]], False), (new_board, "____", "__", True))
 
 class NewJsonBoard2(unittest.TestCase):
 
@@ -398,7 +398,7 @@ class NewJsonBoard3(unittest.TestCase):
                      [" ", " ", " ", " ", " ", " ", " ", " "],
                      [" ", " ", " ", " ", " ", " ", " ", "k"]]
 
-        self.assertEqual(self.board.create_new_json_board([[1, 0], [3, 0]], False), (new_board, "____", "20"))
+        self.assertEqual(self.board.create_new_json_board([[1, 0], [3, 0]], False), (new_board, "____", "20", False))
 
 class NewJsonBoard4(unittest.TestCase):
 
@@ -430,7 +430,7 @@ class NewJsonBoard4(unittest.TestCase):
                      [" ", " ", " ", " ", " ", " ", " ", " "],
                      [" ", " ", " ", " ", " ", " ", " ", "k"]]
 
-        self.assertEqual(self.board.create_new_json_board([[4, 0], [5, 1]], False), (new_board, "____", "__"))
+        self.assertEqual(self.board.create_new_json_board([[4, 0], [5, 1]], False), (new_board, "____", "__", False))
 
 class NewJsonBoard5(unittest.TestCase):
 
@@ -462,7 +462,7 @@ class NewJsonBoard5(unittest.TestCase):
                      [" ", " ", " ", " ", " ", " ", " ", " "],
                      [" ", " ", " ", " ", " ", " ", " ", "k"]]
 
-        self.assertEqual(self.board.create_new_json_board([[0, 0], [1, 0]], False), (new_board, "_Qkq", "__"))
+        self.assertEqual(self.board.create_new_json_board([[0, 0], [1, 0]], False), (new_board, "_Qkq", "__", True))
 
 class NewJsonBoard6(unittest.TestCase):
 
@@ -494,7 +494,7 @@ class NewJsonBoard6(unittest.TestCase):
                      [" ", " ", " ", " ", " ", " ", " ", " "],
                      [" ", " ", " ", " ", " ", " ", " ", "k"]]
 
-        self.assertEqual(self.board.create_new_json_board([[0, 3], [1, 3]], False), (new_board, "__kq", "__"))
+        self.assertEqual(self.board.create_new_json_board([[0, 3], [1, 3]], False), (new_board, "__kq", "__", True))
 
 class NewJsonBoard789(unittest.TestCase):
 
@@ -526,7 +526,7 @@ class NewJsonBoard789(unittest.TestCase):
                      [" ", " ", " ", " ", " ", " ", " ", " "],
                      ["Q", " ", " ", " ", " ", " ", " ", "k"]]
 
-        self.assertEqual(self.board.create_new_json_board([[6, 0], [7, 0]], "Q"), (new_board, "____", "__"))
+        self.assertEqual(self.board.create_new_json_board([[6, 0], [7, 0]], "Q"), (new_board, "____", "__", False))
     
     def test_create_new_json_board8(self):
         """Examine the correctness of the create_new_json_board function - test 8"""
