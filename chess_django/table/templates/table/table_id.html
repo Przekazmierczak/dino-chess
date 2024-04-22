@@ -8,7 +8,12 @@
     </div>
     <div class="board" >
         <div class="player-time">
-            <span class="player">Player 2</span>
+            <span>
+                <span id="black_player" class="player"></span>
+                {% if user.is_authenticated %}
+                    <button type="button" id="black_player_button">Sit</button>
+                {% endif %}
+            </span>
             <span class="time">Time:</span>
         </div>
         <table>
@@ -21,7 +26,12 @@
             {% endfor %}
         </table>
         <div class="player-time">
-            <span class="player">Player 1</span>
+            <span>
+                <span id="white_player" class="player"></span>
+                {% if user.is_authenticated %}
+                    <button type="button" id="white_player_button">Sit</button>
+                {% endif %}
+            </span>
             <span class="time">Time:</span>
         </div>
     </div>

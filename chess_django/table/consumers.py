@@ -23,19 +23,25 @@ class TableConsumer(AsyncWebsocketConsumer):
 
 
     async def send_actual_board(self):
-        actual_state, actual_game, _ = await self.get_state_from_database()
+        actual_state, white_player, black_player, actual_game, _ = await self.get_state_from_database()
+        # if actual_state:
         actual_board_json = json.loads(actual_state.board)
         actual_board_object, winner, checking = pieces.Board(actual_board_json, actual_state.turn, actual_state.castling, actual_state.enpassant).create_json_class()
+        
+        white_player_name = white_player.username  if white_player else "Player 1"
+        black_player_name = black_player.username  if black_player else "Player 2"
 
         # ------------- CHANGE IT IN FUTURE (DON'T CALL THE BOARD CLASS IF THERE IS A WINNER!) ----------------
         if actual_game.winner:
-            winner = {"w": "white", "b": "black"}.get(actual_game.winner, "draw")
+            winner = {"w": "white", "b": "black"}.get(actual_game.winner, "draw") 
         # ----------------------------------------------------------------------------------------
             
         await self.send(text_data=json.dumps({
+            "white_player": white_player_name,
+            "black_player": black_player_name,
+            "winner": winner,
             "board": actual_board_object,
             "turn": actual_state.turn,
-            "winner": winner,
             "checking": checking,
             "total_moves": actual_state.total_moves,
             "soft_moves": actual_state.soft_moves
@@ -45,14 +51,20 @@ class TableConsumer(AsyncWebsocketConsumer):
     @sync_to_async
     def get_state_from_database(self):
         actual_game_db = Game.objects.get(pk=self.table_id)
+        white_player = actual_game_db.white
+        black_player = actual_game_db.black
+        # if actual_game_db.started:
         actual_board_db = Board.objects.filter(game=actual_game_db).latest('id')
         prev_boards_db = Board.objects.filter(game=actual_game_db)
 
         prev_boards = list(prev_boards_db)
 
         actual_board_db.turn = "white" if actual_board_db.turn == "w" else "black"
+        # else:
+        #     actual_board_db = None
+        #     prev_boards = None
         
-        return actual_board_db, actual_game_db, prev_boards
+        return actual_board_db, white_player, black_player, actual_game_db, prev_boards
     
     @sync_to_async
     def push_new_board_to_database(self, updated_board, turn, castling, enpassant, winner, total_moves, self_moves):
@@ -74,58 +86,89 @@ class TableConsumer(AsyncWebsocketConsumer):
             soft_moves = self_moves
         )
 
+    @sync_to_async
+    def push_player_to_database(self, user, player):
+        print(user)
+        game = Game.objects.get(pk=self.table_id)
+        if player == "w": game.white = user
+        elif player == "b": game.black = user
+        game.save()
 
     # Receive message from WebSocket
     async def receive(self, text_data):
         text_data_json = json.loads(text_data)
-        move = text_data_json["move"]
-        promotion = text_data_json["promotion"]
+        if text_data_json["white_player"]:
+            self.user = self.scope["user"]
+            await self.push_player_to_database(self.user, "w")
+        elif text_data_json["black_player"]:
+            self.user = self.scope["user"]
+            await self.push_player_to_database(self.user, "b")
+        else:
+            move = text_data_json["move"]
+            promotion = text_data_json["promotion"]
 
-        prev_state, _, prev_boards = await self.get_state_from_database()
-        prev_board = json.loads(prev_state.board)
+            prev_state, white_player, black_player, game, prev_boards = await self.get_state_from_database()
+            prev_board = json.loads(prev_state.board)
 
-        next_board, next_castling, next_enpassant, soft_move = pieces.Board(prev_board, prev_state.turn, prev_state.castling, prev_state.enpassant).create_new_json_board(move, promotion)
-        next_turn = "black" if prev_state.turn == "white" else "white"
-        next_total_moves = prev_state.total_moves + 1 if next_turn == "white" else prev_state.total_moves
-        next_soft_moves = prev_state.soft_moves + 1 if soft_move else 0
+            white_player_name = white_player.username  if white_player else "Player 1"
+            black_player_name = black_player.username  if black_player else "Player 2"
 
-        if next_board:
-            updated_json_board, winner, checking = pieces.Board(next_board, next_turn, next_castling, next_enpassant).create_json_class()
+            next_board, next_castling, next_enpassant, soft_move = pieces.Board(prev_board, prev_state.turn, prev_state.castling, prev_state.enpassant).create_new_json_board(move, promotion)
+            next_turn = "black" if prev_state.turn == "white" else "white"
+            next_total_moves = prev_state.total_moves + 1 if next_turn == "white" else prev_state.total_moves
+            next_soft_moves = prev_state.soft_moves + 1 if soft_move else 0
 
-            # Threefold repetition
-            repetition = 1
-            next_turn_short = "w" if next_turn == "white" else "b"
-            for prev_board in prev_boards:
-                if (prev_board.board, prev_board.turn, prev_board.castling, prev_board.enpassant) == (json.dumps(next_board), next_turn_short, next_castling, next_enpassant):
-                    repetition += 1
-                if repetition >= 3:
+            if next_board:
+                updated_json_board, winner, checking = pieces.Board(next_board, next_turn, next_castling, next_enpassant).create_json_class()
+
+                # Threefold repetition
+                repetition = 1
+                next_turn_short = "w" if next_turn == "white" else "b"
+                for prev_board in prev_boards:
+                    if (prev_board.board, prev_board.turn, prev_board.castling, prev_board.enpassant) == (json.dumps(next_board), next_turn_short, next_castling, next_enpassant):
+                        repetition += 1
+                    if repetition >= 3:
+                        winner = "draw"
+                        break
+
+                # 50 move rule
+                if next_soft_moves == 100:
                     winner = "draw"
-                    break
+                await self.push_new_board_to_database(next_board, next_turn, next_castling, next_enpassant, winner, next_total_moves, next_soft_moves)
 
-            # 50 move rule
-            if next_soft_moves == 100:
-                winner = "draw"
-            await self.push_new_board_to_database(next_board, next_turn, next_castling, next_enpassant, winner, next_total_moves, next_soft_moves)
-
-            # Send message to room group
-            await self.channel_layer.group_send(
-                self.table_group_id, {"type": "new_board", "board": updated_json_board, "turn": next_turn, "winner": winner, "checking": checking, "total_moves": next_total_moves, "soft_moves": next_soft_moves}
-            )
+                # Send message to room group
+                await self.channel_layer.group_send(
+                    self.table_group_id, {
+                        "white_player": white_player_name,
+                        "black_player": black_player_name,
+                        "winner": winner,
+                        "type": "new_board",
+                        "board": updated_json_board,
+                        "turn": next_turn,
+                        "checking": checking,
+                        "total_moves": next_total_moves,
+                        "soft_moves": next_soft_moves
+                        }
+                )
 
     # Receive message from room group
     async def new_board(self, event):
+        white_player = event["white_player"]
+        black_player = event["black_player"]
+        winner = event["winner"]
         board = event["board"]
         turn = event["turn"]
-        winner = event["winner"]
         checking = event["checking"]
         total_moves = event["total_moves"]
         soft_moves = event["soft_moves"]
 
         # Send message to WebSocket
         await self.send(text_data=json.dumps({
+            "white_player": white_player,
+            "black_player": black_player,
+            "winner": winner,
             "board": board,
             "turn": turn,
-            "winner": winner,
             "checking": checking,
             "total_moves": total_moves,
             "soft_moves": soft_moves

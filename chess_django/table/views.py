@@ -24,9 +24,7 @@ def create_table(request):
                       ["p", "p", "p", "p", "p", "p", "p", "p"],
                       ["r", "n", "b", "k", "q", "b", "n", "r"]]
     
-    new_game = Game.objects.create(
-        winner = None
-    )
+    new_game = Game.objects.create()
 
     Board.objects.create(
         game = new_game,

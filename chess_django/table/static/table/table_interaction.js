@@ -18,10 +18,37 @@ document.addEventListener('DOMContentLoaded', function () {
             const state = JSON.parse(e.data);
             console.log(state)
         clearBoard();
+
+        const whitePlayer = document.getElementById("white_player");
+        const blackPlayer = document.getElementById("black_player");
+        whitePlayer.innerHTML = `${state.white_player}`;
+        blackPlayer.innerHTML = `${state.black_player}`;
+
+        const whitePlayerButton = document.getElementById("white_player_button");
+        whitePlayerButton.addEventListener("click", function() {
+            tableSocket.send(JSON.stringify({
+                'white_player': true,
+                'black_player': null,
+                'move': null,
+                'promotion': null
+            }));
+        })
+        const blackPlayerButton = document.getElementById("black_player_button");
+        blackPlayerButton.addEventListener("click", function() {
+            tableSocket.send(JSON.stringify({
+                'white_player': null,
+                'black_player': true,
+                'move': null,
+                'promotion': null
+            }));
+        })
+
+
         winner(state);
         checking(state);
         updateMoves(state);
         uploadBoard(tableSocket, state);
+
 
         console.log("received updated board");
 
@@ -185,6 +212,8 @@ function pushMove(oldRow, oldCol, row, col, htmlPossibleMove, iFpromotion, table
 
         if (iFpromotion === false) {
             tableSocket.send(JSON.stringify({
+                'white_player': null,
+                'black_player': null,
                 'move': move,
                 'promotion': null
             }));
@@ -200,6 +229,8 @@ function pushMove(oldRow, oldCol, row, col, htmlPossibleMove, iFpromotion, table
                 promotion = pickedPiece;
                 modal_promotion.classList.remove("show");
                 tableSocket.send(JSON.stringify({
+                    'white_player': null,
+                    'black_player': null,
                     'move': move,
                     'promotion': promotion
                 }));

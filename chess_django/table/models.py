@@ -1,8 +1,12 @@
+from django.conf import settings
 from django.db import models
 
 # Create your models here.
 class Game(models.Model):
-    winner = models.CharField(max_length=1, null=True, choices=[(None, 'None'), ('w', 'white'), ('b', 'black'), ('d', 'draw')])
+    winner = models.CharField(max_length=1, null=True, choices=[(None, 'None'), ('w', 'white'), ('b', 'black'), ('d', 'draw')], default=None)
+    started = models.BooleanField(default=False)
+    white = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='white_games')
+    black = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='black_games')
 
 class Board(models.Model):
     game = models.ForeignKey(Game, on_delete=models.CASCADE)
