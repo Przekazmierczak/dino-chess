@@ -20,29 +20,79 @@ document.addEventListener('DOMContentLoaded', function () {
         clearBoard();
 
         const whitePlayer = document.getElementById("white_player");
-        const blackPlayer = document.getElementById("black_player");
         whitePlayer.innerHTML = `${state.white_player}`;
+        const blackPlayer = document.getElementById("black_player");
         blackPlayer.innerHTML = `${state.black_player}`;
 
-        const whitePlayerButton = document.getElementById("white_player_button");
-        whitePlayerButton.addEventListener("click", function() {
-            tableSocket.send(JSON.stringify({
-                'white_player': true,
-                'black_player': null,
-                'move': null,
-                'promotion': null
-            }));
-        })
-        const blackPlayerButton = document.getElementById("black_player_button");
-        blackPlayerButton.addEventListener("click", function() {
-            tableSocket.send(JSON.stringify({
-                'white_player': null,
-                'black_player': true,
-                'move': null,
-                'promotion': null
-            }));
-        })
+        const whitePlayerSitButton = document.getElementById("white_player_sit_button");
+        const whitePlayerStandButton = document.getElementById("white_player_stand_button");
 
+        const blackPlayerSitButton = document.getElementById("black_player_sit_button");
+        const blackPlayerStandButton = document.getElementById("black_player_stand_button");
+
+        if (state.white_player === "Player 1") {
+            whitePlayerSitButton.classList.remove("hidden")
+            whitePlayerStandButton.classList.add("hidden")
+
+            let newElement = whitePlayerStandButton.cloneNode(true);
+            whitePlayerStandButton.parentNode.replaceChild(newElement, whitePlayerStandButton);
+    
+            whitePlayerSitButton.addEventListener("click", function() {
+                tableSocket.send(JSON.stringify({
+                    'white_player': true,
+                    'black_player': null,
+                    'move': null,
+                    'promotion': null
+                }));
+            })
+        } else {
+            whitePlayerSitButton.classList.add("hidden")
+            whitePlayerStandButton.classList.remove("hidden")
+
+            let newElement = whitePlayerSitButton.cloneNode(true);
+            whitePlayerSitButton.parentNode.replaceChild(newElement, whitePlayerSitButton);
+            
+            whitePlayerStandButton.addEventListener("click", function() {
+                tableSocket.send(JSON.stringify({
+                    'white_player': false,
+                    'black_player': null,
+                    'move': null,
+                    'promotion': null
+                }));
+            })
+        }
+        
+        if (state.black_player === "Player 2") {
+            blackPlayerSitButton.classList.remove("hidden")
+            blackPlayerStandButton.classList.add("hidden")
+
+            let newElement = blackPlayerStandButton.cloneNode(true);
+            blackPlayerStandButton.parentNode.replaceChild(newElement, blackPlayerStandButton);
+            
+            blackPlayerSitButton.addEventListener("click", function() {
+                tableSocket.send(JSON.stringify({
+                    'white_player': null,
+                    'black_player': true,
+                    'move': null,
+                    'promotion': null
+                }));
+            })
+        } else {
+            blackPlayerSitButton.classList.add("hidden")
+            blackPlayerStandButton.classList.remove("hidden")
+
+            let newElement = blackPlayerSitButton.cloneNode(true);
+            blackPlayerSitButton.parentNode.replaceChild(newElement, blackPlayerSitButton);
+            
+            blackPlayerStandButton.addEventListener("click", function() {
+                tableSocket.send(JSON.stringify({
+                    'white_player': null,
+                    'black_player': false,
+                    'move': null,
+                    'promotion': null
+                }));
+            })
+        }
 
         winner(state);
         checking(state);

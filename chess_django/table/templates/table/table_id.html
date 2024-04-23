@@ -11,7 +11,8 @@
             <span>
                 <span id="black_player" class="player"></span>
                 {% if user.is_authenticated %}
-                    <button type="button" id="black_player_button">Sit</button>
+                    <button type="button" id="black_player_sit_button" class="hidden">Sit</button>
+                    <button type="button" id="black_player_stand_button" class="hidden">Stand up</button>
                 {% endif %}
             </span>
             <span class="time">Time:</span>
@@ -29,7 +30,8 @@
             <span>
                 <span id="white_player" class="player"></span>
                 {% if user.is_authenticated %}
-                    <button type="button" id="white_player_button">Sit</button>
+                    <button type="button" id="white_player_sit_button" class="hidden">Sit</button>
+                    <button type="button" id="white_player_stand_button" class="hidden">Stand up</button>
                 {% endif %}
             </span>
             <span class="time">Time:</span>

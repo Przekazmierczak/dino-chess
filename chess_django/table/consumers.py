@@ -15,16 +15,40 @@ class TableConsumer(AsyncWebsocketConsumer):
 
         await self.accept()
 
-        await self.send_actual_board()
+        await self.check_state()
+        # await self.send_actual_board()
 
     async def disconnect(self, close_code):
         # Leave room group
         await self.channel_layer.group_discard(self.table_group_id, self.channel_name)
 
 
-    async def send_actual_board(self):
+    async def check_state(self):
         actual_state, white_player, black_player, actual_game, _ = await self.get_state_from_database()
-        # if actual_state:
+        if white_player and black_player:
+            await self.send_actual_board(actual_state, white_player, black_player, actual_game)
+
+        else:
+            await self.send_start_board(actual_state, white_player, black_player, actual_game)
+
+
+    async def send_start_board(self, actual_state, white_player, black_player, actual_game):
+        white_player_name = white_player.username  if white_player else "Player 1"
+        black_player_name = black_player.username  if black_player else "Player 2"
+
+        await self.send(text_data=json.dumps({
+            "white_player": white_player_name,
+            "black_player": black_player_name,
+            "winner": None,
+            "board": None,
+            "turn": actual_state.turn,
+            "checking": None,
+            "total_moves": 0,
+            "soft_moves": 0
+            }))
+
+
+    async def send_actual_board(self, actual_state, white_player, black_player, actual_game):
         actual_board_json = json.loads(actual_state.board)
         actual_board_object, winner, checking = pieces.Board(actual_board_json, actual_state.turn, actual_state.castling, actual_state.enpassant).create_json_class()
         
@@ -88,21 +112,57 @@ class TableConsumer(AsyncWebsocketConsumer):
 
     @sync_to_async
     def push_player_to_database(self, user, player):
-        print(user)
         game = Game.objects.get(pk=self.table_id)
         if player == "w": game.white = user
         elif player == "b": game.black = user
         game.save()
 
+    @sync_to_async
+    def remove_player_from_database(self, user, player):
+        game = Game.objects.get(pk=self.table_id)
+        if player == "w": game.white = None
+        elif player == "b": game.black = None
+        game.save()
+
     # Receive message from WebSocket
     async def receive(self, text_data):
         text_data_json = json.loads(text_data)
-        if text_data_json["white_player"]:
+        if text_data_json["white_player"] or text_data_json["black_player"] or text_data_json["white_player"] == False or text_data_json["black_player"] == False:
             self.user = self.scope["user"]
-            await self.push_player_to_database(self.user, "w")
-        elif text_data_json["black_player"]:
-            self.user = self.scope["user"]
-            await self.push_player_to_database(self.user, "b")
+
+            if text_data_json["white_player"]:
+                await self.push_player_to_database(self.user, "w")
+            if text_data_json["black_player"]:
+                await self.push_player_to_database(self.user, "b")
+            if text_data_json["white_player"] == False:
+                await self.remove_player_from_database(self.user, "w")
+            if text_data_json["black_player"] == False:
+                await self.remove_player_from_database(self.user, "b")
+                
+            # CHANGE IT! CHANGE IT! CHANGE IT! CHANGE IT! CHANGE IT! CHANGE IT! CHANGE IT! CHANGE IT! CHANGE IT! CHANGE IT! CHANGE IT! CHANGE IT! CHANGE IT! CHANGE IT! 
+            actual_state, white_player, black_player, actual_game, _ = await self.get_state_from_database()
+            # if actual_state:
+            actual_board_json = json.loads(actual_state.board)
+            actual_board_object, winner, checking = pieces.Board(actual_board_json, actual_state.turn, actual_state.castling, actual_state.enpassant).create_json_class()
+
+            white_player_name = white_player.username  if white_player else "Player 1"
+            black_player_name = black_player.username  if black_player else "Player 2"
+
+            # Send message to room group
+            await self.channel_layer.group_send(
+                self.table_group_id, {
+                    "type": "new_board",
+                    "white_player": white_player_name,
+                    "black_player": black_player_name,
+                    "winner": None,
+                    "board": actual_board_object,
+                    "turn": actual_state.turn,
+                    "checking": checking,
+                    "total_moves": actual_state.total_moves,
+                    "soft_moves": actual_state.soft_moves
+                    }
+            )
+            # CHANGE IT! CHANGE IT! CHANGE IT! CHANGE IT! CHANGE IT! CHANGE IT! CHANGE IT! CHANGE IT! CHANGE IT! CHANGE IT! CHANGE IT! CHANGE IT! CHANGE IT! CHANGE IT! 
         else:
             move = text_data_json["move"]
             promotion = text_data_json["promotion"]
@@ -139,10 +199,10 @@ class TableConsumer(AsyncWebsocketConsumer):
                 # Send message to room group
                 await self.channel_layer.group_send(
                     self.table_group_id, {
+                        "type": "new_board",
                         "white_player": white_player_name,
                         "black_player": black_player_name,
                         "winner": winner,
-                        "type": "new_board",
                         "board": updated_json_board,
                         "turn": next_turn,
                         "checking": checking,
