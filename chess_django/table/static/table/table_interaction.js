@@ -18,82 +18,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const state = JSON.parse(e.data);
             console.log(state)
         clearBoard();
-
-        const whitePlayer = document.getElementById("white_player");
-        whitePlayer.innerHTML = `${state.white_player}`;
-        const blackPlayer = document.getElementById("black_player");
-        blackPlayer.innerHTML = `${state.black_player}`;
-
-        const whitePlayerSitButton = document.getElementById("white_player_sit_button");
-        const whitePlayerStandButton = document.getElementById("white_player_stand_button");
-
-        const blackPlayerSitButton = document.getElementById("black_player_sit_button");
-        const blackPlayerStandButton = document.getElementById("black_player_stand_button");
-
-        if (state.white_player === "Player 1") {
-            whitePlayerSitButton.classList.remove("hidden")
-            whitePlayerStandButton.classList.add("hidden")
-
-            let newElement = whitePlayerStandButton.cloneNode(true);
-            whitePlayerStandButton.parentNode.replaceChild(newElement, whitePlayerStandButton);
-    
-            whitePlayerSitButton.addEventListener("click", function() {
-                tableSocket.send(JSON.stringify({
-                    'white_player': true,
-                    'black_player': null,
-                    'move': null,
-                    'promotion': null
-                }));
-            })
-        } else {
-            whitePlayerSitButton.classList.add("hidden")
-            whitePlayerStandButton.classList.remove("hidden")
-
-            let newElement = whitePlayerSitButton.cloneNode(true);
-            whitePlayerSitButton.parentNode.replaceChild(newElement, whitePlayerSitButton);
-            
-            whitePlayerStandButton.addEventListener("click", function() {
-                tableSocket.send(JSON.stringify({
-                    'white_player': false,
-                    'black_player': null,
-                    'move': null,
-                    'promotion': null
-                }));
-            })
-        }
-        
-        if (state.black_player === "Player 2") {
-            blackPlayerSitButton.classList.remove("hidden")
-            blackPlayerStandButton.classList.add("hidden")
-
-            let newElement = blackPlayerStandButton.cloneNode(true);
-            blackPlayerStandButton.parentNode.replaceChild(newElement, blackPlayerStandButton);
-            
-            blackPlayerSitButton.addEventListener("click", function() {
-                tableSocket.send(JSON.stringify({
-                    'white_player': null,
-                    'black_player': true,
-                    'move': null,
-                    'promotion': null
-                }));
-            })
-        } else {
-            blackPlayerSitButton.classList.add("hidden")
-            blackPlayerStandButton.classList.remove("hidden")
-
-            let newElement = blackPlayerSitButton.cloneNode(true);
-            blackPlayerSitButton.parentNode.replaceChild(newElement, blackPlayerSitButton);
-            
-            blackPlayerStandButton.addEventListener("click", function() {
-                tableSocket.send(JSON.stringify({
-                    'white_player': null,
-                    'black_player': false,
-                    'move': null,
-                    'promotion': null
-                }));
-            })
-        }
-
+        joinRemovePlayers(tableSocket, state)
         winner(state);
         checking(state);
         updateMoves(state);
@@ -124,9 +49,79 @@ document.addEventListener('DOMContentLoaded', function () {
             uploadBoard(tableSocket, state);
         })
         // ------------------ BUTTONS REMOVE LATER ------------------------
-
+        
     }; 
 });
+
+function joinRemovePlayers(tableSocket, state) {
+    const whitePlayer = document.getElementById("white_player");
+    whitePlayer.innerHTML = `${state.white_player}`;
+    const blackPlayer = document.getElementById("black_player");
+    blackPlayer.innerHTML = `${state.black_player}`;
+
+    const whitePlayerSitButton = document.getElementById("white_player_sit_button");
+    const whitePlayerStandButton = document.getElementById("white_player_stand_button");
+
+    const blackPlayerSitButton = document.getElementById("black_player_sit_button");
+    const blackPlayerStandButton = document.getElementById("black_player_stand_button");
+
+    setButtonState(tableSocket, state, "white", whitePlayerSitButton, whitePlayerStandButton);
+    setButtonState(tableSocket, state, "black", blackPlayerSitButton, blackPlayerStandButton);
+}
+
+function setButtonState(tableSocket, state, player, sitButton, standButton) {
+    // Remove old listeners
+    let newElementSit = sitButton.cloneNode(true);
+    sitButton.parentNode.replaceChild(newElementSit, sitButton);
+    sitButton = newElementSit;
+    
+    let newElementStand = standButton.cloneNode(true);
+    standButton.parentNode.replaceChild(newElementStand, standButton);
+    standButton = newElementStand;
+
+    if (player === "white" && state.white_player === "Player 1" || player === "black" && state.black_player === "Player 2") {
+        sitButton.classList.remove("hidden");
+        standButton.classList.add("hidden");
+
+        sitButton.addEventListener("click", function() {
+            let white_player = null
+            let black_player = null
+            if (player === "white") {
+                white_player = true
+            } else {
+                black_player = true
+            }
+            tableSocket.send(JSON.stringify({
+                'white_player': white_player,
+                'black_player': black_player,
+                'move': null,
+                'promotion': null
+            }));
+        });
+    } else if (player === "white" && state.white_player === state.user || player === "black" && state.black_player === state.user) {
+        sitButton.classList.add("hidden");
+        standButton.classList.remove("hidden");
+
+        standButton.addEventListener("click", function() {
+            let white_player = null
+            let black_player = null
+            if (player === "white") {
+                white_player = false
+            } else {
+                black_player = false
+            }
+            tableSocket.send(JSON.stringify({
+                'white_player': white_player,
+                'black_player': black_player,
+                'move': null,
+                'promotion': null
+            }));
+        });
+    } else {
+        sitButton.classList.add("hidden");
+        standButton.classList.add("hidden");
+    }
+}
 
 function winner(state) {
     if (state.winner !== null) {

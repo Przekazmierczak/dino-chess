@@ -36,7 +36,11 @@ class TableConsumer(AsyncWebsocketConsumer):
         white_player_name = white_player.username  if white_player else "Player 1"
         black_player_name = black_player.username  if black_player else "Player 2"
 
+        user = self.scope["user"]
+        user_name = user.username
+
         await self.send(text_data=json.dumps({
+            "user": user_name,
             "white_player": white_player_name,
             "black_player": black_player_name,
             "winner": None,
@@ -59,8 +63,12 @@ class TableConsumer(AsyncWebsocketConsumer):
         if actual_game.winner:
             winner = {"w": "white", "b": "black"}.get(actual_game.winner, "draw") 
         # ----------------------------------------------------------------------------------------
-            
+        
+        user = self.scope["user"]
+        user_name = user.username
+
         await self.send(text_data=json.dumps({
+            "user": user_name,
             "white_player": white_player_name,
             "black_player": black_player_name,
             "winner": winner,
@@ -213,6 +221,9 @@ class TableConsumer(AsyncWebsocketConsumer):
 
     # Receive message from room group
     async def new_board(self, event):
+        user = self.scope["user"]
+        user_name = user.username
+
         white_player = event["white_player"]
         black_player = event["black_player"]
         winner = event["winner"]
@@ -224,6 +235,7 @@ class TableConsumer(AsyncWebsocketConsumer):
 
         # Send message to WebSocket
         await self.send(text_data=json.dumps({
+            "user": user_name,
             "white_player": white_player,
             "black_player": black_player,
             "winner": winner,
