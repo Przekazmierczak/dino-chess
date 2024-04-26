@@ -13,25 +13,29 @@
                 {% if user.is_authenticated %}
                     <button type="button" id="black_player_sit_button" class="hidden">Sit</button>
                     <button type="button" id="black_player_stand_button" class="hidden">Stand up</button>
-                {% endif %}
-            </span>
-            <span class="time">Time:</span>
-        </div>
-        <table>
-            {% for row in "76543210" %}
-            <tr>
-                {% for column in "76543210" %}
-                <td id="square{{ row }}{{ column }}"></td>
+                    <button type="button" id="black_player_ready_button" class="hidden">Ready</button>
+                    <button type="button" id="black_player_unready_button" class="hidden">Unready</button>
+                    {% endif %}
+                </span>
+                <span class="time">Time:</span>
+            </div>
+            <table>
+                {% for row in "76543210" %}
+                <tr>
+                    {% for column in "76543210" %}
+                    <td id="square{{ row }}{{ column }}"></td>
+                    {% endfor %}
+                </tr>
                 {% endfor %}
-            </tr>
-            {% endfor %}
-        </table>
-        <div class="player-time">
-            <span>
-                <span id="white_player" class="player"></span>
-                {% if user.is_authenticated %}
+            </table>
+            <div class="player-time">
+                <span>
+                    <span id="white_player" class="player"></span>
+                    {% if user.is_authenticated %}
                     <button type="button" id="white_player_sit_button" class="hidden">Sit</button>
                     <button type="button" id="white_player_stand_button" class="hidden">Stand up</button>
+                    <button type="button" id="white_player_ready_button" class="hidden">Ready</button>
+                    <button type="button" id="white_player_unready_button" class="hidden">Unready</button>
                 {% endif %}
             </span>
             <span class="time">Time:</span>
