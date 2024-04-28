@@ -18,15 +18,16 @@ document.addEventListener('DOMContentLoaded', function () {
             const state = JSON.parse(e.data);
             console.log(state)
         clearBoard();
-        joinRemovePlayers(tableSocket, state)
+        showPlayers(state);
+        addRemovePlayers(tableSocket, state)
         winner(state);
         checking(state);
         updateMoves(state);
         uploadBoard(tableSocket, state);
-
-
+        
+        
         console.log("received updated board");
-
+        
         // ------------------ BUTTONS REMOVE LATER ------------------------
         const board = document.querySelector(".board");
         const rotateButton = document.getElementById("button_rotate");
@@ -53,12 +54,14 @@ document.addEventListener('DOMContentLoaded', function () {
     }; 
 });
 
-function joinRemovePlayers(tableSocket, state) {
+function showPlayers(state) {
     const whitePlayer = document.getElementById("white_player");
     whitePlayer.innerHTML = `${state.white_player}`;
     const blackPlayer = document.getElementById("black_player");
     blackPlayer.innerHTML = `${state.black_player}`;
+}
 
+function addRemovePlayers(tableSocket, state) {
     const whitePlayerSitButton = document.getElementById("white_player_sit_button");
     const whitePlayerStandButton = document.getElementById("white_player_stand_button");
     const whitePlayerReadyButton = document.getElementById("white_player_ready_button");
@@ -69,8 +72,19 @@ function joinRemovePlayers(tableSocket, state) {
     const blackPlayerReadyButton = document.getElementById("black_player_ready_button");
     const blackPlayerUnreadyButton = document.getElementById("black_player_unready_button");
 
-    setButtonState(tableSocket, state, "white", whitePlayerSitButton, whitePlayerStandButton, whitePlayerReadyButton,whitePlayerUnreadyButton);
-    setButtonState(tableSocket, state, "black", blackPlayerSitButton, blackPlayerStandButton, blackPlayerReadyButton, blackPlayerUnreadyButton);
+    if (state.white_player_ready !== true || state.black_player_ready !== true) {
+        setButtonState(tableSocket, state, "white", whitePlayerSitButton, whitePlayerStandButton, whitePlayerReadyButton, whitePlayerUnreadyButton);
+        setButtonState(tableSocket, state, "black", blackPlayerSitButton, blackPlayerStandButton, blackPlayerReadyButton, blackPlayerUnreadyButton);
+    } else {
+        whitePlayerSitButton.classList.add("hidden");
+        whitePlayerStandButton.classList.add("hidden");
+        whitePlayerReadyButton.classList.add("hidden");
+        whitePlayerUnreadyButton.classList.add("hidden");
+        blackPlayerSitButton.classList.add("hidden");
+        blackPlayerStandButton.classList.add("hidden");
+        blackPlayerReadyButton.classList.add("hidden");
+        blackPlayerUnreadyButton.classList.add("hidden");
+    }
 }
 
 function setButtonState(tableSocket, state, player, sitButton, standButton, readyButton, unreadyButton) {
@@ -179,12 +193,6 @@ function setButtonState(tableSocket, state, player, sitButton, standButton, read
                 'promotion': null
             }));
         });
-
-    } else {
-        sitButton.classList.add("hidden");
-        standButton.classList.add("hidden");
-        readyButton.classList.add("hidden");
-        unreadyButton.classList.add("hidden");
     }
 }
 
@@ -324,6 +332,8 @@ function pushMove(oldRow, oldCol, row, col, htmlPossibleMove, iFpromotion, table
             tableSocket.send(JSON.stringify({
                 'white_player': null,
                 'black_player': null,
+                'white_player_ready': null,
+                'black_player_ready': null,
                 'move': move,
                 'promotion': null
             }));
@@ -341,6 +351,8 @@ function pushMove(oldRow, oldCol, row, col, htmlPossibleMove, iFpromotion, table
                 tableSocket.send(JSON.stringify({
                     'white_player': null,
                     'black_player': null,
+                    'white_player_ready': null,
+                    'black_player_ready': null,
                     'move': move,
                     'promotion': promotion
                 }));
