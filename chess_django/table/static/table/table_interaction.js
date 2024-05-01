@@ -261,32 +261,34 @@ function uploadSquare(state, row, col, tableSocket) {
     const htmlSquare = document.querySelector(`#square${row}${col}`);
     htmlSquare.innerHTML = `${image}`;
     if (turn === player && state.winner === null) {
+        if ((player === "white" && state.user === state.white_player) || (player === "black" && state.user === state.black_player)) {
+            // PUT INTO FUNCTION ---------
+            htmlSquare.setAttribute("draggable", "true");
+            htmlSquare.classList.add("draggableElement");
         
-        // PUT INTO FUNCTION ---------
-        htmlSquare.setAttribute("draggable", "true");
-        htmlSquare.classList.add("draggableElement");
+            // let img = new Image();
+            // img.src = "/static/table/pieces_images/Queen_white.png";
     
-        // let img = new Image();
-        // img.src = "/static/table/pieces_images/Queen_white.png";
-
-        htmlSquare.addEventListener('dragstart', (event) => {
-            htmlSquare.classList.add("dragging");
-            // event.dataTransfer.setDragImage(img, 100, 100);
-            htmlSquare.click();
-        });
-        htmlSquare.addEventListener("dragend", () => {
-            htmlSquare.classList.remove("dragging");
-        });
-        // --------------------
-
-        htmlSquare.addEventListener("click", function() {
-            colorBoard();
-            removeMoveListeners();
-            addMarked(htmlSquare)
-            const iFpromotion = moves[2]
-            moves[0].forEach(move => addPossibleMove(move, row, col, tableSocket, iFpromotion, "move"));
-            moves[1].forEach(move => addPossibleMove(move, row, col, tableSocket, iFpromotion, "attack"));
-        });
+            htmlSquare.addEventListener('dragstart', (event) => {
+                htmlSquare.classList.add("dragging");
+                // event.dataTransfer.setDragImage(img, 100, 100);
+                htmlSquare.click();
+            });
+            htmlSquare.addEventListener("dragend", () => {
+                htmlSquare.classList.remove("dragging");
+            });
+            // --------------------
+    
+            htmlSquare.addEventListener("click", function() {
+                colorBoard();
+                removeMoveListeners();
+                addMarked(htmlSquare)
+                const iFpromotion = moves[2]
+                moves[0].forEach(move => addPossibleMove(move, row, col, tableSocket, iFpromotion, "move"));
+                moves[1].forEach(move => addPossibleMove(move, row, col, tableSocket, iFpromotion, "attack"));
+            });
+        }
+        
     }
 };
 

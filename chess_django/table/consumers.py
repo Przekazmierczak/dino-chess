@@ -16,7 +16,6 @@ class TableConsumer(AsyncWebsocketConsumer):
         await self.accept()
 
         await self.check_state()
-        # await self.send_actual_board()
 
     async def disconnect(self, close_code):
         # Leave room group
@@ -26,7 +25,11 @@ class TableConsumer(AsyncWebsocketConsumer):
     async def check_state(self):
         actual_state, white_player, black_player,  white_player_ready, black_player_ready, actual_game, _ = await self.get_state_from_database()
         if white_player_ready and black_player_ready:
-            await self.send_actual_board(actual_state, white_player, black_player, white_player_ready, black_player_ready, actual_game)
+            user_name = self.scope["user"].username
+            if (actual_state.turn == "white" and str(white_player) == user_name) or (actual_state.turn == "black" and str(black_player) == user_name):
+                await self.send_current_board_player(actual_state, white_player, black_player, white_player_ready, black_player_ready, actual_game)
+            else:
+                await self.send_current_board_rest(actual_state, white_player, black_player, white_player_ready, black_player_ready, actual_game)
 
         else:
             await self.send_start_board(actual_state, white_player, black_player, white_player_ready, black_player_ready, actual_game)
@@ -36,8 +39,9 @@ class TableConsumer(AsyncWebsocketConsumer):
         white_player_name = white_player.username  if white_player else "Player 1"
         black_player_name = black_player.username  if black_player else "Player 2"
 
-        user = self.scope["user"]
-        user_name = user.username
+        user_name = self.scope["user"].username
+
+        board = pieces.boardSimplify(None)
 
         await self.send(text_data=json.dumps({
             "user": user_name,
@@ -46,7 +50,7 @@ class TableConsumer(AsyncWebsocketConsumer):
             "white_player_ready": white_player_ready,
             "black_player_ready": black_player_ready,
             "winner": None,
-            "board": None,
+            "board": board,
             "turn": None,
             "checking": None,
             "total_moves": 0,
@@ -54,7 +58,7 @@ class TableConsumer(AsyncWebsocketConsumer):
             }))
 
 
-    async def send_actual_board(self, actual_state, white_player, black_player, white_player_ready, black_player_ready, actual_game):
+    async def send_current_board_player(self, actual_state, white_player, black_player, white_player_ready, black_player_ready, actual_game):
         actual_board_json = json.loads(actual_state.board)
         actual_board_object, winner, checking = pieces.Board(actual_board_json, actual_state.turn, actual_state.castling, actual_state.enpassant).create_json_class()
         
@@ -66,8 +70,7 @@ class TableConsumer(AsyncWebsocketConsumer):
             winner = {"w": "white", "b": "black"}.get(actual_game.winner, "draw") 
         # ----------------------------------------------------------------------------------------
         
-        user = self.scope["user"]
-        user_name = user.username
+        user_name = self.scope["user"].username
 
         await self.send(text_data=json.dumps({
             "user": user_name,
@@ -83,6 +86,31 @@ class TableConsumer(AsyncWebsocketConsumer):
             "soft_moves": actual_state.soft_moves
             }))
 
+    async def send_current_board_rest(self, actual_state, white_player, black_player, white_player_ready, black_player_ready, actual_game):
+        actual_board_json = json.loads(actual_state.board)
+        actual_board_object = pieces.boardSimplify(actual_board_json)
+
+        white_player_name = white_player.username  if white_player else "Player 1"
+        black_player_name = black_player.username  if black_player else "Player 2"
+
+        user_name = self.scope["user"].username
+
+        winner = {"w": "white", "b": "black"}.get(actual_game.winner, "draw") if actual_game.winner else None
+
+
+        await self.send(text_data=json.dumps({
+            "user": user_name,
+            "white_player": white_player_name,
+            "black_player": black_player_name,
+            "white_player_ready": white_player_ready,
+            "black_player_ready": black_player_ready,
+            "winner": winner,
+            "board": actual_board_object,
+            "turn": actual_state.turn,
+            "checking": None,
+            "total_moves": actual_state.total_moves,
+            "soft_moves": actual_state.soft_moves
+            }))
 
     @sync_to_async
     def get_state_from_database(self):
@@ -93,14 +121,14 @@ class TableConsumer(AsyncWebsocketConsumer):
         black_player_ready = actual_game_db.black_ready
 
         if not white_player_ready or not black_player_ready:
-            return None, white_player, black_player, white_player_ready, black_player_ready, None, None
-
-        actual_board_db = Board.objects.filter(game=actual_game_db).latest('id')
-        prev_boards_db = Board.objects.filter(game=actual_game_db)
-
-        prev_boards = list(prev_boards_db)
-
-        actual_board_db.turn = "white" if actual_board_db.turn == "w" else "black"
+            actual_board_db = None
+            actual_game_db = None
+            prev_boards = None
+        else:
+            actual_board_db = Board.objects.filter(game=actual_game_db).latest('id')
+            prev_boards_db = Board.objects.filter(game=actual_game_db)
+            prev_boards = list(prev_boards_db)
+            actual_board_db.turn = "white" if actual_board_db.turn == "w" else "black"
         
         return actual_board_db, white_player, black_player, white_player_ready, black_player_ready, actual_game_db, prev_boards
     
@@ -225,6 +253,8 @@ class TableConsumer(AsyncWebsocketConsumer):
                 white_player_name = white_player.username  if white_player else "Player 1"
                 black_player_name = black_player.username  if black_player else "Player 2"
 
+                board = pieces.boardSimplify(None)
+
                 # Send message to room group
                 await self.channel_layer.group_send(
                     self.table_group_id, {
@@ -234,7 +264,7 @@ class TableConsumer(AsyncWebsocketConsumer):
                         "white_player_ready": white_player_ready,
                         "black_player_ready": black_player_ready,
                         "winner": None,
-                        "board": None,
+                        "board": board,
                         "turn": None,
                         "checking": None,
                         "total_moves": None,
@@ -294,8 +324,7 @@ class TableConsumer(AsyncWebsocketConsumer):
 
     # Receive message from room group
     async def new_board(self, event):
-        user = self.scope["user"]
-        user_name = user.username
+        user_name = self.scope["user"].username
 
         white_player = event["white_player"]
         black_player = event["black_player"]
