@@ -503,3 +503,64 @@ class Board:
             
         # If the move is invalid or not made by the correct player, return False
         return (new_json_board, self.castling, enpassant, soft_move) if correct else False
+
+def boardSimplify(board):
+    # Define the dimensions of the chessboard
+    ROWS, COLS = 8, 8
+
+    if not board:
+        board = [["R", "N", "B", "K", "Q", "B", "N", "R"],
+                 ["P", "P", "P", "P", "P", "P", "P", "P"],
+                 [" ", " ", " ", " ", " ", " ", " ", " "],
+                 [" ", " ", " ", " ", " ", " ", " ", " "],
+                 [" ", " ", " ", " ", " ", " ", " ", " "],
+                 [" ", " ", " ", " ", " ", " ", " ", " "],
+                 ["p", "p", "p", "p", "p", "p", "p", "p"],
+                 ["r", "n", "b", "k", "q", "b", "n", "r"]]
+
+    # Dictionary to map the characters representing pieces to their respective properties
+    board_piece = {
+        "R": {"piece": "rook", "player": "white"},
+        "N": {"piece": "knight", "player": "white"},
+        "B": {"piece": "bishop", "player": "white"},
+        "K": {"piece": "king", "player": "white"},
+        "Q": {"piece": "queen", "player": "white"},
+        "P": {"piece": "pawn", "player": "white"},
+        "r": {"piece": "rook", "player": "black"},
+        "n": {"piece": "knight", "player": "black"},
+        "b": {"piece": "bishop", "player": "black"},
+        "k": {"piece": "king", "player": "black"},
+        "q": {"piece": "queen", "player": "black"},
+        "p": {"piece": "pawn", "player": "black"}
+    }
+
+    # Initialize an empty 2D array to represent the chessboard
+    class_board = [[None for _ in range(ROWS)] for _ in range(COLS)]
+    
+    # Iterate over each cell in the board
+    for row in range(ROWS):
+        for col in range(COLS):
+            # Check if the current cell contains a piece
+            if board[row][col] in board_piece:
+                # Retrieve the piece type and player color from the dictionary
+                piece = board_piece[board[row][col]]["piece"]
+                player = board_piece[board[row][col]]["player"]
+                # Create a Piece object with the retrieved information and place it on the board
+                class_board[row][col] = Piece(piece, player, (row, col))
+    
+    # Initialize an empty 2D array to store JSON representation of the board
+    json_class = [[None for _ in range(ROWS)] for _ in range(COLS)]
+
+    # Iterate over each cell on the board
+    for row in range(ROWS):
+        for col in range(COLS):
+            # Check if there is a piece on the current cell
+            if class_board[row][col]:
+                # Create a dictionary representing the piece with its attributes
+                json_class[row][col] = {
+                    "piece": class_board[row][col].piece, # Piece type
+                    "player": class_board[row][col].player, # Player color
+                    "moves": [] # Possible moves for the piece
+                    }
+
+    return json_class

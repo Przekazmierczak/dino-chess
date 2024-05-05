@@ -18,13 +18,16 @@ document.addEventListener('DOMContentLoaded', function () {
             const state = JSON.parse(e.data);
             console.log(state)
         clearBoard();
+        showPlayers(state);
+        addRemovePlayers(tableSocket, state)
         winner(state);
         checking(state);
         updateMoves(state);
         uploadBoard(tableSocket, state);
-
+        
+        
         console.log("received updated board");
-
+        
         // ------------------ BUTTONS REMOVE LATER ------------------------
         const board = document.querySelector(".board");
         const rotateButton = document.getElementById("button_rotate");
@@ -47,9 +50,151 @@ document.addEventListener('DOMContentLoaded', function () {
             uploadBoard(tableSocket, state);
         })
         // ------------------ BUTTONS REMOVE LATER ------------------------
-
+        
     }; 
 });
+
+function showPlayers(state) {
+    const whitePlayer = document.getElementById("white_player");
+    whitePlayer.innerHTML = `${state.white_player}`;
+    const blackPlayer = document.getElementById("black_player");
+    blackPlayer.innerHTML = `${state.black_player}`;
+}
+
+function addRemovePlayers(tableSocket, state) {
+    const whitePlayerSitButton = document.getElementById("white_player_sit_button");
+    const whitePlayerStandButton = document.getElementById("white_player_stand_button");
+    const whitePlayerReadyButton = document.getElementById("white_player_ready_button");
+    const whitePlayerUnreadyButton = document.getElementById("white_player_unready_button");
+    
+    const blackPlayerSitButton = document.getElementById("black_player_sit_button");
+    const blackPlayerStandButton = document.getElementById("black_player_stand_button");
+    const blackPlayerReadyButton = document.getElementById("black_player_ready_button");
+    const blackPlayerUnreadyButton = document.getElementById("black_player_unready_button");
+
+    if (state.white_player_ready !== true || state.black_player_ready !== true) {
+        setButtonState(tableSocket, state, "white", whitePlayerSitButton, whitePlayerStandButton, whitePlayerReadyButton, whitePlayerUnreadyButton);
+        setButtonState(tableSocket, state, "black", blackPlayerSitButton, blackPlayerStandButton, blackPlayerReadyButton, blackPlayerUnreadyButton);
+    } else {
+        whitePlayerSitButton.classList.add("hidden");
+        whitePlayerStandButton.classList.add("hidden");
+        whitePlayerReadyButton.classList.add("hidden");
+        whitePlayerUnreadyButton.classList.add("hidden");
+        blackPlayerSitButton.classList.add("hidden");
+        blackPlayerStandButton.classList.add("hidden");
+        blackPlayerReadyButton.classList.add("hidden");
+        blackPlayerUnreadyButton.classList.add("hidden");
+    }
+}
+
+function setButtonState(tableSocket, state, player, sitButton, standButton, readyButton, unreadyButton) {
+    // Remove old listeners
+    let newElementSit = sitButton.cloneNode(true);
+    sitButton.parentNode.replaceChild(newElementSit, sitButton);
+    sitButton = newElementSit;
+    
+    let newElementStand = standButton.cloneNode(true);
+    standButton.parentNode.replaceChild(newElementStand, standButton);
+    standButton = newElementStand;
+
+    let newElementReady = readyButton.cloneNode(true);
+    readyButton.parentNode.replaceChild(newElementReady, readyButton);
+    readyButton = newElementReady;
+
+    let newElementUnready = unreadyButton.cloneNode(true);
+    unreadyButton.parentNode.replaceChild(newElementUnready, unreadyButton);
+    unreadyButton = newElementUnready;
+
+    if (player === "white" && state.white_player === "Player 1" || player === "black" && state.black_player === "Player 2") {
+        sitButton.classList.remove("hidden");
+        standButton.classList.add("hidden");
+        readyButton.classList.add("hidden");
+        unreadyButton.classList.add("hidden");
+
+        sitButton.addEventListener("click", function() {
+            let white_player = null
+            let black_player = null
+            if (player === "white") {
+                white_player = true
+            } else {
+                black_player = true
+            }
+            tableSocket.send(JSON.stringify({
+                'white_player': white_player,
+                'black_player': black_player,
+                'white_player_ready': null,
+                'black_player_ready': null,
+                'move': null,
+                'promotion': null
+            }));
+        });
+    } else if (player === "white" && state.white_player === state.user && state.white_player_ready === false || player === "black" && state.black_player === state.user && state.black_player_ready === false) {
+        sitButton.classList.add("hidden");
+        standButton.classList.remove("hidden");
+        readyButton.classList.remove("hidden");
+        unreadyButton.classList.add("hidden");
+        
+        standButton.addEventListener("click", function() {
+            let white_player = null
+            let black_player = null
+            if (player === "white") {
+                white_player = false
+            } else {
+                black_player = false
+            }
+            tableSocket.send(JSON.stringify({
+                'white_player': white_player,
+                'black_player': black_player,
+                'white_player_ready': null,
+                'black_player_ready': null,
+                'move': null,
+                'promotion': null
+            }));
+        });
+
+        readyButton.addEventListener("click", function() {
+            let white_player_ready = null
+            let black_player_ready = null
+            if (player === "white") {
+                white_player_ready = true
+            } else {
+                black_player_ready = true
+            }
+            tableSocket.send(JSON.stringify({
+                'white_player': null,
+                'black_player': null,
+                'white_player_ready': white_player_ready,
+                'black_player_ready': black_player_ready,
+                'move': null,
+                'promotion': null
+            }));
+        });
+
+    } else if (player === "white" && state.white_player === state.user && state.white_player_ready === true || player === "black" && state.black_player === state.user && state.black_player_ready === true) {
+        sitButton.classList.add("hidden");
+        standButton.classList.add("hidden");
+        readyButton.classList.add("hidden");
+        unreadyButton.classList.remove("hidden");
+        
+        unreadyButton.addEventListener("click", function() {
+            let white_player_ready = null
+            let black_player_ready = null
+            if (player === "white") {
+                white_player_ready = false
+            } else {
+                black_player_ready = false
+            }
+            tableSocket.send(JSON.stringify({
+                'white_player': null,
+                'black_player': null,
+                'white_player_ready': white_player_ready,
+                'black_player_ready': black_player_ready,
+                'move': null,
+                'promotion': null
+            }));
+        });
+    }
+}
 
 function winner(state) {
     if (state.winner !== null) {
@@ -116,32 +261,34 @@ function uploadSquare(state, row, col, tableSocket) {
     const htmlSquare = document.querySelector(`#square${row}${col}`);
     htmlSquare.innerHTML = `${image}`;
     if (turn === player && state.winner === null) {
+        if ((player === "white" && state.user === state.white_player) || (player === "black" && state.user === state.black_player)) {
+            // PUT INTO FUNCTION ---------
+            htmlSquare.setAttribute("draggable", "true");
+            htmlSquare.classList.add("draggableElement");
         
-        // PUT INTO FUNCTION ---------
-        htmlSquare.setAttribute("draggable", "true");
-        htmlSquare.classList.add("draggableElement");
+            // let img = new Image();
+            // img.src = "/static/table/pieces_images/Queen_white.png";
     
-        // let img = new Image();
-        // img.src = "/static/table/pieces_images/Queen_white.png";
-
-        htmlSquare.addEventListener('dragstart', (event) => {
-            htmlSquare.classList.add("dragging");
-            // event.dataTransfer.setDragImage(img, 100, 100);
-            htmlSquare.click();
-        });
-        htmlSquare.addEventListener("dragend", () => {
-            htmlSquare.classList.remove("dragging");
-        });
-        // --------------------
-
-        htmlSquare.addEventListener("click", function() {
-            colorBoard();
-            removeMoveListeners();
-            addMarked(htmlSquare)
-            const iFpromotion = moves[2]
-            moves[0].forEach(move => addPossibleMove(move, row, col, tableSocket, iFpromotion, "move"));
-            moves[1].forEach(move => addPossibleMove(move, row, col, tableSocket, iFpromotion, "attack"));
-        });
+            htmlSquare.addEventListener('dragstart', (event) => {
+                htmlSquare.classList.add("dragging");
+                // event.dataTransfer.setDragImage(img, 100, 100);
+                htmlSquare.click();
+            });
+            htmlSquare.addEventListener("dragend", () => {
+                htmlSquare.classList.remove("dragging");
+            });
+            // --------------------
+    
+            htmlSquare.addEventListener("click", function() {
+                colorBoard();
+                removeMoveListeners();
+                addMarked(htmlSquare)
+                const iFpromotion = moves[2]
+                moves[0].forEach(move => addPossibleMove(move, row, col, tableSocket, iFpromotion, "move"));
+                moves[1].forEach(move => addPossibleMove(move, row, col, tableSocket, iFpromotion, "attack"));
+            });
+        }
+        
     }
 };
 
@@ -185,6 +332,10 @@ function pushMove(oldRow, oldCol, row, col, htmlPossibleMove, iFpromotion, table
 
         if (iFpromotion === false) {
             tableSocket.send(JSON.stringify({
+                'white_player': null,
+                'black_player': null,
+                'white_player_ready': null,
+                'black_player_ready': null,
                 'move': move,
                 'promotion': null
             }));
@@ -200,6 +351,10 @@ function pushMove(oldRow, oldCol, row, col, htmlPossibleMove, iFpromotion, table
                 promotion = pickedPiece;
                 modal_promotion.classList.remove("show");
                 tableSocket.send(JSON.stringify({
+                    'white_player': null,
+                    'black_player': null,
+                    'white_player_ready': null,
+                    'black_player_ready': null,
                     'move': move,
                     'promotion': promotion
                 }));

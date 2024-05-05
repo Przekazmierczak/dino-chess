@@ -195,3 +195,7 @@ td.checking {
 .container2 {
     display: grid;
 }
+
+.hidden {
+    display: none;
+}
