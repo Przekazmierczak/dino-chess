@@ -288,7 +288,6 @@ function uploadSquare(state, row, col, tableSocket) {
                 moves[1].forEach(move => addPossibleMove(move, row, col, tableSocket, iFpromotion, "attack"));
             });
         }
-        
     }
 };
 
