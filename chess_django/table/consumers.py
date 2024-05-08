@@ -49,7 +49,8 @@ class TableConsumer(AsyncWebsocketConsumer):
             board = pieces.boardSimplify(None)
             winner, turn, checking, total_moves, soft_moves =  None, None, None, 0, 0
         
-        await self.send_game_state_to_websocket(white_player, black_player, current_game.white_ready, current_game.black_ready, winner, board, turn, checking, total_moves, soft_moves)
+        message = self.construct_game_state_message(white_player, black_player, current_game.white_ready, current_game.black_ready, winner, board, turn, checking, total_moves, soft_moves)
+        await self.send_game_state_to_websocket(message)
 
     # Receive message from WebSocket
     async def receive(self, text_data):
@@ -116,12 +117,11 @@ class TableConsumer(AsyncWebsocketConsumer):
                 board = pieces.boardSimplify(None)
                 winner, turn, checking, total_moves, soft_moves =  None, None, None, 0, 0
 
-        await self.send_game_state_to_room_group(white_player, black_player, current_game.white_ready, current_game.black_ready, winner, board, turn, checking, total_moves, soft_moves)
+        message = self.construct_game_state_message(white_player, black_player, current_game.white_ready, current_game.black_ready, winner, board, turn, checking, total_moves, soft_moves)
+        await self.send_game_state_to_room_group(message)
 
-    # Send message to WebSocket
-    async def send_game_state_to_websocket(self, white_player, black_player, white_player_ready, black_player_ready, winner, board, turn, checking, total_moves, soft_moves):
-        await self.send(text_data=json.dumps({
-            "user": self.scope["user"].username,
+    def construct_game_state_message(self, white_player, black_player, white_player_ready, black_player_ready, winner, board, turn, checking, total_moves, soft_moves):
+        return {
             "white_player": white_player,
             "black_player": black_player,
             "white_player_ready": white_player_ready,
@@ -132,24 +132,16 @@ class TableConsumer(AsyncWebsocketConsumer):
             "checking": checking,
             "total_moves": total_moves,
             "soft_moves": soft_moves
-            }))
+        }
+
+    # Send message to WebSocket
+    async def send_game_state_to_websocket(self, message):
+        await self.send(text_data=json.dumps({"user": self.scope["user"].username, **message}))
     
     # Send message to room group
-    async def send_game_state_to_room_group(self, white_player, black_player, white_player_ready, black_player_ready, winner, board, turn, checking, total_moves, soft_moves):
+    async def send_game_state_to_room_group(self, message):
         await self.channel_layer.group_send(
-            self.table_group_id, {
-                "type": "send_new_game_state",
-                "white_player": white_player,
-                "black_player": black_player,
-                "white_player_ready": white_player_ready,
-                "black_player_ready": black_player_ready,
-                "winner": winner,
-                "board": board,
-                "turn": turn,
-                "checking": checking,
-                "total_moves": total_moves,
-                "soft_moves": soft_moves
-                }
+            self.table_group_id, {"type": "send_new_game_state", **message}
         )
 
     # Receive message from room group
@@ -165,7 +157,8 @@ class TableConsumer(AsyncWebsocketConsumer):
         total_moves = event["total_moves"]
         soft_moves = event["soft_moves"]
 
-        await self.send_game_state_to_websocket(white_player, black_player, white_player_ready, black_player_ready, winner, board, turn, checking, total_moves, soft_moves)
+        message = self.construct_game_state_message(white_player, black_player, white_player_ready, black_player_ready, winner, board, turn, checking, total_moves, soft_moves)
+        await self.send_game_state_to_websocket(message)
         
     @sync_to_async
     def get_game_from_database(self):
