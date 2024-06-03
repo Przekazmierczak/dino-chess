@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
+import sys
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -32,6 +33,7 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'daphne',
+    'channels',
     'table',
     'menu',
     'django.contrib.admin',
@@ -128,11 +130,18 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Async
 ASGI_APPLICATION = "chess_django.asgi.application"
-CHANNEL_LAYERS = {
+if "test" in sys.argv:
+    CHANNEL_LAYERS = {
     "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
-        "CONFIG": {
-            "hosts": [("127.0.0.1", 6379)],
+        "BACKEND": "channels.layers.InMemoryChannelLayer",
         },
-    },
-}
+    }
+else:
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels_redis.core.RedisChannelLayer",
+            "CONFIG": {
+                "hosts": [("127.0.0.1", 6379)],
+            },
+        },
+    }

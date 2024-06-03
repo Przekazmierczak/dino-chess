@@ -38,8 +38,8 @@ class TableConsumer(AsyncWebsocketConsumer):
             current_board_json = json.loads(current_state.board)
 
             # Determine current player's view
-            if ((current_state.turn == "white" and str(current_game.white) == user) or
-                (current_state.turn == "black" and str(current_game.black) == user) and not winner):
+            if ((current_state.turn == "white" and current_game.white.username == user) or
+                (current_state.turn == "black" and current_game.black.username == user) and not winner):
                 board, _, checking = pieces.Board(current_board_json, current_state.turn, current_state.castling, current_state.enpassant).create_json_class()
             else:
                 board = pieces.boardSimplify(current_board_json)

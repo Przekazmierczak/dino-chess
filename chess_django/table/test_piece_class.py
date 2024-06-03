@@ -1,6 +1,6 @@
 import unittest
 
-from pieces import Piece
+from table.pieces import Piece
 
 ROWS, COLS = 8, 8
 

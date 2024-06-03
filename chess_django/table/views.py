@@ -15,26 +15,7 @@ def table(request, table_id):
     })
 
 def create_table(request):
-    # starting_board = [["R", "N", "B", "K", "Q", "B", "N", "R"],
-    #                   ["P", "P", "P", "P", "P", "P", "P", "P"],
-    #                   [" ", " ", " ", " ", " ", " ", " ", " "],
-    #                   [" ", " ", " ", " ", " ", " ", " ", " "],
-    #                   [" ", " ", " ", " ", " ", " ", " ", " "],
-    #                   [" ", " ", " ", " ", " ", " ", " ", " "],
-    #                   ["p", "p", "p", "p", "p", "p", "p", "p"],
-    #                   ["r", "n", "b", "k", "q", "b", "n", "r"]]
-    
     new_game = Game.objects.create()
-
-    # Board.objects.create(
-    #     game = new_game,
-    #     total_moves = 0,
-    #     board = json.dumps(starting_board),
-    #     turn = "w",
-    #     castling = "KQkq",
-    #     enpassant = "__",
-    #     soft_moves = 0
-    # )
 
     table_id = f"{new_game.id}"
     return redirect("table", table_id=table_id)
