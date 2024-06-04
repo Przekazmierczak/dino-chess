@@ -193,3 +193,94 @@ class TableConsumerTestCase(TestCase):
             assert message['checking'] == None
             assert message['total_moves'] == 0
             assert message['soft_moves'] == 0
+
+
+class TableConsumerTestCase(TestCase):
+
+    async def setup_consumer(self):
+        """
+        Set up the TableConsumer instance with mock data and return the consumer and mock board.
+        """
+        # Create an instance of your consumer
+        consumer = TableConsumer()
+        
+        # Mock the scope with a user and other necessary attributes
+        consumer.scope = {
+            "type": "websocket",
+            "url_route": {"kwargs": {"table_id": 1}},
+            "user": MagicMock(username="test_user")
+        }
+        consumer.channel_layer = MagicMock()
+        consumer.channel_name = "test_channel"
+
+        # Mock game state
+        mock_game = MagicMock()
+        mock_game.white = None
+        mock_game.black = MagicMock(username="black_player")
+        mock_game.white_ready = False
+        mock_game.black_ready = True
+        mock_game.winner = None
+
+        # Mock async methods
+        consumer.get_game_from_database = AsyncMock(return_value=mock_game)
+        consumer.handle_move = AsyncMock()
+        consumer.handle_user_action = AsyncMock()
+
+        return consumer
+    
+    @pytest.mark.asyncio
+    async def test_receive_handle_move(self):
+        """
+        Test the receive method handling a move.        
+        """
+        mock_text_data = {'white_player': None,
+                          'black_player': None,
+                          'white_player_ready': None,
+                          'black_player_ready': None,
+                          'move': [[1, 1], [2, 2]],
+                          'promotion': None}
+        
+        mock_text_data_json = json.dumps(mock_text_data)
+
+        # Setup consumer
+        consumer = await self.setup_consumer()
+        
+        # Call the method
+        await consumer.receive(mock_text_data_json)
+
+        # Verify interactions and state
+        consumer.get_game_from_database.assert_called_once()
+        consumer.handle_move.assert_called_once_with(
+            consumer.get_game_from_database.return_value,
+            consumer.scope["user"],
+            mock_text_data["move"],
+            mock_text_data["promotion"]
+        )
+
+    @pytest.mark.asyncio
+    async def test_receive_handle_user_action(self):
+        """
+        Test the receive method handling a user action when there is no move.
+        """
+        mock_text_data = {'white_player': 'white_player',
+                          'black_player': 'black_player',
+                          'white_player_ready': None,
+                          'black_player_ready': None,
+                          'move': None,
+                          'promotion': None}
+        
+        mock_text_data_json = json.dumps(mock_text_data)
+
+        # Setup consumer
+        consumer = await self.setup_consumer()
+        
+        # Call the method
+        await consumer.receive(mock_text_data_json)
+
+        # Verify interactions and state
+        consumer.get_game_from_database.assert_called_once()
+        consumer.handle_user_action.assert_called_once_with(
+            consumer.get_game_from_database.return_value,
+            consumer.scope["user"],
+            mock_text_data
+        )
