@@ -80,7 +80,7 @@ class TableConsumer(AsyncWebsocketConsumer):
         total_moves = prev_state.total_moves + 1 if turn == "white" else prev_state.total_moves
         soft_moves = prev_state.soft_moves + 1 if soft_move else 0
 
-        if next_board and ((prev_state.turn == "white" and white_player == str(user)) or (prev_state.turn == "black" and black_player == str(user))):
+        if next_board and ((prev_state.turn == "white" and white_player == user.username) or (prev_state.turn == "black" and black_player == user.username)):
             board, winner, checking = pieces.Board(next_board, turn, next_castling, next_enpassant).create_json_class()
 
             # Check for threefold repetition
@@ -95,7 +95,7 @@ class TableConsumer(AsyncWebsocketConsumer):
             await self.push_new_board_to_database(next_board, turn, next_castling, next_enpassant, winner, total_moves, soft_moves)
         else:
             # Handle invalid move or disconnection
-            pass
+            return
         
         # Construct and send the game state message to the room group
         message = self.construct_game_state_message(white_player, black_player, current_game.white_ready, current_game.black_ready, winner, board, turn, checking, total_moves, soft_moves)
