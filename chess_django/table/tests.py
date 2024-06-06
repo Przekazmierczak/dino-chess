@@ -843,3 +843,119 @@ class TableConsumerTestCase4(TestCase):
             assert message['checking'] == None
             assert message['total_moves'] == 0
             assert message['soft_moves'] == 0
+
+class TableConsumerTestCase5(TestCase):
+
+    def test_construct_game_state_message(self):
+        """
+        Test construct_game_state_message to ensure it returns the correct dictionary.
+        """
+        # Create an instance of your consumer
+        consumer = TableConsumer()
+        
+        # Call the handle_user_action method
+        game_state_message = consumer.construct_game_state_message(
+            'white_player', 'black_player', True,
+            True, None, 'correct board',
+            'white', None, 0, 0)
+    
+        # Verify the message sent to WebSocket room group
+        assert game_state_message['white_player'] == 'white_player'
+        assert game_state_message['black_player'] == 'black_player'
+        assert game_state_message['white_player_ready'] == True
+        assert game_state_message['black_player_ready'] == True
+        assert game_state_message['winner'] == None
+        assert game_state_message['board'] is not None
+        assert game_state_message['turn'] == 'white'
+        assert game_state_message['checking'] == None
+        assert game_state_message['total_moves'] == 0
+        assert game_state_message['soft_moves'] == 0
+
+class TableConsumerTestCase6(TestCase):
+
+    @pytest.mark.asyncio
+    async def test_send_new_game_state(self):
+        """
+        Test send_new_game_state to ensure it sends the correct game state message to WebSocket.
+        """
+        # Create an instance of your consumer
+        consumer = TableConsumer()
+        
+        # Prepare test data
+        event = {
+            'white_player': 'white_player',
+            'black_player': 'black_player',
+            'white_player_ready': True,
+            'black_player_ready': True,
+            'winner': None,
+            'board': "correct board",
+            'turn': 'white',
+            'checking': None,
+            'total_moves': 0,
+            'soft_moves': 0,
+        }
+
+        # Mock async methods
+        consumer.send_game_state_to_websocket = AsyncMock()
+        expected_message = {
+            'white_player': event['white_player'],
+            'black_player': event['black_player'],
+            'white_player_ready': event['white_player_ready'],
+            'black_player_ready': event['black_player_ready'],
+            'winner': event['winner'],
+            'board': event['board'],
+            'turn': event['turn'],
+            'checking': event['checking'],
+            'total_moves': event['total_moves'],
+            'soft_moves': event['soft_moves']
+        }
+        consumer.construct_game_state_message = AsyncMock(return_value=expected_message)
+        
+        # Execute the method under test
+        await consumer.send_new_game_state(event)
+
+        # Verify that the correct message is sent to the WebSocket
+        message = await consumer.send_game_state_to_websocket.call_args[0][0]
+        assert message == expected_message
+
+# class TableConsumerTestCase7(TestCase):
+
+#     @pytest.mark.asyncio
+#     async def test_send_game_state_to_websocket(self):
+#         """
+#         Test send_new_game_state to ensure it sends the correct game state message to WebSocket.
+#         """
+#         # Create an instance of your consumer
+#         consumer = TableConsumer()
+        
+#         # Mock the scope with a user and other necessary attributes
+#         consumer.scope = {
+#             "type": "websocket",
+#             "url_route": {"kwargs": {"table_id": 1}},
+#             "user": MagicMock(username="test_user")
+#         }
+#         consumer.channel_layer = MagicMock()
+#         consumer.channel_name = "test_channel"
+
+#         # Prepare test data
+#         expected_message = {
+#             'white_player': 'white_player',
+#             'black_player': 'black_player',
+#             'white_player_ready': True,
+#             'black_player_ready': True,
+#             'winner': None,
+#             'board': "correct board",
+#             'turn': 'white',
+#             'checking': None,
+#             'total_moves': 0,
+#             'soft_moves': 0,
+#         }
+
+#         consumer.send = AsyncMock()
+        
+#         # Execute the method under test
+#         await consumer.send_game_state_to_websocket(expected_message)
+
+#         # Verify that the correct message is sent to the WebSocket
+#         message = await consumer.send.call_args[0][0]
+#         assert message['user'] == "test_user"
