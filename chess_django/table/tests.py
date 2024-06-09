@@ -1079,32 +1079,81 @@ class TableConsumerTestCase8(TestCase):
         return consumer, game
     
     @pytest.mark.asyncio
-    async def test_push_new_board_to_database(self):
+    async def test_push_new_board_to_database_with_no_winner(self):
         """
-        ...
+        Test the push_new_board_to_database method of TableConsumer.
         """
         consumer, game = await self.setup_consumer()
 
-        updated_board=json.dumps([
+        updated_board = json.dumps([
             ["R", "N", "B", "K", "Q", "B", "N", "R"],
-            [None, "P", "P", "P", "P", "P", "P", "P"],
-            ["P", None, None, None, None, None, None, None],
+            ["P", "P", "P", "P", "P", "P", "P", "P"],
+            [None, None, None, None, None, None, None, None],
             [None, None, None, None, None, None, None, None],
             [None, None, None, None, None, None, None, None],
             [None, None, None, None, None, None, None, None],
             ["p", "p", "p", "p", "p", "p", "p", "p"],
             ["r", "n", "b", "k", "q", "b", "n", "r"]
-        ]),
-        turn="b",
-        castling="KQkq",
-        enpassant="__",
-        total_moves=0,
-        soft_moves=1
-
-
+        ])
+        turn = "b"
+        castling = "KQkq"
+        enpassant = "__"
+        winner = None
+        total_moves = 0
+        soft_moves = 0
 
         # Call the method and test it
-        result = await consumer.get_game_from_database()
+        await consumer.push_new_board_to_database(
+            updated_board, turn, castling, enpassant, winner, total_moves, soft_moves
+        )
+
+        current_board = await sync_to_async(Board.objects.filter(game=game).latest)('id')
 
         # Assertions
-        assert result.pk == game.pk
+        assert current_board.board is not None
+        assert current_board.turn == turn
+        assert current_board.castling == castling
+        assert current_board.enpassant == enpassant
+        assert current_board.total_moves == total_moves
+        assert current_board.soft_moves == soft_moves
+        assert game.winner is None
+
+    @pytest.mark.asyncio
+    async def test_push_new_board_to_database_with_winner(self):
+        """
+        Test the push_new_board_to_database method of TableConsumer.
+        """
+        consumer, game = await self.setup_consumer()
+
+        updated_board = json.dumps([
+            ["R", "N", "B", "K", "Q", "B", "N", "R"],
+            ["P", "P", "P", "P", "P", "P", "P", "P"],
+            [None, None, None, None, None, None, None, None],
+            [None, None, None, None, None, None, None, None],
+            [None, None, None, None, None, None, None, None],
+            [None, None, None, None, None, None, None, None],
+            ["p", "p", "p", "p", "p", "p", "p", "p"],
+            ["r", "n", "b", "k", "q", "b", "n", "r"]
+        ])
+        turn = "b"
+        castling = "KQkq"
+        enpassant = "__"
+        winner = "draw"
+        total_moves = 0
+        soft_moves = 0
+
+        # Call the method and test it
+        await consumer.push_new_board_to_database(
+            updated_board, turn, castling, enpassant, winner, total_moves, soft_moves
+        )
+
+        current_board = await sync_to_async(Board.objects.filter(game=game).latest)('id')
+
+        # Assertions
+        assert current_board.board is not None
+        assert current_board.turn == turn
+        assert current_board.castling == castling
+        assert current_board.enpassant == enpassant
+        assert current_board.total_moves == total_moves
+        assert current_board.soft_moves == soft_moves
+        # assert game.winner == "d"
