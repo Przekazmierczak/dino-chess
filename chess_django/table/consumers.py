@@ -177,7 +177,7 @@ class TableConsumer(AsyncWebsocketConsumer):
 
     
     @sync_to_async
-    def push_new_board_to_database(self, updated_board, turn, castling, enpassant, winner, total_moves, self_moves):
+    def push_new_board_to_database(self, updated_board, turn, castling, enpassant, winner, total_moves, soft_moves):
         # Save the new board state to the database
         game = Game.objects.get(pk=self.table_id)
         if winner:
@@ -194,7 +194,7 @@ class TableConsumer(AsyncWebsocketConsumer):
             turn = db_turn,
             castling = castling,
             enpassant = enpassant,
-            soft_moves = self_moves
+            soft_moves = soft_moves
         )
 
     @sync_to_async

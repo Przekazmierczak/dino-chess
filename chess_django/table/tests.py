@@ -946,7 +946,7 @@ class TableConsumerTestCase7(TestCase):
         consumer.table_id = 1
 
         # Add a boards to the game
-        board1 = await sync_to_async(Board.objects.create)(
+        await sync_to_async(Board.objects.create)(
             game=game,
             total_moves=0,
             board=json.dumps([
@@ -965,7 +965,7 @@ class TableConsumerTestCase7(TestCase):
             soft_moves=0
         )
 
-        board2 = await sync_to_async(Board.objects.create)(
+        await sync_to_async(Board.objects.create)(
             game=game,
             total_moves=0,
             board=json.dumps([
@@ -1049,3 +1049,62 @@ class TableConsumerTestCase7(TestCase):
         assert result[1].enpassant == "__"
         assert result[0].soft_moves == 0
         assert result[1].soft_moves == 1
+
+class TableConsumerTestCase8(TestCase):
+
+    async def setup_consumer(self):
+        # Create two users for the game
+        user1 = await sync_to_async(User.objects.create)(
+            username="white_player"
+        )
+
+        user2 = await sync_to_async(User.objects.create)(
+            username="black_player"
+        )
+
+        # Set up a game in the test database
+        game = await sync_to_async(Game.objects.create)(
+            winner = None,
+            started = True,
+            white = user1,
+            black = user2,
+            white_ready = True,
+            black_ready = True,
+        )
+
+        # Instantiate TableConsumer
+        consumer = TableConsumer()
+        consumer.table_id = 1
+
+        return consumer, game
+    
+    @pytest.mark.asyncio
+    async def test_push_new_board_to_database(self):
+        """
+        ...
+        """
+        consumer, game = await self.setup_consumer()
+
+        updated_board=json.dumps([
+            ["R", "N", "B", "K", "Q", "B", "N", "R"],
+            [None, "P", "P", "P", "P", "P", "P", "P"],
+            ["P", None, None, None, None, None, None, None],
+            [None, None, None, None, None, None, None, None],
+            [None, None, None, None, None, None, None, None],
+            [None, None, None, None, None, None, None, None],
+            ["p", "p", "p", "p", "p", "p", "p", "p"],
+            ["r", "n", "b", "k", "q", "b", "n", "r"]
+        ]),
+        turn="b",
+        castling="KQkq",
+        enpassant="__",
+        total_moves=0,
+        soft_moves=1
+
+
+
+        # Call the method and test it
+        result = await consumer.get_game_from_database()
+
+        # Assertions
+        assert result.pk == game.pk
