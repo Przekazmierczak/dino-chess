@@ -4,6 +4,7 @@ from django.conf import settings
 from chess_django.asgi import application
 
 from .models import Game, Board
+from menu.models import User
 from asgiref.sync import sync_to_async
 
 import json
@@ -918,44 +919,133 @@ class TableConsumerTestCase6(TestCase):
         message = await consumer.send_game_state_to_websocket.call_args[0][0]
         assert message == expected_message
 
-# class TableConsumerTestCase7(TestCase):
+class TableConsumerTestCase7(TestCase):
 
-#     @pytest.mark.asyncio
-#     async def test_send_game_state_to_websocket(self):
-#         """
-#         Test send_new_game_state to ensure it sends the correct game state message to WebSocket.
-#         """
-#         # Create an instance of your consumer
-#         consumer = TableConsumer()
-        
-#         # Mock the scope with a user and other necessary attributes
-#         consumer.scope = {
-#             "type": "websocket",
-#             "url_route": {"kwargs": {"table_id": 1}},
-#             "user": MagicMock(username="test_user")
-#         }
-#         consumer.channel_layer = MagicMock()
-#         consumer.channel_name = "test_channel"
+    async def setup_consumer(self):
+        # Create two users for the game
+        user1 = await sync_to_async(User.objects.create)(
+            username="white_player"
+        )
 
-#         # Prepare test data
-#         expected_message = {
-#             'white_player': 'white_player',
-#             'black_player': 'black_player',
-#             'white_player_ready': True,
-#             'black_player_ready': True,
-#             'winner': None,
-#             'board': "correct board",
-#             'turn': 'white',
-#             'checking': None,
-#             'total_moves': 0,
-#             'soft_moves': 0,
-#         }
+        user2 = await sync_to_async(User.objects.create)(
+            username="black_player"
+        )
 
-#         consumer.send = AsyncMock()
-        
-#         # Execute the method under test
-#         await consumer.send_game_state_to_websocket(expected_message)
+        # Set up a game in the test database
+        game = await sync_to_async(Game.objects.create)(
+            winner = None,
+            started = True,
+            white = user1,
+            black = user2,
+            white_ready = True,
+            black_ready = True,
+        )
 
-#         # Verify that the correct message is sent to the WebSocket
-#         message = await consumer.send.call_args[0][0]
-#         assert message['user'] == "test_user"
+        # Instantiate TableConsumer
+        consumer = TableConsumer()
+        consumer.table_id = 1
+
+        # Add a boards to the game
+        board1 = await sync_to_async(Board.objects.create)(
+            game=game,
+            total_moves=0,
+            board=json.dumps([
+                ["R", "N", "B", "K", "Q", "B", "N", "R"],
+                ["P", "P", "P", "P", "P", "P", "P", "P"],
+                [None, None, None, None, None, None, None, None],
+                [None, None, None, None, None, None, None, None],
+                [None, None, None, None, None, None, None, None],
+                [None, None, None, None, None, None, None, None],
+                ["p", "p", "p", "p", "p", "p", "p", "p"],
+                ["r", "n", "b", "k", "q", "b", "n", "r"]
+            ]),
+            turn="w",
+            castling="KQkq",
+            enpassant="__",
+            soft_moves=0
+        )
+
+        board2 = await sync_to_async(Board.objects.create)(
+            game=game,
+            total_moves=0,
+            board=json.dumps([
+                ["R", "N", "B", "K", "Q", "B", "N", "R"],
+                [None, "P", "P", "P", "P", "P", "P", "P"],
+                ["P", None, None, None, None, None, None, None],
+                [None, None, None, None, None, None, None, None],
+                [None, None, None, None, None, None, None, None],
+                [None, None, None, None, None, None, None, None],
+                ["p", "p", "p", "p", "p", "p", "p", "p"],
+                ["r", "n", "b", "k", "q", "b", "n", "r"]
+            ]),
+            turn="b",
+            castling="KQkq",
+            enpassant="__",
+            soft_moves=1
+        )
+
+        return consumer, game
+
+    @pytest.mark.asyncio
+    async def test_get_game_from_database(self):
+        """
+        Test get_game_from_database to ensure it retrieves the correct game state from the database.
+        """
+        consumer, game = await self.setup_consumer()
+
+        # Call the method and test it
+        result = await consumer.get_game_from_database()
+
+        # Assertions
+        assert result.pk == game.pk
+        assert result.winner == None
+        assert result.started == True
+        assert result.white.username == "white_player"
+        assert result.white_ready == True
+        assert result.black_ready == True
+
+    @pytest.mark.asyncio
+    async def test_get_latest_board_from_database(self):
+        """
+        Test get_latest_board_from_database to ensure it retrieves the correct board state from the database.
+        """
+        consumer, game = await self.setup_consumer()
+
+        # Call the method and test it
+        result = await consumer.get_latest_board_from_database(game)
+
+        # Assertions
+        assert result.pk == 2
+        assert result.total_moves == 0
+        assert result.board is not None
+        assert result.turn == "black"
+        assert result.castling == "KQkq"
+        assert result.enpassant == "__"
+        assert result.soft_moves == 1
+
+    @pytest.mark.asyncio
+    async def test_get_prev_boards_from_database(self):
+        """
+        Test get_prev_boards_from_databasee to ensure it retrieves the correct boards state from the database.
+        """
+        consumer, game = await self.setup_consumer()
+
+        # Call the method and test it
+        result = await consumer.get_prev_boards_from_database(game)
+
+        # Assertions
+        assert isinstance(result, list)
+        assert result[0].pk == 1
+        assert result[1].pk == 2
+        assert result[0].total_moves == 0
+        assert result[1].total_moves == 0
+        assert result[0].board is not None
+        assert result[1].board is not None
+        assert result[0].turn == "w"
+        assert result[1].turn == "b"
+        assert result[0].castling == "KQkq"
+        assert result[1].castling == "KQkq"
+        assert result[0].enpassant == "__"
+        assert result[1].enpassant == "__"
+        assert result[0].soft_moves == 0
+        assert result[1].soft_moves == 1
