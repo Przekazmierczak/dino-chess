@@ -1164,46 +1164,43 @@ class TableConsumerTestCase8(TestCase):
 
 class TableConsumerTestCase9(TestCase):
 
-    async def setup_consumer(self):
-        # Create two users for the game
-        user1 = await sync_to_async(User.objects.create)(
-            username="white_player"
-        )
-
-        user2 = await sync_to_async(User.objects.create)(
-            username="black_player"
-        )
+    async def setup_consumer(self, white, black, white_ready, black_ready):
 
         # Set up a game in the test database
         game = await sync_to_async(Game.objects.create)(
             winner = None,
             started = False,
-            white = None,
-            black = None,
-            white_ready = False,
-            black_ready = False,
+            white = white,
+            black = black,
+            white_ready = white_ready,
+            black_ready = black_ready,
         )
 
         # Instantiate TableConsumer
         consumer = TableConsumer()
         consumer.table_id = 1
 
-        return consumer, game, user1, user2
+        return consumer, game
     
     @pytest.mark.asyncio
-    async def test_push_players_state_to_db(self):
+    async def test_push_players_state_to_db_add_player(self):
         """
-        Test the push_players_state_to_db method of TableConsumer.
+        Test adding a player to the game.
         """
-        consumer, game, user1, user2 = await self.setup_consumer()
+        # Create users for the game
+        user1 = await sync_to_async(User.objects.create)(username="white_player")
+
+        consumer, game = await self.setup_consumer(None, None, False, False)
 
         # Mock the input data that would be received from the WebSocket
-        mock_text_data = {'white_player': True,
-                          'black_player': None,
-                          'white_player_ready': None,
-                          'black_player_ready': None,
-                          'move': None,
-                          'promotion': None}
+        mock_text_data = {
+            'white_player': True,
+            'black_player': None,
+            'white_player_ready': None,
+            'black_player_ready': None,
+            'move': None,
+            'promotion': None
+        }
 
         # Call the method and test it
         await consumer.push_players_state_to_db(game, user1, mock_text_data)
@@ -1214,3 +1211,214 @@ class TableConsumerTestCase9(TestCase):
         assert game.black == None
         assert game.white_ready == False
         assert game.black_ready == False
+
+        # Check if the function creates a board
+        try:
+            current_board = await sync_to_async(Board.objects.filter(game=game).latest)('id')
+            assert current_board is None
+        except Board.DoesNotExist:
+            assert True
+
+    @pytest.mark.asyncio
+    async def test_push_players_state_to_db_remove_player(self):
+        """
+        Test removing a player from the game.
+        """
+        # Create users for the game
+        user1 = await sync_to_async(User.objects.create)(username="white_player")
+
+        consumer, game = await self.setup_consumer(user1, None, False, False)
+
+        # Mock the input data that would be received from the WebSocket
+        mock_text_data = {
+            'white_player': False,
+            'black_player': None,
+            'white_player_ready': None,
+            'black_player_ready': None,
+            'move': None,
+            'promotion': None
+        }
+
+        # Call the method and test it
+        await consumer.push_players_state_to_db(game, user1, mock_text_data)
+
+        # Assertions
+        game = await sync_to_async(Game.objects.get)(pk=game.pk)
+        assert game.white == None
+        assert game.black == None
+        assert game.white_ready == False
+        assert game.black_ready == False
+
+        # Check if the function creates a board
+        try:
+            current_board = await sync_to_async(Board.objects.filter(game=game).latest)('id')
+            assert current_board is None
+        except Board.DoesNotExist:
+            assert True
+
+    @pytest.mark.asyncio
+    async def test_push_players_state_to_db_player_ready(self):
+        """
+        Test setting a player as ready.
+        """
+        # Create users for the game
+        user1 = await sync_to_async(User.objects.create)(username="white_player")
+
+        consumer, game = await self.setup_consumer(user1, None, False, False)
+
+        # Mock the input data that would be received from the WebSocket
+        mock_text_data = {
+            'white_player': None,
+            'black_player': None,
+            'white_player_ready': True,
+            'black_player_ready': None,
+            'move': None,
+            'promotion': None
+        }
+
+        # Call the method and test it
+        await consumer.push_players_state_to_db(game, user1, mock_text_data)
+
+        # Assertions
+        game = await sync_to_async(Game.objects.get)(pk=game.pk)
+        assert await sync_to_async(lambda: game.white)() == user1
+        assert game.black == None
+        assert game.white_ready == True
+        assert game.black_ready == False
+
+        # Check if the function creates a board
+        try:
+            current_board = await sync_to_async(Board.objects.filter(game=game).latest)('id')
+            assert current_board is None
+        except Board.DoesNotExist:
+            assert True
+
+    @pytest.mark.asyncio
+    async def test_push_players_state_to_db_player_unready(self):
+        """
+        Test setting a player as not ready.
+        """
+        # Create users for the game
+        user1 = await sync_to_async(User.objects.create)(username="white_player")
+
+        consumer, game = await self.setup_consumer(user1, None, True, False)
+
+        # Mock the input data that would be received from the WebSocket
+        mock_text_data = {
+            'white_player': None,
+            'black_player': None,
+            'white_player_ready': False,
+            'black_player_ready': None,
+            'move': None,
+            'promotion': None
+        }
+
+        # Call the method and test it
+        await consumer.push_players_state_to_db(game, user1, mock_text_data)
+
+        # Assertions
+        game = await sync_to_async(Game.objects.get)(pk=game.pk)
+        assert await sync_to_async(lambda: game.white)() == user1
+        assert game.black == None
+        assert game.white_ready == False
+        assert game.black_ready == False
+
+        # Check if the function creates a board
+        try:
+            current_board = await sync_to_async(Board.objects.filter(game=game).latest)('id')
+            assert current_board is None
+        except Board.DoesNotExist:
+            assert True
+
+    @pytest.mark.asyncio
+    async def test_push_players_state_to_db_both_player_ready(self):
+        """
+        Test setting both players as ready and check if the board is created.
+        """
+        # Create users for the game
+        user1 = await sync_to_async(User.objects.create)(username="white_player")
+
+        user2 = await sync_to_async(User.objects.create)(username="black_player")
+
+        consumer, game = await self.setup_consumer(user1, user2, True, False)
+
+        # Mock the input data that would be received from the WebSocket
+        mock_text_data = {
+            'white_player': None,
+            'black_player': None,
+            'white_player_ready': None,
+            'black_player_ready': True,
+            'move': None,
+            'promotion': None
+        }
+
+        # Call the method and test it
+        await consumer.push_players_state_to_db(game, user2, mock_text_data)
+
+        # Assertions
+        game = await sync_to_async(Game.objects.get)(pk=game.pk)
+        assert await sync_to_async(lambda: game.white)() == user1
+        assert await sync_to_async(lambda: game.black)() == user2
+        assert game.white_ready == True
+        assert game.black_ready == True
+
+        # Check if the function creates a board
+        try:
+            current_board = await sync_to_async(Board.objects.filter(game=game).latest)('id')
+            assert current_board is not None
+        except Board.DoesNotExist:
+            assert False
+
+class TableConsumerTestCase10(TestCase):
+
+    async def setup_consumer(self, white, black, white_ready, black_ready):
+
+        # Set up a game in the test database
+        game = await sync_to_async(Game.objects.create)(
+            winner = None,
+            started = False,
+            white = white,
+            black = black,
+            white_ready = white_ready,
+            black_ready = black_ready,
+        )
+
+        # Instantiate TableConsumer
+        consumer = TableConsumer()
+        consumer.table_id = game.id
+
+        return consumer, game
+    
+    @pytest.mark.asyncio
+    async def test_if_game_started_true(self):
+        """
+        Test if the if_game_started method returns True when both players are ready.
+        """
+        # Create users for the game
+        user1 = await sync_to_async(User.objects.create)(username="white_player")
+        user2 = await sync_to_async(User.objects.create)(username="black_player")
+
+        consumer, game = await self.setup_consumer(user1, user2, True, True)
+
+        # Call the method and test it
+        result = consumer.if_game_started(game)
+
+        # Assertions
+        assert result == True
+
+    @pytest.mark.asyncio
+    async def test_if_game_started_false(self):
+        """
+        Test if the if_game_started method returns False when one or both players are not ready.
+        """
+        # Create users for the game
+        user1 = await sync_to_async(User.objects.create)(username="white_player")
+        user2 = await sync_to_async(User.objects.create)(username="black_player")
+
+        consumer, game = await self.setup_consumer(user1, user2, True, False)
+
+        # Call the method and test it
+        result = consumer.if_game_started(game)
+
+        # Assertions
+        assert result == False
