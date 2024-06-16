@@ -1422,3 +1422,242 @@ class TableConsumerTestCase10(TestCase):
 
         # Assertions
         assert result == False
+
+class TableConsumerTestCase11(TestCase):
+
+    async def setup_consumer(self):
+        # Create two users for the game
+        user1 = await sync_to_async(User.objects.create)(
+            username="white_player"
+        )
+
+        user2 = await sync_to_async(User.objects.create)(
+            username="black_player"
+        )
+
+        # Set up a game in the test database
+        game = await sync_to_async(Game.objects.create)(
+            winner = None,
+            started = True,
+            white = user1,
+            black = user2,
+            white_ready = True,
+            black_ready = True,
+        )
+
+        # Instantiate TableConsumer
+        consumer = TableConsumer()
+        consumer.table_id = 1
+
+        # Add a boards to the game
+        await sync_to_async(Board.objects.create)(
+            game=game,
+            total_moves=0,
+            board=json.dumps([
+                ["R", "N", "B", "K", "Q", "B", "N", "R"],
+                ["P", "P", "P", "P", "P", "P", "P", "P"],
+                [None, None, None, None, None, None, None, None],
+                [None, None, None, None, None, None, None, None],
+                [None, None, None, None, None, None, None, None],
+                [None, None, None, None, None, None, None, None],
+                ["p", "p", "p", "p", "p", "p", "p", "p"],
+                ["r", "n", "b", "k", "q", "b", "n", "r"]
+            ]),
+            turn="w",
+            castling="KQkq",
+            enpassant="__",
+            soft_moves=0
+        )
+
+        await sync_to_async(Board.objects.create)(
+            game=game,
+            total_moves=0,
+            board=json.dumps([
+                ["R", None, "B", "K", "Q", "B", "N", "R"],
+                ["P", "P", "P", "P", "P", "P", "P", "P"],
+                [None, None, "N", None, None, None, None, None],
+                [None, None, None, None, None, None, None, None],
+                [None, None, None, None, None, None, None, None],
+                [None, None, None, None, None, None, None, None],
+                ["p", "p", "p", "p", "p", "p", "p", "p"],
+                ["r", "n", "b", "k", "q", "b", "n", "r"]
+            ]),
+            turn="b",
+            castling="KQkq",
+            enpassant="__",
+            soft_moves=1
+        )
+
+        await sync_to_async(Board.objects.create)(
+            game=game,
+            total_moves=1,
+            board=json.dumps([
+                ["R", None, "B", "K", "Q", "B", "N", "R"],
+                ["P", "P", "P", "P", "P", "P", "P", "P"],
+                [None, None, "N", None, None, None, None, None],
+                [None, None, None, None, None, None, None, None],
+                [None, None, None, None, None, None, None, None],
+                [None, None, None, None, None, "n", None, None],
+                ["p", "p", "p", "p", "p", "p", "p", "p"],
+                ["r", "n", "b", "k", "q", "b", None, "r"]
+            ]),
+            turn="w",
+            castling="KQkq",
+            enpassant="__",
+            soft_moves=2
+        )
+
+        await sync_to_async(Board.objects.create)(
+            game=game,
+            total_moves=1,
+            board=json.dumps([
+                ["R", "N", "B", "K", "Q", "B", "N", "R"],
+                ["P", "P", "P", "P", "P", "P", "P", "P"],
+                [None, None, None, None, None, None, None, None],
+                [None, None, None, None, None, None, None, None],
+                [None, None, None, None, None, None, None, None],
+                [None, None, None, None, None, "n", None, None],
+                ["p", "p", "p", "p", "p", "p", "p", "p"],
+                ["r", "n", "b", "k", "q", "b", None, "r"]
+            ]),
+            turn="b",
+            castling="KQkq",
+            enpassant="__",
+            soft_moves=3
+        )
+
+        await sync_to_async(Board.objects.create)(
+            game=game,
+            total_moves=2,
+            board=json.dumps([
+                ["R", "N", "B", "K", "Q", "B", "N", "R"],
+                ["P", "P", "P", "P", "P", "P", "P", "P"],
+                [None, None, None, None, None, None, None, None],
+                [None, None, None, None, None, None, None, None],
+                [None, None, None, None, None, None, None, None],
+                [None, None, None, None, None, None, None, None],
+                ["p", "p", "p", "p", "p", "p", "p", "p"],
+                ["r", "n", "b", "k", "q", "b", 'n', "r"]
+            ]),
+            turn="w",
+            castling="KQkq",
+            enpassant="__",
+            soft_moves=4
+        )
+
+        await sync_to_async(Board.objects.create)(
+            game=game,
+            total_moves=2,
+            board=json.dumps([
+                ["R", None, "B", "K", "Q", "B", "N", "R"],
+                ["P", "P", "P", "P", "P", "P", "P", "P"],
+                [None, None, "N", None, None, None, None, None],
+                [None, None, None, None, None, None, None, None],
+                [None, None, None, None, None, None, None, None],
+                [None, None, None, None, None, None, None, None],
+                ["p", "p", "p", "p", "p", "p", "p", "p"],
+                ["r", "n", "b", "k", "q", "b", "n", "r"]
+            ]),
+            turn="b",
+            castling="KQkq",
+            enpassant="__",
+            soft_moves=5
+        )
+
+        await sync_to_async(Board.objects.create)(
+            game=game,
+            total_moves=3,
+            board=json.dumps([
+                ["R", None, "B", "K", "Q", "B", "N", "R"],
+                ["P", "P", "P", "P", "P", "P", "P", "P"],
+                [None, None, "N", None, None, None, None, None],
+                [None, None, None, None, None, None, None, None],
+                [None, None, None, None, None, None, None, None],
+                [None, None, None, None, None, "n", None, None],
+                ["p", "p", "p", "p", "p", "p", "p", "p"],
+                ["r", "n", "b", "k", "q", "b", None, "r"]
+            ]),
+            turn="w",
+            castling="KQkq",
+            enpassant="__",
+            soft_moves=6
+        )
+
+        await sync_to_async(Board.objects.create)(
+            game=game,
+            total_moves=3,
+            board=json.dumps([
+                ["R", "N", "B", "K", "Q", "B", "N", "R"],
+                ["P", "P", "P", "P", "P", "P", "P", "P"],
+                [None, None, None, None, None, None, None, None],
+                [None, None, None, None, None, None, None, None],
+                [None, None, None, None, None, None, None, None],
+                [None, None, None, None, None, "n", None, None],
+                ["p", "p", "p", "p", "p", "p", "p", "p"],
+                ["r", "n", "b", "k", "q", "b", None, "r"]
+            ]),
+            turn="b",
+            castling="KQkq",
+            enpassant="__",
+            soft_moves=7
+        )
+
+        return consumer, game
+    
+    @pytest.mark.asyncio
+    async def test_is_threefold_repetition_True(self):
+        """
+        Test if the is_threefold_repetition method correctly identifies a threefold repetition.
+        """
+        consumer, game = await self.setup_consumer()
+
+        prev_boards = await sync_to_async(lambda: list(Board.objects.filter(game=game)))()
+
+        next_board = [
+            ["R", "N", "B", "K", "Q", "B", "N", "R"],
+            ["P", "P", "P", "P", "P", "P", "P", "P"],
+            [None, None, None, None, None, None, None, None],
+            [None, None, None, None, None, None, None, None],
+            [None, None, None, None, None, None, None, None],
+            [None, None, None, None, None, None, None, None],
+            ["p", "p", "p", "p", "p", "p", "p", "p"],
+            ["r", "n", "b", "k", "q", "b", "n", "r"]
+        ]
+        next_castling = "KQkq"
+        next_enpassant = "__"
+        next_turn = "white"
+
+        # Call the method and test it
+        result = consumer.is_threefold_repetition(prev_boards, next_board, next_castling, next_enpassant, next_turn)
+
+        # Assertions
+        assert result == True
+
+    @pytest.mark.asyncio
+    async def test_is_threefold_repetition_False(self):
+        """
+        Test if the is_threefold_repetition method correctly identifies when there is no threefold repetition.
+        """
+        consumer, game = await self.setup_consumer()
+
+        prev_boards = await sync_to_async(lambda: list(Board.objects.filter(game=game)))()
+
+        next_board = [
+            ["R", "N", "B", "K", "Q", "B", "N", "R"],
+            ["P", "P", "P", "P", "P", "P", "P", "P"],
+            [None, None, None, None, None, None, None, None],
+            [None, None, None, None, None, None, None, None],
+            [None, None, None, None, None, None, None, None],
+            [None, None, "n", None, None, "n", None, None],
+            ["p", "p", "p", "p", "p", "p", "p", "p"],
+            ["r", None, "b", "k", "q", "b", None, "r"]
+        ]
+        next_castling = "KQkq"
+        next_enpassant = "__"
+        next_turn = "white"
+
+        # Call the method and test it
+        result = consumer.is_threefold_repetition(prev_boards, next_board, next_castling, next_enpassant, next_turn)
+
+        # Assertions
+        assert result == False
