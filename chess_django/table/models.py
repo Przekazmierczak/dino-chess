@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.db import models
+from datetime import timedelta
 
 # Create your models here.
 class Game(models.Model):
@@ -18,3 +19,6 @@ class Board(models.Model):
     castling = models.CharField(max_length=4)
     enpassant = models.CharField(max_length=2)
     soft_moves = models.IntegerField()
+    white_time_left = models.DurationField(default=timedelta(minutes=15))
+    black_time_left = models.DurationField(default=timedelta(minutes=15))
+    created_at = models.DateTimeField(auto_now_add=True)
