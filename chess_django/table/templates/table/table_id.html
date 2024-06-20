@@ -17,7 +17,7 @@
                     <button type="button" id="black_player_unready_button" class="hidden">Unready</button>
                     {% endif %}
                 </span>
-                <span class="time">Time:</span>
+                <span id="black_time" class="time"></span>
             </div>
             <table>
                 {% for row in "76543210" %}
@@ -38,7 +38,7 @@
                     <button type="button" id="white_player_unready_button" class="hidden">Unready</button>
                 {% endif %}
             </span>
-            <span class="time">Time:</span>
+            <span id="white_time" class="time"></span>
         </div>
     </div>
     <div class="modal-promotion" id="modal_promotion">

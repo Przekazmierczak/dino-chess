@@ -19,6 +19,7 @@ document.addEventListener('DOMContentLoaded', function () {
             console.log(state)
         clearBoard();
         showPlayers(state);
+        showTimes(state);
         addRemovePlayers(tableSocket, state)
         winner(state);
         checking(state);
@@ -59,6 +60,13 @@ function showPlayers(state) {
     whitePlayer.innerHTML = `${state.white_player}`;
     const blackPlayer = document.getElementById("black_player");
     blackPlayer.innerHTML = `${state.black_player}`;
+}
+
+function showTimes(state) {
+    const whiteTime = document.getElementById("white_time");
+    whiteTime.innerHTML = `${state.white_time_left}`;
+    const blackTime = document.getElementById("black_time");
+    blackTime.innerHTML = `${state.black_time_left}`;
 }
 
 function addRemovePlayers(tableSocket, state) {
