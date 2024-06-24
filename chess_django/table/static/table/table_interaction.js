@@ -1,4 +1,5 @@
 let moveListeners = [];
+let intervalId;
 let style = "dino";
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -63,10 +64,45 @@ function showPlayers(state) {
 }
 
 function showTimes(state) {
+    if (intervalId) {
+        clearInterval(intervalId);
+    }
+
+    let whiteTimeInSeconds = state.white_time_left
+    let blackTimeInSeconds = state.black_time_left
+
     const whiteTime = document.getElementById("white_time");
-    whiteTime.innerHTML = `${state.white_time_left}`;
     const blackTime = document.getElementById("black_time");
-    blackTime.innerHTML = `${state.black_time_left}`;
+
+    updateDisplay();
+
+    intervalId = setInterval(countDown, 1000)
+
+    function countDown() {
+        if (state.turn === "white") {
+            whiteTimeInSeconds--;
+        } else {
+            blackTimeInSeconds--;
+        }
+        updateDisplay();
+    }
+
+    function updateDisplay() {
+        let whiteMinutes = Math.floor(whiteTimeInSeconds / 60);
+        let whiteSeconds = Math.floor(whiteTimeInSeconds % 60);
+        whiteTime.innerHTML = `${formatTime(whiteMinutes)}:${formatTime(whiteSeconds)}`;
+    
+        let blackMinutes = Math.floor(blackTimeInSeconds / 60);
+        let blackSeconds = Math.floor(blackTimeInSeconds % 60);
+        blackTime.innerHTML = `${formatTime(blackMinutes)}:${formatTime(blackSeconds)}`;
+    }
+    
+    function formatTime(time) {
+        if (time < 0) {
+            time = 0
+        }
+        return time.toString().padStart(2, '0');
+    }
 }
 
 function addRemovePlayers(tableSocket, state) {
