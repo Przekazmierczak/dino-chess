@@ -41,7 +41,7 @@ class TableConsumer(AsyncWebsocketConsumer):
 
             # Calculate the remaining time for each player
             white_time_left, black_time_left = self.get_current_time(current_state.white_time_left, current_state.black_time_left, current_state.created_at, turn)
-            white_time_left, black_time_left, created_at = self.format_time(white_time_left, black_time_left, current_state.created_at)
+            white_time_left, black_time_left = self.format_time(white_time_left, black_time_left)
             
             # Load the current board state
             current_board_json = json.loads(current_state.board)
@@ -58,14 +58,14 @@ class TableConsumer(AsyncWebsocketConsumer):
             # Set up the initial board state if the game hasn't started
             board = pieces.boardSimplify(None)
             winner, turn, checking, total_moves, soft_moves =  None, None, None, 0, 0
-            white_time_left, black_time_left, created_at = None, None, None
+            white_time_left, black_time_left = None, None
         
         # Construct and send the game state message to the room group
         message = self.construct_game_state_message(
             white_player, black_player, current_game.white_ready,
             current_game.black_ready, winner, board, turn,
             checking, total_moves, soft_moves,
-            white_time_left, black_time_left, created_at
+            white_time_left, black_time_left
             )
         await self.send_game_state_to_websocket(message)
 
@@ -120,14 +120,14 @@ class TableConsumer(AsyncWebsocketConsumer):
             return
         
         # Format the time values for display
-        white_time_left, black_time_left, created_at = self.format_time(white_time_left, black_time_left, prev_state.created_at)
+        white_time_left, black_time_left = self.format_time(white_time_left, black_time_left)
         
         # Construct and send the game state message to the room group
         message = self.construct_game_state_message(
             white_player, black_player, current_game.white_ready,
             current_game.black_ready, winner, board, turn,
             checking, total_moves, soft_moves,
-            white_time_left, black_time_left, created_at
+            white_time_left, black_time_left
             )
         await self.send_game_state_to_room_group(message)
         
@@ -146,20 +146,20 @@ class TableConsumer(AsyncWebsocketConsumer):
             current_board_json = json.loads(current_state.board)
             board, winner, checking = pieces.Board(current_board_json, current_state.turn, current_state.castling, current_state.enpassant).create_json_class()
             turn, total_moves, soft_moves = current_state.turn, current_state.total_moves, current_state.soft_moves
-            white_time_left, black_time_left, created_at = self.format_time(current_state.white_time_left, current_state.black_time_left, current_state.created_at)
+            white_time_left, black_time_left = self.format_time(current_state.white_time_left, current_state.black_time_left)
             
         else:
             # Set up the initial board state if the game hasn't started
             board = pieces.boardSimplify(None)
             winner, turn, checking, total_moves, soft_moves =  None, None, None, 0, 0
-            white_time_left, black_time_left, created_at = None, None, None
+            white_time_left, black_time_left = None, None
 
         # Construct and send the game state message to the room group
         message = self.construct_game_state_message(
             white_player, black_player, current_game.white_ready,
             current_game.black_ready, winner, board, turn,
             checking, total_moves, soft_moves,
-            white_time_left, black_time_left, created_at
+            white_time_left, black_time_left
             )
         await self.send_game_state_to_room_group(message)
 
@@ -167,7 +167,7 @@ class TableConsumer(AsyncWebsocketConsumer):
             self, white_player, black_player, white_player_ready,
             black_player_ready, winner, board, turn,
             checking, total_moves, soft_moves, 
-            white_time_left, black_time_left, created_at
+            white_time_left, black_time_left
         ):
         # Constructs a dictionary containing the game state
         return {
@@ -183,7 +183,6 @@ class TableConsumer(AsyncWebsocketConsumer):
             "soft_moves": soft_moves,
             "white_time_left": white_time_left,
             "black_time_left": black_time_left,
-            "created_at": created_at,
         }
 
     async def send_game_state_to_websocket(self, message):
@@ -200,7 +199,7 @@ class TableConsumer(AsyncWebsocketConsumer):
             event["white_player"], event["black_player"], event["white_player_ready"], 
             event["black_player_ready"], event["winner"], event["board"], 
             event["turn"], event["checking"], event["total_moves"], event["soft_moves"],
-            event["white_time_left"], event["black_time_left"], event["created_at"]
+            event["white_time_left"], event["black_time_left"]
         )
         await self.send_game_state_to_websocket(message)
         
@@ -316,6 +315,6 @@ class TableConsumer(AsyncWebsocketConsumer):
             black_time_left -= datetime.now(timezone.utc) - created_at
         return white_time_left, black_time_left
     
-    def format_time(self, white_time_left, black_time_left, created_at):
+    def format_time(self, white_time_left, black_time_left):
         # Format time values to ensure compatibility with JSON serialization
-        return white_time_left.total_seconds(), black_time_left.total_seconds(), created_at.isoformat()
+        return white_time_left.total_seconds(), black_time_left.total_seconds()

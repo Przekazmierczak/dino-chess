@@ -2,6 +2,7 @@ from channels.testing import WebsocketCommunicator
 from django.test import TransactionTestCase, SimpleTestCase, TestCase
 from django.conf import settings
 from chess_django.asgi import application
+from datetime import datetime, timezone, timedelta
 
 from .models import Game, Board
 from menu.models import User
@@ -341,6 +342,9 @@ class TableConsumerTestCase3(TestCase):
         mock_board_prev.castling = "KQkq"
         mock_board_prev.enpassant = "__"
         mock_board_prev.soft_moves = 0
+        mock_board_prev.white_time_left = timedelta(minutes=15)
+        mock_board_prev.black_time_left = timedelta(minutes=15)
+        mock_board_prev.created_at = datetime(2024, 6, 24, 21, 0, 0, tzinfo=timezone.utc)
 
         # Mock the next board state after the move
         mock_board_next = MagicMock()
@@ -357,15 +361,19 @@ class TableConsumerTestCase3(TestCase):
         mock_board_next.castling = "KQkq"
         mock_board_next.enpassant = "__"
         mock_board_next.soft_moves = 1
+        mock_board_next.white_time_left = timedelta(minutes=15)
+        mock_board_next.black_time_left = timedelta(minutes=15)
+        mock_board_next.created_at = datetime(2024, 6, 24, 21, 0, 0, tzinfo=timezone.utc)
         
         # Mock the move details
         mock_move = [[0, 1], [0, 2]]
         mock_promotion = None
 
         # Patch the Board class to control its behavior in the test
-        with patch('table.pieces.Board') as MockBoard:
+        with patch('table.pieces.Board') as MockBoard, patch.object(TableConsumer, 'get_current_time') as mock_get_current_time:
             MockBoard.return_value.create_new_json_board.return_value = (mock_board_next.board, None, None, True)
             MockBoard.return_value.create_json_class.return_value = ("correct_class", None, None)
+            mock_get_current_time.return_value = timedelta(minutes=15), timedelta(minutes=15)
 
             # Setup consumers
             consumer = await self.setup_consumer(mock_board_prev, [mock_board_prev], False)
@@ -384,6 +392,8 @@ class TableConsumerTestCase3(TestCase):
                 None,
                 mock_board_next.total_moves,
                 mock_board_next.soft_moves,
+                mock_board_next.white_time_left,
+                mock_board_next.black_time_left
             )
         
             # Verify the message sent to WebSocket room group
@@ -398,6 +408,8 @@ class TableConsumerTestCase3(TestCase):
             assert message['checking'] == None
             assert message['total_moves'] == mock_board_next.total_moves
             assert message['soft_moves'] == mock_board_next.soft_moves
+            assert message['white_time_left'] == mock_board_next.white_time_left.total_seconds()
+            assert message['black_time_left'] == mock_board_next.black_time_left.total_seconds()
 
     @pytest.mark.asyncio
     async def test_handle_threefold_move(self):
@@ -427,6 +439,9 @@ class TableConsumerTestCase3(TestCase):
         mock_board_prev.castling = "KQkq"
         mock_board_prev.enpassant = "__"
         mock_board_prev.soft_moves = 0
+        mock_board_prev.white_time_left = timedelta(minutes=15)
+        mock_board_prev.black_time_left = timedelta(minutes=15)
+        mock_board_prev.created_at = datetime(2024, 6, 24, 21, 0, 0, tzinfo=timezone.utc)
 
         # Mock the next board state after the move
         mock_board_next = MagicMock()
@@ -443,15 +458,19 @@ class TableConsumerTestCase3(TestCase):
         mock_board_next.castling = "KQkq"
         mock_board_next.enpassant = "__"
         mock_board_next.soft_moves = 1
+        mock_board_next.white_time_left = timedelta(minutes=15)
+        mock_board_next.black_time_left = timedelta(minutes=15)
+        mock_board_next.created_at = datetime(2024, 6, 24, 21, 0, 0, tzinfo=timezone.utc)
         
         # Mock the move details
         mock_move = [[0, 1], [0, 2]]
         mock_promotion = None
 
         # Patch the Board class to control its behavior in the test
-        with patch('table.pieces.Board') as MockBoard:
+        with patch('table.pieces.Board') as MockBoard, patch.object(TableConsumer, 'get_current_time') as mock_get_current_time:
             MockBoard.return_value.create_new_json_board.return_value = (mock_board_next.board, None, None, True)
             MockBoard.return_value.create_json_class.return_value = ("correct_class", None, None)
+            mock_get_current_time.return_value = timedelta(minutes=15), timedelta(minutes=15)
 
             # Setup consumers
             consumer = await self.setup_consumer(mock_board_prev, [mock_board_prev], True)
@@ -470,6 +489,8 @@ class TableConsumerTestCase3(TestCase):
                 'draw',
                 mock_board_next.total_moves,
                 mock_board_next.soft_moves,
+                mock_board_next.white_time_left,
+                mock_board_next.black_time_left
             )
         
             # Verify the message sent to WebSocket room group
@@ -484,6 +505,8 @@ class TableConsumerTestCase3(TestCase):
             assert message['checking'] == None
             assert message['total_moves'] == mock_board_next.total_moves
             assert message['soft_moves'] == mock_board_next.soft_moves
+            assert message['white_time_left'] == mock_board_next.white_time_left.total_seconds()
+            assert message['black_time_left'] == mock_board_next.black_time_left.total_seconds()
     
     @pytest.mark.asyncio
     async def test_handle_50rule_move(self):
@@ -513,6 +536,10 @@ class TableConsumerTestCase3(TestCase):
         mock_board_prev.castling = "KQkq"
         mock_board_prev.enpassant = "__"
         mock_board_prev.soft_moves = 99
+        mock_board_prev.white_time_left = timedelta(minutes=15)
+        mock_board_prev.black_time_left = timedelta(minutes=15)
+        mock_board_prev.created_at = datetime(2024, 6, 24, 21, 0, 0, tzinfo=timezone.utc)
+
 
         # Mock the next board state after the move
         mock_board_next = MagicMock()
@@ -529,15 +556,19 @@ class TableConsumerTestCase3(TestCase):
         mock_board_next.castling = "KQkq"
         mock_board_next.enpassant = "__"
         mock_board_next.soft_moves = 100
+        mock_board_next.white_time_left = timedelta(minutes=15)
+        mock_board_next.black_time_left = timedelta(minutes=15)
+        mock_board_next.created_at = datetime(2024, 6, 24, 21, 0, 5, tzinfo=timezone.utc)
         
         # Mock the move details
         mock_move = [[0, 1], [0, 2]]
         mock_promotion = None
 
         # Patch the Board class to control its behavior in the test
-        with patch('table.pieces.Board') as MockBoard:
-            MockBoard.return_value.create_new_json_board.return_value = (mock_board_next.board, None, None, True)
+        with patch('table.pieces.Board') as MockBoard, patch.object(TableConsumer, 'get_current_time') as mock_get_current_time:
+            MockBoard.return_value.create_new_json_board.return_value = (mock_board_next.board, mock_board_next.castling, mock_board_next.enpassant, True)
             MockBoard.return_value.create_json_class.return_value = ("correct_class", None, None)
+            mock_get_current_time.return_value = timedelta(minutes=15), timedelta(minutes=15)
 
             # Setup consumers
             consumer = await self.setup_consumer(mock_board_prev, [mock_board_prev], False)
@@ -551,11 +582,13 @@ class TableConsumerTestCase3(TestCase):
             consumer.push_new_board_to_database.assert_called_once_with(
                 mock_board_next.board,
                 mock_board_next.turn,
-                None,
-                None,
+                mock_board_next.castling,
+                mock_board_next.enpassant,
                 'draw',
                 mock_board_next.total_moves,
                 mock_board_next.soft_moves,
+                mock_board_next.white_time_left,
+                mock_board_next.black_time_left
             )
         
             # Verify the message sent to WebSocket room group
@@ -570,6 +603,8 @@ class TableConsumerTestCase3(TestCase):
             assert message['checking'] == None
             assert message['total_moves'] == mock_board_next.total_moves
             assert message['soft_moves'] == mock_board_next.soft_moves
+            assert message['white_time_left'] == mock_board_next.white_time_left.total_seconds()
+            assert message['black_time_left'] == mock_board_next.black_time_left.total_seconds()
     
     @pytest.mark.asyncio
     async def test_handle_invalid_move(self):
@@ -858,7 +893,7 @@ class TableConsumerTestCase5(TestCase):
         game_state_message = consumer.construct_game_state_message(
             'white_player', 'black_player', True,
             True, None, 'correct board',
-            'white', None, 0, 0)
+            'white', None, 0, 0, 900, 900)
     
         # Verify the message sent to WebSocket room group
         assert game_state_message['white_player'] == 'white_player'
@@ -871,6 +906,8 @@ class TableConsumerTestCase5(TestCase):
         assert game_state_message['checking'] == None
         assert game_state_message['total_moves'] == 0
         assert game_state_message['soft_moves'] == 0
+        assert game_state_message['white_time_left'] == 900
+        assert game_state_message['black_time_left'] == 900
 
 class TableConsumerTestCase6(TestCase):
 
@@ -894,6 +931,9 @@ class TableConsumerTestCase6(TestCase):
             'checking': None,
             'total_moves': 0,
             'soft_moves': 0,
+            'white_time_left': None,
+            'black_time_left': None,
+            'created_at': None
         }
 
         # Mock async methods
@@ -908,7 +948,10 @@ class TableConsumerTestCase6(TestCase):
             'turn': event['turn'],
             'checking': event['checking'],
             'total_moves': event['total_moves'],
-            'soft_moves': event['soft_moves']
+            'soft_moves': event['soft_moves'],
+            'white_time_left': event["white_time_left"],
+            'black_time_left': event["black_time_left"],
+            'created_at': event["created_at"]
         }
         consumer.construct_game_state_message = AsyncMock(return_value=expected_message)
         
@@ -1101,10 +1144,12 @@ class TableConsumerTestCase8(TestCase):
         winner = None
         total_moves = 0
         soft_moves = 0
+        white_time_left = timedelta(minutes=15)
+        black_time_left = timedelta(minutes=15)
 
         # Call the method and test it
         await consumer.push_new_board_to_database(
-            updated_board, turn, castling, enpassant, winner, total_moves, soft_moves
+            updated_board, turn, castling, enpassant, winner, total_moves, soft_moves, white_time_left, black_time_left
         )
 
         current_board = await sync_to_async(Board.objects.filter(game=game).latest)('id')
@@ -1116,6 +1161,8 @@ class TableConsumerTestCase8(TestCase):
         assert current_board.enpassant == enpassant
         assert current_board.total_moves == total_moves
         assert current_board.soft_moves == soft_moves
+        assert current_board.white_time_left == white_time_left
+        assert current_board.black_time_left == black_time_left
 
         game = await sync_to_async(Game.objects.get)(pk=game.id)
         assert game.winner == None
@@ -1143,10 +1190,12 @@ class TableConsumerTestCase8(TestCase):
         winner = "draw"
         total_moves = 0
         soft_moves = 0
+        white_time_left = timedelta(minutes=15)
+        black_time_left = timedelta(minutes=15)
 
         # Call the method and test it
         await consumer.push_new_board_to_database(
-            updated_board, turn, castling, enpassant, winner, total_moves, soft_moves
+            updated_board, turn, castling, enpassant, winner, total_moves, soft_moves, white_time_left, black_time_left
         )
 
         current_board = await sync_to_async(Board.objects.filter(game=game).latest)('id')
@@ -1158,6 +1207,8 @@ class TableConsumerTestCase8(TestCase):
         assert current_board.enpassant == enpassant
         assert current_board.total_moves == total_moves
         assert current_board.soft_moves == soft_moves
+        assert current_board.white_time_left == white_time_left
+        assert current_board.black_time_left == black_time_left
 
         game = await sync_to_async(Game.objects.get)(pk=game.pk)
         assert game.winner == "d"
