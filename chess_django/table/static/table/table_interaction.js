@@ -76,7 +76,9 @@ function showTimes(state) {
 
     updateDisplay();
 
-    intervalId = setInterval(countDown, 1000)
+    if (state.winner === null) {
+        intervalId = setInterval(countDown, 1000)
+    }
 
     function countDown() {
         if (state.turn === "white") {

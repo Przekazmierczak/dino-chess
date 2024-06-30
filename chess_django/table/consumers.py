@@ -5,6 +5,11 @@ from asgiref.sync import sync_to_async
 
 from .models import Game, Board
 from . import pieces
+from .tasks import check_game_timeout
+
+from math import ceil
+
+# from datetime import timedelta
 
 class TableConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -42,7 +47,7 @@ class TableConsumer(AsyncWebsocketConsumer):
             # Calculate the remaining time for each player
             white_time_left, black_time_left = self.get_current_time(current_state.white_time_left, current_state.black_time_left, current_state.created_at, turn)
             white_time_left, black_time_left = self.format_time(white_time_left, black_time_left)
-            
+
             # Load the current board state
             current_board_json = json.loads(current_state.board)
 
@@ -113,6 +118,15 @@ class TableConsumer(AsyncWebsocketConsumer):
             if soft_moves == 100:
                 winner = "draw"
 
+            # Schedule a task to check for timeout
+            if not winner:
+                if turn == "white":
+                    timeout = ceil(white_time_left.total_seconds())
+                else:
+                    timeout = ceil(black_time_left.total_seconds())
+                
+                check_game_timeout.apply_async((current_game.id, turn, total_moves, board), countdown=timeout)
+
             # Update database with new board state
             await self.push_new_board_to_database(next_board, turn, next_castling, next_enpassant, winner, total_moves, soft_moves, white_time_left, black_time_left)
         else:
@@ -146,7 +160,12 @@ class TableConsumer(AsyncWebsocketConsumer):
             current_board_json = json.loads(current_state.board)
             board, winner, checking = pieces.Board(current_board_json, current_state.turn, current_state.castling, current_state.enpassant).create_json_class()
             turn, total_moves, soft_moves = current_state.turn, current_state.total_moves, current_state.soft_moves
+
+            # Calculate the remaining time for each player
             white_time_left, black_time_left = self.format_time(current_state.white_time_left, current_state.black_time_left)
+
+            # Schedule a task to check for timeout
+            check_game_timeout.apply_async((current_game.id, turn, total_moves, board), countdown=white_time_left)
             
         else:
             # Set up the initial board state if the game hasn't started
@@ -287,7 +306,9 @@ class TableConsumer(AsyncWebsocketConsumer):
                 turn = "w",
                 castling = "KQkq",
                 enpassant = "__",
-                soft_moves = 0
+                soft_moves = 0,
+                # white_time_left = timedelta(minutes=1),
+                # black_time_left = timedelta(minutes=1)
             )
         game.save()
     
