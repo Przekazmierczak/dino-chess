@@ -369,8 +369,11 @@ class TableConsumerTestCase3(TestCase):
         mock_move = [[0, 1], [0, 2]]
         mock_promotion = None
 
-        # Patch the Board class to control its behavior in the test
-        with patch('table.pieces.Board') as MockBoard, patch.object(TableConsumer, 'get_current_time') as mock_get_current_time:
+        # Patch the Board class and check_game_timeout to control its behavior in the test
+        with patch('table.pieces.Board') as MockBoard, \
+             patch.object(TableConsumer, 'get_current_time') as mock_get_current_time, \
+             patch('table.tasks.check_game_timeout.apply_async'):
+
             MockBoard.return_value.create_new_json_board.return_value = (mock_board_next.board, None, None, True)
             MockBoard.return_value.create_json_class.return_value = ("correct_class", None, None)
             mock_get_current_time.return_value = timedelta(minutes=15), timedelta(minutes=15)
@@ -798,8 +801,8 @@ class TableConsumerTestCase4(TestCase):
                           'promotion': None}
         mock_text_data_json = json.dumps(mock_text_data)     
 
-        # Patch the Board class to control its behavior in the test
-        with patch('table.pieces.Board') as MockBoard:
+        # Patch the Board class and check_game_timeout to control its behavior in the test
+        with patch('table.pieces.Board') as MockBoard, patch('table.tasks.check_game_timeout.apply_async'):
             MockBoard.return_value.create_json_class.return_value = ("correct_class", None, None)
 
             # Setup consumers
