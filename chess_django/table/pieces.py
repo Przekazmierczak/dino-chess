@@ -411,6 +411,7 @@ class Board:
 
 
     def create_new_json_board(self, move, promotion):
+        print(move)
         # Extract old and new positions from the move
         old_position = tuple(move[0])
         new_position = tuple(move[1])

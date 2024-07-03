@@ -7,17 +7,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const tableID = JSON.parse(document.getElementById('table_id').textContent);
     
-    const tableSocket = new WebSocket(
-        'ws://'
-        + window.location.host
-        + '/ws/table/'
-        + tableID
-        + '/'
-        );
+    const tableSocket = new WebSocket(`ws://${window.location.host}/ws/table/${tableID}/`);
         
-        tableSocket.onmessage = function(e) {
-            const state = JSON.parse(e.data);
-            console.log(state)
+    tableSocket.onmessage = function(e) {
+        const state = JSON.parse(e.data);
+        console.log(state)
         clearBoard();
         showPlayers(state);
         showTimes(state);
@@ -26,8 +20,7 @@ document.addEventListener('DOMContentLoaded', function () {
         checking(state);
         updateMoves(state);
         uploadBoard(tableSocket, state);
-        
-        
+
         console.log("received updated board");
         
         // ------------------ BUTTONS REMOVE LATER ------------------------
@@ -70,14 +63,13 @@ function showTimes(state) {
 
     let whiteTimeInSeconds = state.white_time_left
     let blackTimeInSeconds = state.black_time_left
-
     const whiteTime = document.getElementById("white_time");
     const blackTime = document.getElementById("black_time");
 
     updateDisplay();
 
     if (state.winner === null) {
-        intervalId = setInterval(countDown, 1000)
+        intervalId = setInterval(countDown, 1000);
     }
 
     function countDown() {
@@ -90,20 +82,15 @@ function showTimes(state) {
     }
 
     function updateDisplay() {
-        let whiteMinutes = Math.floor(whiteTimeInSeconds / 60);
-        let whiteSeconds = Math.floor(whiteTimeInSeconds % 60);
-        whiteTime.innerHTML = `${formatTime(whiteMinutes)}:${formatTime(whiteSeconds)}`;
-    
-        let blackMinutes = Math.floor(blackTimeInSeconds / 60);
-        let blackSeconds = Math.floor(blackTimeInSeconds % 60);
-        blackTime.innerHTML = `${formatTime(blackMinutes)}:${formatTime(blackSeconds)}`;
+        whiteTime.innerHTML = formatTime(whiteTimeInSeconds);
+        blackTime.innerHTML = formatTime(blackTimeInSeconds);
     }
-    
+
     function formatTime(time) {
-        if (time < 0) {
-            time = 0
-        }
-        return time.toString().padStart(2, '0');
+        if (time < 0) time = 0;
+        let minutes = Math.floor(time / 60);
+        let seconds = Math.trunc(time % 60);
+        return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
     }
 }
 
