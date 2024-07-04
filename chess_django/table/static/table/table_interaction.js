@@ -16,10 +16,10 @@ document.addEventListener('DOMContentLoaded', function () {
         showPlayers(state);
         showTimes(state);
         addRemovePlayers(tableSocket, state)
-        winner(state);
-        checking(state);
+        displayWinner(state);
+        highlightChecks(state);
         updateMoves(state);
-        uploadBoard(tableSocket, state);
+        renderBoard(tableSocket, state);
 
         console.log("received updated board");
         
@@ -42,7 +42,7 @@ document.addEventListener('DOMContentLoaded', function () {
             } else {
                 style = "classic";
             }
-            uploadBoard(tableSocket, state);
+            renderBoard(tableSocket, state);
         })
         // ------------------ BUTTONS REMOVE LATER ------------------------
         
@@ -95,48 +95,31 @@ function showTimes(state) {
 }
 
 function addRemovePlayers(tableSocket, state) {
-    const whitePlayerSitButton = document.getElementById("white_player_sit_button");
-    const whitePlayerStandButton = document.getElementById("white_player_stand_button");
-    const whitePlayerReadyButton = document.getElementById("white_player_ready_button");
-    const whitePlayerUnreadyButton = document.getElementById("white_player_unready_button");
-    
-    const blackPlayerSitButton = document.getElementById("black_player_sit_button");
-    const blackPlayerStandButton = document.getElementById("black_player_stand_button");
-    const blackPlayerReadyButton = document.getElementById("black_player_ready_button");
-    const blackPlayerUnreadyButton = document.getElementById("black_player_unready_button");
+    const buttonsConfig = [
+        { player: "white", sit: "white_player_sit_button", stand: "white_player_stand_button", ready: "white_player_ready_button", unready: "white_player_unready_button" },
+        { player: "black", sit: "black_player_sit_button", stand: "black_player_stand_button", ready: "black_player_ready_button", unready: "black_player_unready_button" }
+    ];
 
     if (state.white_player_ready !== true || state.black_player_ready !== true) {
-        setButtonState(tableSocket, state, "white", whitePlayerSitButton, whitePlayerStandButton, whitePlayerReadyButton, whitePlayerUnreadyButton);
-        setButtonState(tableSocket, state, "black", blackPlayerSitButton, blackPlayerStandButton, blackPlayerReadyButton, blackPlayerUnreadyButton);
+        buttonsConfig.forEach(config => {
+            setButtonState(tableSocket, state, config.player, config.sit, config.stand, config.ready, config.unready);
+        });
     } else {
-        whitePlayerSitButton.classList.add("hidden");
-        whitePlayerStandButton.classList.add("hidden");
-        whitePlayerReadyButton.classList.add("hidden");
-        whitePlayerUnreadyButton.classList.add("hidden");
-        blackPlayerSitButton.classList.add("hidden");
-        blackPlayerStandButton.classList.add("hidden");
-        blackPlayerReadyButton.classList.add("hidden");
-        blackPlayerUnreadyButton.classList.add("hidden");
+        buttonsConfig.forEach(config => {
+            document.getElementById(config.sit).classList.add("hidden");
+            document.getElementById(config.stand).classList.add("hidden");
+            document.getElementById(config.ready).classList.add("hidden");
+            document.getElementById(config.unready).classList.add("hidden");
+        });
     }
 }
 
-function setButtonState(tableSocket, state, player, sitButton, standButton, readyButton, unreadyButton) {
+function setButtonState(tableSocket, state, player, sitButtonId, standButtonId, readyButtonId, unreadyButtonId) {
     // Remove old listeners
-    let newElementSit = sitButton.cloneNode(true);
-    sitButton.parentNode.replaceChild(newElementSit, sitButton);
-    sitButton = newElementSit;
-    
-    let newElementStand = standButton.cloneNode(true);
-    standButton.parentNode.replaceChild(newElementStand, standButton);
-    standButton = newElementStand;
-
-    let newElementReady = readyButton.cloneNode(true);
-    readyButton.parentNode.replaceChild(newElementReady, readyButton);
-    readyButton = newElementReady;
-
-    let newElementUnready = unreadyButton.cloneNode(true);
-    unreadyButton.parentNode.replaceChild(newElementUnready, unreadyButton);
-    unreadyButton = newElementUnready;
+    const sitButton = resetButton(sitButtonId);
+    const standButton = resetButton(standButtonId);
+    const readyButton = resetButton(readyButtonId);
+    const unreadyButton = resetButton(unreadyButtonId);
 
     if (player === "white" && state.white_player === "Player 1" || player === "black" && state.black_player === "Player 2") {
         sitButton.classList.remove("hidden");
@@ -145,21 +128,7 @@ function setButtonState(tableSocket, state, player, sitButton, standButton, read
         unreadyButton.classList.add("hidden");
 
         sitButton.addEventListener("click", function() {
-            let white_player = null
-            let black_player = null
-            if (player === "white") {
-                white_player = true
-            } else {
-                black_player = true
-            }
-            tableSocket.send(JSON.stringify({
-                'white_player': white_player,
-                'black_player': black_player,
-                'white_player_ready': null,
-                'black_player_ready': null,
-                'move': null,
-                'promotion': null
-            }));
+            updatePlayerState(tableSocket, player, true, null, null, null);
         });
     } else if (player === "white" && state.white_player === state.user && state.white_player_ready === false || player === "black" && state.black_player === state.user && state.black_player_ready === false) {
         sitButton.classList.add("hidden");
@@ -168,39 +137,11 @@ function setButtonState(tableSocket, state, player, sitButton, standButton, read
         unreadyButton.classList.add("hidden");
         
         standButton.addEventListener("click", function() {
-            let white_player = null
-            let black_player = null
-            if (player === "white") {
-                white_player = false
-            } else {
-                black_player = false
-            }
-            tableSocket.send(JSON.stringify({
-                'white_player': white_player,
-                'black_player': black_player,
-                'white_player_ready': null,
-                'black_player_ready': null,
-                'move': null,
-                'promotion': null
-            }));
+            updatePlayerState(tableSocket, player, false, null, null, null);
         });
 
         readyButton.addEventListener("click", function() {
-            let white_player_ready = null
-            let black_player_ready = null
-            if (player === "white") {
-                white_player_ready = true
-            } else {
-                black_player_ready = true
-            }
-            tableSocket.send(JSON.stringify({
-                'white_player': null,
-                'black_player': null,
-                'white_player_ready': white_player_ready,
-                'black_player_ready': black_player_ready,
-                'move': null,
-                'promotion': null
-            }));
+            updatePlayerState(tableSocket, player, null, true, null, null);
         });
 
     } else if (player === "white" && state.white_player === state.user && state.white_player_ready === true || player === "black" && state.black_player === state.user && state.black_player_ready === true) {
@@ -210,26 +151,31 @@ function setButtonState(tableSocket, state, player, sitButton, standButton, read
         unreadyButton.classList.remove("hidden");
         
         unreadyButton.addEventListener("click", function() {
-            let white_player_ready = null
-            let black_player_ready = null
-            if (player === "white") {
-                white_player_ready = false
-            } else {
-                black_player_ready = false
-            }
-            tableSocket.send(JSON.stringify({
-                'white_player': null,
-                'black_player': null,
-                'white_player_ready': white_player_ready,
-                'black_player_ready': black_player_ready,
-                'move': null,
-                'promotion': null
-            }));
+            updatePlayerState(tableSocket, player, null, false, null, null);
         });
     }
 }
 
-function winner(state) {
+function resetButton(buttonId) {
+    const button = document.getElementById(buttonId);
+    const newButton = button.cloneNode(true);
+    button.parentNode.replaceChild(newButton, button);
+    return newButton;
+}
+
+function updatePlayerState(tableSocket, player, playerState, readyState, move, promotion) {
+    const update = {
+        white_player: player === "white" ? playerState : null,
+        black_player: player === "black" ? playerState : null,
+        white_player_ready: player === "white" ? readyState : null,
+        black_player_ready: player === "black" ? readyState : null,
+        move: move,
+        promotion: promotion
+    };
+    tableSocket.send(JSON.stringify(update));
+}
+
+function displayWinner(state) {
     if (state.winner !== null) {
         modal_winner.classList.add("show");
         htmlWinner = document.getElementById("winner");
@@ -241,10 +187,10 @@ function winner(state) {
     }
 }
 
-function checking(state) {
+function highlightChecks(state) {
     if (state.checking !== null) {
-        state.checking.forEach(function(element) {
-            const boardSquare = document.querySelector(`#square${element[0]}${element[1]}`);
+        state.checking.forEach(function([row, col]) {
+            const boardSquare = document.querySelector(`#square${row}${col}`);
             boardSquare.classList.add("checking")
         });
     }
@@ -255,76 +201,53 @@ function updateMoves(state) {
     moves.innerHTML = `Moves: ${state.total_moves}`;
 }
 
-function uploadBoard(tableSocket, state) {
+function renderBoard(tableSocket, state) {
     for (let row = 0; row < 8; row++) {
         for (let col = 0; col < 8; col++) {
-            mouseOver(row, col);
-            removeDraggable(row, col);
+            setupSquareEvents(row, col);
             if (state.board[row][col] !== null) {
-                uploadSquare(state, row, col, tableSocket);
+                renderSquare(state, row, col, tableSocket);
             }
         }
     }
 }
 
-function removeDraggable(row, col) {
-    const boardSquare = document.querySelector(`#square${row}${col}`);
-    boardSquare.removeAttribute("draggable");
-    if (boardSquare.classList.contains("draggableElement")) {
-        boardSquare.classList.remove("draggableElement");
-    }
+function setupSquareEvents(row, col) {
+    const square = document.querySelector(`#square${row}${col}`);
+    square.removeAttribute("draggable");
+    square.classList.remove("draggableElement");
+    square.addEventListener("mouseover", () => square.classList.add("mouseover"));
+    square.addEventListener("mouseleave", () => square.classList.remove("mouseover"));
 }
 
-function mouseOver(row, col) {
-    const boardSquare = document.querySelector(`#square${row}${col}`);
-    boardSquare.addEventListener("mouseover", function(event) {
-        event.target.classList.add("mouseover");
-    });
-    boardSquare.addEventListener("mouseleave", function(event) {
-        event.target.classList.remove("mouseover");
-    });
-}
-
-function uploadSquare(state, row, col, tableSocket) {
-    const boardSquare = state.board[row][col];
-    const turn = state.turn;
-    const {piece, player, moves} = boardSquare
-    
+function renderSquare(state, row, col, tableSocket) {
+    const {piece, player, moves} = state.board[row][col];
     const image = getImageSource(piece, player);
-    const htmlSquare = document.querySelector(`#square${row}${col}`);
-    htmlSquare.innerHTML = `${image}`;
-    if (turn === player && state.winner === null) {
-        if ((player === "white" && state.user === state.white_player) || (player === "black" && state.user === state.black_player)) {
-            // PUT INTO FUNCTION ---------
-            htmlSquare.setAttribute("draggable", "true");
-            htmlSquare.classList.add("draggableElement");
-        
-            // let img = new Image();
-            // img.src = "/static/table/pieces_images/Queen_white.png";
-    
-            htmlSquare.addEventListener('dragstart', (event) => {
-                htmlSquare.classList.add("dragging");
-                // event.dataTransfer.setDragImage(img, 100, 100);
-                htmlSquare.click();
-            });
-            htmlSquare.addEventListener("dragend", () => {
-                htmlSquare.classList.remove("dragging");
-            });
-            // --------------------
-    
-            htmlSquare.addEventListener("click", function() {
-                colorBoard();
-                removeMoveListeners();
-                addMarked(htmlSquare)
-                const iFpromotion = moves[2]
-                moves[0].forEach(move => addPossibleMove(move, row, col, tableSocket, iFpromotion, "move"));
-                moves[1].forEach(move => addPossibleMove(move, row, col, tableSocket, iFpromotion, "attack"));
-            });
-        }
-    }
-};
+    const square = document.querySelector(`#square${row}${col}`);
+    square.innerHTML = `${image}`;
 
-function addMarked(element) {
+    if (state.turn === player && state.winner === null && ((player === "white" && state.user === state.white_player) || (player === "black" && state.user === state.black_player))) {
+        square.setAttribute("draggable", "true");
+        square.classList.add("draggableElement");
+
+        square.addEventListener('dragstart', (event) => {
+            square.classList.add("dragging");
+            square.click();
+        });
+        square.addEventListener("dragend", () => square.classList.remove("dragging"));
+
+        square.addEventListener("click", function() {
+            colorBoard();
+            removeMoveListeners();
+            highlightSelectedSquare(square)
+            const isPromotion = moves[2]
+            moves[0].forEach(move => addPossibleMove(move, row, col, tableSocket, isPromotion, "move"));
+            moves[1].forEach(move => addPossibleMove(move, row, col, tableSocket, isPromotion, "attack"));
+        });
+    }
+}
+
+function highlightSelectedSquare(element) {
     if (element.classList.contains('dark')) {
         element.classList.remove('dark');
         element.classList.add('marked');
@@ -334,35 +257,34 @@ function addMarked(element) {
     }
 }
 
-function addPossibleMove(move, oldRow, oldCol, tableSocket, iFpromotion, type) {
-    const row = move[0]
-    const col = move[1]
-    
-    const htmlPossibleMove = document.querySelector(`#square${row}${col}`);
-    if (htmlPossibleMove.classList.contains('dark')) {
-        htmlPossibleMove.classList.remove('dark');
+function addPossibleMove(move, oldRow, oldCol, tableSocket, isPromotion, type) {
+    const [row, col] = move
+    const square = document.querySelector(`#square${row}${col}`);
+
+    if (square.classList.contains('dark')) {
+        square.classList.remove('dark');
         if (type === "move") {
-            htmlPossibleMove.classList.add('darkGreen');
+            square.classList.add('darkGreen');
         } else {
-            htmlPossibleMove.classList.add('darkRed');
+            square.classList.add('darkRed');
         }
     } else {
-        htmlPossibleMove.classList.remove('light');
+        square.classList.remove('light');
         if (type === "move") {
-            htmlPossibleMove.classList.add('lightGreen');
+            square.classList.add('lightGreen');
         } else {
-            htmlPossibleMove.classList.add('lightRed');
+            square.classList.add('lightRed');
         }
     }
-    pushMove(oldRow, oldCol, row, col, htmlPossibleMove, iFpromotion, tableSocket);
+    addMoveListener(oldRow, oldCol, row, col, square, isPromotion, tableSocket);
 }
 
-function pushMove(oldRow, oldCol, row, col, htmlPossibleMove, iFpromotion, tableSocket) {
+function addMoveListener(oldRow, oldCol, row, col, square, isPromotion, tableSocket) {
     let moveListener = function() {
         const move = [[oldRow, oldCol], [row, col]];
         let promotion
 
-        if (iFpromotion === false) {
+        if (isPromotion === false) {
             tableSocket.send(JSON.stringify({
                 'white_player': null,
                 'black_player': null,
@@ -421,13 +343,13 @@ function pushMove(oldRow, oldCol, row, col, htmlPossibleMove, iFpromotion, table
         moveListener(event);
     }
 
-    htmlPossibleMove.addEventListener("click", moveListener);
-    htmlPossibleMove.addEventListener("dragover", function(event) {
+    square.addEventListener("click", moveListener);
+    square.addEventListener("dragover", function(event) {
         event.preventDefault();
     });
-    htmlPossibleMove.addEventListener("drop", dropListener);
+    square.addEventListener("drop", dropListener);
 
-    moveListeners.push({element: htmlPossibleMove, clickListener: moveListener, dropListener: dropListener});
+    moveListeners.push({element: square, clickListener: moveListener, dropListener: dropListener});
 }
 
 function clearBoard() {
