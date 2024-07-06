@@ -4,23 +4,26 @@ let style = "dino";
 
 document.addEventListener('DOMContentLoaded', function () {
     colorBoard();
+    setupWebSocket();
+});
 
+function setupWebSocket() {
     const tableID = JSON.parse(document.getElementById('table_id').textContent);
-    
     const tableSocket = new WebSocket(`ws://${window.location.host}/ws/table/${tableID}/`);
         
     tableSocket.onmessage = function(e) {
         const state = JSON.parse(e.data);
         console.log(state)
+    
         clearBoard();
         showPlayers(state);
         showTimes(state);
-        addRemovePlayers(tableSocket, state)
+        addRemovePlayers(tableSocket, state);
         displayWinner(state);
         highlightChecks(state);
         updateMoves(state);
         renderBoard(tableSocket, state);
-
+    
         console.log("received updated board");
         
         // ------------------ BUTTONS REMOVE LATER ------------------------
@@ -46,14 +49,12 @@ document.addEventListener('DOMContentLoaded', function () {
         })
         // ------------------ BUTTONS REMOVE LATER ------------------------
         
-    }; 
-});
+    };
+}
 
 function showPlayers(state) {
-    const whitePlayer = document.getElementById("white_player");
-    whitePlayer.innerHTML = `${state.white_player}`;
-    const blackPlayer = document.getElementById("black_player");
-    blackPlayer.innerHTML = `${state.black_player}`;
+    document.getElementById("white_player").innerHTML = `${state.white_player}`;
+    document.getElementById("black_player").innerHTML = `${state.black_player}`;
 }
 
 function showTimes(state) {
@@ -177,8 +178,9 @@ function updatePlayerState(tableSocket, player, playerState, readyState, move, p
 
 function displayWinner(state) {
     if (state.winner !== null) {
-        modal_winner.classList.add("show");
-        htmlWinner = document.getElementById("winner");
+        const modalWinner = document.getElementById("modal_winner");
+        modalWinner.classList.add("show");
+        const htmlWinner = document.getElementById("winner");
         if (state.winner === "draw") {
             htmlWinner.innerHTML = `<p>It's a draw!</p>`;
         } else {
@@ -227,24 +229,74 @@ function renderSquare(state, row, col, tableSocket) {
     square.innerHTML = `${image}`;
 
     if (state.turn === player && state.winner === null && ((player === "white" && state.user === state.white_player) || (player === "black" && state.user === state.black_player))) {
-        square.setAttribute("draggable", "true");
-        square.classList.add("draggableElement");
-
-        square.addEventListener('dragstart', (event) => {
-            square.classList.add("dragging");
-            square.click();
-        });
-        square.addEventListener("dragend", () => square.classList.remove("dragging"));
-
-        square.addEventListener("click", function() {
-            colorBoard();
-            removeMoveListeners();
-            highlightSelectedSquare(square)
-            const isPromotion = moves[2]
-            moves[0].forEach(move => addPossibleMove(move, row, col, tableSocket, isPromotion, "move"));
-            moves[1].forEach(move => addPossibleMove(move, row, col, tableSocket, isPromotion, "attack"));
-        });
+        enableDraggable(square, row, col, moves, tableSocket);
     }
+}
+
+function getImageSource(piece, player) {
+    const pieceImages = {
+        "pawn": {"white": "Pawn_white", "black": "Pawn_black"},
+        "rook": {"white": "Rook_white",  "black": "Rook_black"},
+        "knight": {"white": "Knight_white",  "black": "Knight_black"},
+        "bishop": {"white": "Bishop_white",  "black": "Bishop_black"},
+        "queen": {"white": "Queen_white",  "black": "Queen_black"},
+        "king": {"white": "King_white",  "black": "King_black"}
+    };
+    const prefix = style === "classic" ? "" : "d";
+    if (piece in pieceImages && player in pieceImages[piece]) {
+        return `<img src="/static/table/pieces_images/${prefix}${pieceImages[piece][player]}.png" class="pieceImage" alt="${pieceImages[piece][player]}">`;
+    } else {
+        return ""
+    }
+}
+
+function enableDraggable(square, row, col, moves, tableSocket) {
+    square.setAttribute("draggable", "true");
+    square.classList.add("draggableElement");
+
+    square.addEventListener('dragstart', () => {
+        square.classList.add("dragging");
+        square.click();
+    });
+
+    square.addEventListener("dragend", () => square.classList.remove("dragging"));
+
+    square.addEventListener("click", () => {
+        colorBoard();
+        removeMoveListeners();
+        highlightSelectedSquare(square);
+        const isPromotion = moves[2];
+        moves[0].forEach(move => addPossibleMove(move, row, col, tableSocket, isPromotion, "move"));
+        moves[1].forEach(move => addPossibleMove(move, row, col, tableSocket, isPromotion, "attack"));
+    });
+}
+
+function colorBoard() {
+    for (let row = 0; row < 8; row++){
+        for (let col = 0; col < 8; col++) {
+            const htmlSquare = document.querySelector(`#square${row}${col}`);
+            const colors = ['darkGreen', 'lightGreen', 'darkRed', 'lightRed'];
+            for (let i = 0; i < colors.length; i++) {
+                if (htmlSquare.classList.contains(colors[i])) {
+                    htmlSquare.classList.remove(colors[i]);
+                }
+            }
+            if ((row + col) % 2 == 0) {
+                htmlSquare.classList.add('dark');
+            } else {
+                htmlSquare.classList.add('light');
+            }
+        }
+    }
+}
+
+function removeMoveListeners() {
+    console.log(moveListeners)
+    moveListeners.forEach(function(item) {
+        item.element.removeEventListener("click", item.clickListener);
+        item.element.removeEventListener("drop", item.dropListener);
+    });
+    moveListeners = [];
 }
 
 function highlightSelectedSquare(element) {
@@ -263,18 +315,10 @@ function addPossibleMove(move, oldRow, oldCol, tableSocket, isPromotion, type) {
 
     if (square.classList.contains('dark')) {
         square.classList.remove('dark');
-        if (type === "move") {
-            square.classList.add('darkGreen');
-        } else {
-            square.classList.add('darkRed');
-        }
+        square.classList.add(type === "move" ? 'darkGreen' : 'darkRed');
     } else {
         square.classList.remove('light');
-        if (type === "move") {
-            square.classList.add('lightGreen');
-        } else {
-            square.classList.add('lightRed');
-        }
+        square.classList.add(type === "move" ? 'lightGreen' : 'lightRed');
     }
     addMoveListener(oldRow, oldCol, row, col, square, isPromotion, tableSocket);
 }
@@ -282,36 +326,25 @@ function addPossibleMove(move, oldRow, oldCol, tableSocket, isPromotion, type) {
 function addMoveListener(oldRow, oldCol, row, col, square, isPromotion, tableSocket) {
     let moveListener = function() {
         const move = [[oldRow, oldCol], [row, col]];
-        let promotion
+        let promotion;
 
-        if (isPromotion === false) {
-            tableSocket.send(JSON.stringify({
-                'white_player': null,
-                'black_player': null,
-                'white_player_ready': null,
-                'black_player_ready': null,
-                'move': move,
-                'promotion': null
-            }));
+        if (!isPromotion) {
+            updatePlayerState(tableSocket, null, null, null, move, null);
         } else {
-            modal_promotion.classList.add("show");
             const promotionObject = {
                 queen: ["modal_queen", "Queen_white", "Q", "Queen_black", "q"],
                 rook: ["modal_rook", "Rook_white", "R", "Rook_black", "r"],
                 knight: ["modal_knight", "Knight_white", "N",  "Knight_black", "n"],
                 bishop: ["modal_bishop", "Bishop_white", "B", "Bishop_black", "b"],
             }
+
+            const modalPromotion = document.querySelector("#modal_promotion");
+            modalPromotion.classList.add("show");
+
             function pickPiece(pickedPiece) {
                 promotion = pickedPiece;
-                modal_promotion.classList.remove("show");
-                tableSocket.send(JSON.stringify({
-                    'white_player': null,
-                    'black_player': null,
-                    'white_player_ready': null,
-                    'black_player_ready': null,
-                    'move': move,
-                    'promotion': promotion
-                }));
+                modalPromotion.classList.remove("show");
+                updatePlayerState(tableSocket, null, null, null, move, promotion);
             }
             for (const piece in promotionObject) {
                 if (Object.hasOwnProperty.call(promotionObject, piece)) {
@@ -338,7 +371,7 @@ function addMoveListener(oldRow, oldCol, row, col, square, isPromotion, tableSoc
         }
     }
     
-    let dropListener= function(event) {
+    const dropListener = function(event) {
         event.preventDefault();
         moveListener(event);
     }
@@ -354,108 +387,16 @@ function addMoveListener(oldRow, oldCol, row, col, square, isPromotion, tableSoc
 
 function clearBoard() {
     colorBoard();
-    removeAllListeners();
-    removePieces();
-    removeChecking();
-}
-
-function colorBoard() {
-    for (let row = 0; row < 8; row++){
-        for (let col = 0; col < 8; col++) {
-            const htmlSquare = document.querySelector(`#square${row}${col}`);
-            const colors = ['darkGreen', 'lightGreen', 'darkRed', 'lightRed'];
-            for (let i = 0; i < colors.length; i++) {
-                if (htmlSquare.classList.contains(colors[i])) {
-                    htmlSquare.classList.remove(colors[i]);
-                }
-            }
-            if ((row + col) % 2 == 0) {
-                htmlSquare.classList.add('dark');
-            } else {
-                htmlSquare.classList.add('light');
-            }
-        }
-    }
-}
-
-function removeAllListeners() {
     for(let row = 0; row < 8; row++) {
         for (let col = 0; col < 8; col++) {
-            let htmlSquare = document.querySelector(`#square${row}${col}`);
-            let newElement = htmlSquare.cloneNode(true);
-            htmlSquare.parentNode.replaceChild(newElement, htmlSquare);
-        }
-    }
-}
-
-function removePieces() {
-    for(let row = 0; row < 8; row++) {
-        for (let col = 0; col < 8; col++) {
-            let htmlSquare = document.querySelector(`#square${row}${col}`);
-            htmlSquare.innerHTML = "";
-        }
-    }
-}
-
-function removeChecking() {
-    for(let row = 0; row < 8; row++) {
-        for (let col = 0; col < 8; col++) {
-            let htmlSquare = document.querySelector(`#square${row}${col}`);
-            if (htmlSquare.classList.contains("checking")) {
-                htmlSquare.classList.remove("checking");
-            }
-        }
-    }
-}
-
-function removeMoveListeners() {
-    console.log(moveListeners)
-    moveListeners.forEach(function(item) {
-        item.element.removeEventListener("click", item.clickListener);
-        item.element.removeEventListener("drop", item.dropListener);
-    });
-    moveListeners = [];
-}
-
-function getImageSource(piece, player) {
-    const pieceImages = {
-        "pawn": {
-            "white": "Pawn_white",
-            "black": "Pawn_black"
-        },
-        "rook": {
-            "white": "Rook_white",
-            "black": "Rook_black"
-        },
-        "knight": {
-            "white": "Knight_white",
-            "black": "Knight_black"
-        },
-        "bishop": {
-            "white": "Bishop_white",
-            "black": "Bishop_black"
-        },
-        "queen": {
-            "white": "Queen_white",
-            "black": "Queen_black"
-        },
-        "king": {
-            "white": "King_white",
-            "black": "King_black"
-        }
-    };
-    
-    if (style === "classic") {
-        if (piece in pieceImages && player in pieceImages[piece]) {
-            return `<img src="/static/table/pieces_images/${pieceImages[piece][player]}.png" class="pieceImage" alt="${pieceImages[piece][player]}">`;
-        } else {
-            return ""
-        }
-    } else {
-        if (piece in pieceImages && player in pieceImages[piece]) {
-            return `<img src="/static/table/pieces_images/d${pieceImages[piece][player]}.png" class="pieceImage" alt="${pieceImages[piece][player]}">`;
-        } else {
-            return ""
+            // Remove all listeners
+            let square = document.querySelector(`#square${row}${col}`);
+            let newElement = square.cloneNode(true);
+            square.parentNode.replaceChild(newElement, square);
+            // Remove all pieces
+            newElement.innerHTML = "";
+            // Remove all checking
+            newElement.classList.remove("checking");
         }
     }
 }
