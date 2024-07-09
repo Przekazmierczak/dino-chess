@@ -326,7 +326,6 @@ function addPossibleMove(move, oldRow, oldCol, tableSocket, isPromotion, type) {
 function addMoveListener(oldRow, oldCol, row, col, square, isPromotion, tableSocket) {
     let moveListener = function() {
         const move = [[oldRow, oldCol], [row, col]];
-        let promotion;
 
         if (!isPromotion) {
             updatePlayerState(tableSocket, null, null, null, move, null);
@@ -341,45 +340,41 @@ function addMoveListener(oldRow, oldCol, row, col, square, isPromotion, tableSoc
             const modalPromotion = document.querySelector("#modal_promotion");
             modalPromotion.classList.add("show");
 
-            function pickPiece(pickedPiece) {
-                promotion = pickedPiece;
-                modalPromotion.classList.remove("show");
-                updatePlayerState(tableSocket, null, null, null, move, promotion);
-            }
             for (const piece in promotionObject) {
                 if (Object.hasOwnProperty.call(promotionObject, piece)) {
                     const list = promotionObject[piece];
                     let curr_piece = document.getElementById(list[0]);
+                    
                     // Remove previous listeners
                     let removeListeners = curr_piece.cloneNode(true);
                     curr_piece.parentNode.replaceChild(removeListeners, curr_piece);
                     curr_piece = removeListeners
 
+                    const setPromotionPiece  = function(curr_piece, pieceName, pieceSymbol) {
+                        curr_piece.innerHTML = `<img src="/static/table/pieces_images/${pieceName}.png" class="pieceImage" alt=${pieceName}></img>`
+                        curr_piece.addEventListener("click", function() {
+                            modalPromotion.classList.remove("show");
+                            updatePlayerState(tableSocket, null, null, null, move, pieceSymbol);
+                        });
+                    }
+
                     if (oldRow === 6) {
-                        curr_piece.innerHTML = `<img src="/static/table/pieces_images/${list[1]}.png" class="pieceImage" alt=${list[1]}></img>`
-                        curr_piece.addEventListener("click", function() {
-                            pickPiece(list[2])
-                        });
+                        setPromotionPiece(curr_piece, list[1], list[2]);
                     } else {
-                        curr_piece.innerHTML = `<img src="/static/table/pieces_images/${list[3]}.png" class="pieceImage" alt=${list[3]}></img>`
-                        curr_piece.addEventListener("click", function() {
-                            pickPiece(list[4])
-                        });
+                        setPromotionPiece(curr_piece, list[3], list[4]);
                     }
                 }
             }
         }
     }
-    
+
     const dropListener = function(event) {
         event.preventDefault();
         moveListener(event);
     }
 
     square.addEventListener("click", moveListener);
-    square.addEventListener("dragover", function(event) {
-        event.preventDefault();
-    });
+    square.addEventListener("dragover", function(event) {event.preventDefault();});
     square.addEventListener("drop", dropListener);
 
     moveListeners.push({element: square, clickListener: moveListener, dropListener: dropListener});
