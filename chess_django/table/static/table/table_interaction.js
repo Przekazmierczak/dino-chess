@@ -103,7 +103,7 @@ function addRemovePlayers(tableSocket, state) {
 
     if (state.white_player_ready !== true || state.black_player_ready !== true) {
         buttonsConfig.forEach(config => {
-            setButtonState(tableSocket, state, config.player, config.sit, config.stand, config.ready, config.unready);
+            setButtonState(tableSocket, state, config);
         });
     } else {
         buttonsConfig.forEach(config => {
@@ -115,12 +115,13 @@ function addRemovePlayers(tableSocket, state) {
     }
 }
 
-function setButtonState(tableSocket, state, player, sitButtonId, standButtonId, readyButtonId, unreadyButtonId) {
+function setButtonState(tableSocket, state, config) {
+    const { player, sit, stand, ready, unready } = config;
     // Remove old listeners
-    const sitButton = resetButton(sitButtonId);
-    const standButton = resetButton(standButtonId);
-    const readyButton = resetButton(readyButtonId);
-    const unreadyButton = resetButton(unreadyButtonId);
+    const sitButton = resetButton(sit);
+    const standButton = resetButton(stand);
+    const readyButton = resetButton(ready);
+    const unreadyButton = resetButton(unready);
 
     if (player === "white" && state.white_player === "Player 1" || player === "black" && state.black_player === "Player 2") {
         sitButton.classList.remove("hidden");
@@ -312,6 +313,7 @@ function highlightSelectedSquare(element) {
 function addPossibleMove(move, oldRow, oldCol, tableSocket, isPromotion, type) {
     const [row, col] = move
     const square = document.querySelector(`#square${row}${col}`);
+    const fullMove = [[oldRow, oldCol], [row, col]];
 
     if (square.classList.contains('dark')) {
         square.classList.remove('dark');
@@ -320,64 +322,66 @@ function addPossibleMove(move, oldRow, oldCol, tableSocket, isPromotion, type) {
         square.classList.remove('light');
         square.classList.add(type === "move" ? 'lightGreen' : 'lightRed');
     }
-    addMoveListener(oldRow, oldCol, row, col, square, isPromotion, tableSocket);
+    addMoveListener(fullMove, square, isPromotion, tableSocket);
 }
 
-function addMoveListener(oldRow, oldCol, row, col, square, isPromotion, tableSocket) {
-    let moveListener = function() {
-        const move = [[oldRow, oldCol], [row, col]];
-
-        if (!isPromotion) {
-            updatePlayerState(tableSocket, null, null, null, move, null);
-        } else {
-            const promotionObject = {
-                queen: ["modal_queen", "Queen_white", "Q", "Queen_black", "q"],
-                rook: ["modal_rook", "Rook_white", "R", "Rook_black", "r"],
-                knight: ["modal_knight", "Knight_white", "N",  "Knight_black", "n"],
-                bishop: ["modal_bishop", "Bishop_white", "B", "Bishop_black", "b"],
-            }
-
-            const modalPromotion = document.querySelector("#modal_promotion");
-            modalPromotion.classList.add("show");
-
-            for (const piece in promotionObject) {
-                if (Object.hasOwnProperty.call(promotionObject, piece)) {
-                    const list = promotionObject[piece];
-                    let curr_piece = document.getElementById(list[0]);
-                    
-                    // Remove previous listeners
-                    let removeListeners = curr_piece.cloneNode(true);
-                    curr_piece.parentNode.replaceChild(removeListeners, curr_piece);
-                    curr_piece = removeListeners
-
-                    const setPromotionPiece  = function(curr_piece, pieceName, pieceSymbol) {
-                        curr_piece.innerHTML = `<img src="/static/table/pieces_images/${pieceName}.png" class="pieceImage" alt=${pieceName}></img>`
-                        curr_piece.addEventListener("click", function() {
-                            modalPromotion.classList.remove("show");
-                            updatePlayerState(tableSocket, null, null, null, move, pieceSymbol);
-                        });
-                    }
-
-                    if (oldRow === 6) {
-                        setPromotionPiece(curr_piece, list[1], list[2]);
-                    } else {
-                        setPromotionPiece(curr_piece, list[3], list[4]);
-                    }
-                }
-            }
-        }
-    }
+function addMoveListener(move, square, isPromotion, tableSocket) {
+    const moveListener = function() {handleMove(move, isPromotion, tableSocket)};
 
     const dropListener = function(event) {
         event.preventDefault();
         moveListener(event);
-    }
+    };
 
     square.addEventListener("click", moveListener);
     square.addEventListener("dragover", function(event) {event.preventDefault();});
     square.addEventListener("drop", dropListener);
 
     moveListeners.push({element: square, clickListener: moveListener, dropListener: dropListener});
+}
+
+function handleMove(move, isPromotion, tableSocket) {
+    if (!isPromotion) {
+        updatePlayerState(tableSocket, null, null, null, move, null);
+    } else {
+        showPromotionModal(move, tableSocket);
+    }
+}
+
+function showPromotionModal(move, tableSocket) {
+    const promotionObject = {
+        queen: { id: "modal_queen", white: "Queen_white", whiteSymbol: "Q", black: "Queen_black", blackSymbol: "q" },
+        rook: { id: "modal_rook", white: "Rook_white", whiteSymbol: "R", black: "Rook_black", blackSymbol: "r" },
+        knight: { id: "modal_knight", white: "Knight_white", whiteSymbol: "N", black: "Knight_black", blackSymbol: "n" },
+        bishop: { id: "modal_bishop", white: "Bishop_white", whiteSymbol: "B", black: "Bishop_black", blackSymbol: "b" },
+    }
+
+    const modalPromotion = document.querySelector("#modal_promotion");
+    modalPromotion.classList.add("show");
+
+    const setPromotionPiece  = function(curr_piece, pieceName, pieceSymbol) {
+        curr_piece.innerHTML = `<img src="/static/table/pieces_images/${pieceName}.png" class="pieceImage" alt=${pieceName}></img>`
+        curr_piece.addEventListener("click", function() {
+            modalPromotion.classList.remove("show");
+            updatePlayerState(tableSocket, null, null, null, move, pieceSymbol);
+        });
+    }
+
+    for (const pieceType in promotionObject) {
+        const pieceInfo = promotionObject[pieceType];
+        let curr_piece = document.getElementById(pieceInfo.id);
+        
+        // Remove previous listeners
+        let removeListeners = curr_piece.cloneNode(true);
+        curr_piece.parentNode.replaceChild(removeListeners, curr_piece);
+        curr_piece = removeListeners
+
+        if (move[0][0] === 6) {
+            setPromotionPiece(curr_piece, pieceInfo.white, pieceInfo.whiteSymbol);
+        } else {
+            setPromotionPiece(curr_piece, pieceInfo.black, pieceInfo.blackSymbol);
+        }
+    }
 }
 
 function clearBoard() {
