@@ -131,7 +131,7 @@ class BasicMovements2(unittest.TestCase):
         """Examine the movements of the king located on square (7, 3) - Basic movements test."""
         self.assertEqual(self.get_moves(7, 3), ({(6, 2)}, {(6, 4)}, False))
 
-class BlockTheKing(unittest.TestCase):
+class BlockTheKingMove(unittest.TestCase):
 
     # initiate test board
     @classmethod
@@ -141,6 +141,46 @@ class BlockTheKing(unittest.TestCase):
         cls.turn, cls.opponents_attacks, cls.checkin_pieces, cls.pinned_pieces, cls.castling, cls.enpassant = "black", set(), {}, {}, "____", None
 
         cls.pieces_positions = [("pawn", "white", (1, 2)), ("rook", "white", (1, 5)), ("knight", "white", (0, 5)), ("bishop", "white", (2, 6)),
+                                ("queen", "white", (3, 7)), ("king", "white", (0, 0)), ("king", "black", (3, 4))]
+
+        for piece_position in cls.pieces_positions:
+            piece, player, position = piece_position
+            row, col = position
+            cls.board[row][col] = Piece(piece, player, (row, col))
+
+        # Opponent
+        for row in range(ROWS):
+            for col in range(COLS):
+                curr_piece = cls.board[row][col]
+                if curr_piece and curr_piece.player != cls.turn:
+                    cls.possible_moves[row][col] = cls.get_moves(cls, row, col)
+
+        # Player
+        for row in range(ROWS):
+            for col in range(COLS):
+                curr_piece = cls.board[row][col]
+                if curr_piece and curr_piece.player == cls.turn:
+                    cls.possible_moves[row][col] = cls.get_moves(cls, row, col)
+    
+    def get_moves(self, row, col):
+        moves, attacks, promotion = self.board[row][col].check_piece_possible_moves(self, self.opponents_attacks, self.checkin_pieces, self.pinned_pieces, self.castling, self.enpassant)
+        return (set(moves), set(attacks), promotion)
+
+    def test_block_the_king_king_3_4(self):
+        """Examine the movements of the king located on square (3, 4) - Block the king test."""
+        self.assertEqual(self.get_moves(3, 4), ({(4, 3)}, set(), False))
+
+class BlockTheKingAttack(unittest.TestCase):
+
+    # initiate test board
+    @classmethod
+    def setUpClass(cls):
+        cls.board = [[None for _ in range(ROWS)] for _ in range(COLS)]
+        cls.possible_moves = [[None for _ in range(ROWS)] for _ in range(COLS)]
+        cls.turn, cls.opponents_attacks, cls.checkin_pieces, cls.pinned_pieces, cls.castling, cls.enpassant = "black", set(), {}, {}, "____", None
+
+        cls.pieces_positions = [("pawn", "white", (2, 5)), ("pawn", "white", (3, 3)), ("pawn", "white", (4, 4)), ("pawn", "white", (4, 5)),
+                                ("rook", "white", (0, 4)), ("knight", "white", (0, 6)), ("bishop", "white", (1, 2)),
                                 ("queen", "white", (3, 7)), ("king", "white", (0, 0)), ("king", "black", (3, 4))]
 
         for piece_position in cls.pieces_positions:
