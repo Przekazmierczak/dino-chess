@@ -128,7 +128,6 @@ class Piece:
                     distance = 1 # Starting distance
                     current_direction = [] # Stores the current direction of movement for checking purposes
                     absolute_pin_check = False # Continue checking in case the next attacked piece is the opponent's king; if it is, then the piece is in an absolute pin
-                    king_check = False # If the attacked piece is the opponent's king, continue once more to prevent its movement along the attacked line
                     while True:
                         new_row = self.row + distance * direction[0]
                         new_column = self.column + distance * direction[1]
@@ -137,7 +136,7 @@ class Piece:
                             break
                         # If the position is not empty, check if it's an opponent's piece
                         if board[new_row][new_column] is not None:
-                            if board[new_row][new_column].player is not self.player and not absolute_pin_check and not king_check:
+                            if board[new_row][new_column].player is not self.player and not absolute_pin_check:
                                 # Record pinned piece position
                                 pinned_piece = (new_row, new_column)
                                 # Add location to the attacked positions
@@ -145,12 +144,17 @@ class Piece:
                                 # Check whether the current piece is putting the opponent's king in check
                                 if board[new_row][new_column].piece == "king" and board[new_row][new_column].player is not self.player:
                                     checkin_pieces[(self.row, self.column)] = current_direction
-                                    king_check = True
+                                    # Add comment!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                                    next_row = self.row + (distance + 1) * direction[0]
+                                    next_column = self.column + (distance + 1) * direction[1]
+                                    if self._is_valid_position(next_row, next_column):
+                                        attacked_positions.add((next_row, next_column))
+                                    break
                                 # Check if the current piece is putting the attacked piece in absolute pin
                                 else:
                                     absolute_pin_check = True
                             # If the attacked location is occupied by a self piece, add the attack position and break
-                            elif board[new_row][new_column].player is self.player and not absolute_pin_check and not king_check:
+                            elif board[new_row][new_column].player is self.player and not absolute_pin_check:
                                 attacked_positions.add((new_row, new_column))
                                 break
                             # If the next piece behind the attacked opponent's piece is his king, the attacked piece is absolutely pinned
@@ -161,13 +165,9 @@ class Piece:
                             else:
                                 break
                         else:
-                            if not absolute_pin_check and not king_check:
+                            if not absolute_pin_check:
                                 # Add to opponent's attacks set
                                 attacked_positions.add((new_row, new_column))
-                            if king_check:
-                                # Add to opponent's attacks set
-                                attacked_positions.add((new_row, new_column))
-                                break
                             current_direction.append((new_row, new_column))
                         distance += 1
             
@@ -215,14 +215,10 @@ class Piece:
                     # Check if the new position is valid
                     if self._is_valid_position(new_row, new_column):
                         if self.piece == "knight":
-                            # If the position is empty, it's a possible move, otherwise, it might be an attack
-                            if board[new_row][new_column] is None:
-                                attacked_positions.add((new_row, new_column))
-                            elif board[new_row][new_column].player is not self.player:
-                                attacked_positions.add((new_row, new_column))
-                                # Check whether the current piece is putting the opponent's king in check
-                                if board[new_row][new_column].piece == "king" and board[new_row][new_column].player is not self.player:
-                                    checkin_pieces[(self.row, self.column)] = []
+                            attacked_positions.add((new_row, new_column))
+                            # Check whether the current piece is putting the opponent's king in check
+                            if board[new_row][new_column] is not None and board[new_row][new_column].piece == "king" and board[new_row][new_column].player is not self.player:
+                                checkin_pieces[(self.row, self.column)] = []
                         
                         elif self.piece == "king":
                             # Skip castling
@@ -362,7 +358,7 @@ class Board:
                 if curr_piece and curr_piece.player != self.turn:
                     # Calculate possible moves for opponent's pieces
                     possible_moves[row][col] = curr_piece.check_piece_possible_moves(self, attacked_positions, checkin_pieces, pinned_pieces, self.castling, self.enpassant)
-
+        print(attacked_positions)
         # Iterate over player's pieces
         for row in range(self.ROWS):
             for col in range(self.COLS):
