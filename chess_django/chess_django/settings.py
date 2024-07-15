@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     'channels',
     'table',
     'menu',
+    'lobby',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
