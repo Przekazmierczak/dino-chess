@@ -6,6 +6,9 @@ from .models import Game, Board
 from . import pieces
 
 # Create your views here.
+def index(request):
+    return redirect("lobby_index")
+
 def table(request, table_id):
     return render(request, "table/table_id.html", {
         "table_id": table_id,

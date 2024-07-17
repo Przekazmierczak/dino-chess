@@ -1,12 +1,8 @@
 {% extends "lobby/layout.html" %}
 
 {% block body %}
-    <a href="table/create_table">Create a new table</a>
-
-    <!-- <script>
-        document.querySelector('#table-id-submit').onclick = function(e) {
-            var tableID = "";
-            window.location.pathname = '/table/' + tableID + '/';
-        };
-    </script> -->
+    <a href="{% url 'create_table' %}">Create a new table</a>
+    <div>
+        Free tables: {{ free_tables }}
+    </div>
 {% endblock %}

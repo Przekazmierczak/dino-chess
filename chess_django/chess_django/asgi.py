@@ -17,12 +17,13 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'chess_django.settings')
 django_asgi_app = get_asgi_application()
 
 import table.routing
+import lobby.routing
 
 application = ProtocolTypeRouter(
     {
         "http": get_asgi_application(),
         "websocket": AllowedHostsOriginValidator(
-            AuthMiddlewareStack(URLRouter(table.routing.websocket_urlpatterns))
+            AuthMiddlewareStack(URLRouter(table.routing.websocket_urlpatterns + lobby.routing.websocket_urlpatterns))
         ),
     }
 )
