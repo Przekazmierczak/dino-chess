@@ -1,6 +1,7 @@
 import json
 from datetime import datetime, timezone
 from channels.generic.websocket import AsyncWebsocketConsumer
+from channels.layers import get_channel_layer
 from asgiref.sync import sync_to_async
 
 from .models import Game, Board
@@ -8,6 +9,8 @@ from . import pieces
 from .tasks import check_game_timeout
 
 from math import ceil
+
+from lobby.consumers import LobbyConsumer
 
 # from datetime import timedelta
 
@@ -148,6 +151,7 @@ class TableConsumer(AsyncWebsocketConsumer):
     async def handle_user_action(self, current_game, user, text_data_json):
         # Update player states in the database
         await self.push_players_state_to_db(current_game, user, text_data_json)
+        await self.send_message_to_lobby()
 
         # Get player usernames or default names
         white_player = current_game.white.username if current_game.white else "Player 1"
@@ -221,6 +225,14 @@ class TableConsumer(AsyncWebsocketConsumer):
             event["white_time_left"], event["black_time_left"]
         )
         await self.send_game_state_to_websocket(message)
+
+    async def send_message_to_lobby(self):
+        # Send the game state to the LobbyConsumer
+        formated_free_games = await LobbyConsumer.get_free_games_from_database()
+        message = LobbyConsumer.construct_free_games_message(formated_free_games)
+
+        channel_layer = get_channel_layer()
+        await channel_layer.group_send("lobby",{'type': 'send_free_games', **message})
         
     @sync_to_async
     def get_game_from_database(self):

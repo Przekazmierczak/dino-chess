@@ -38,6 +38,7 @@ function setupWebSocket() {
     // Handle incoming messages from the server
     tableSocket.onmessage = function(e) {
         const state = JSON.parse(e.data);
+        console.log(state)
     
         clearBoard();  // Clear board and listeners
         showPlayers(state);  // Update player names
