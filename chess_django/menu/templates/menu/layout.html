@@ -3,11 +3,74 @@
 <html lang="en">
     <head>
         <title>Menu</title>
-        <!-- <link rel="stylesheet" type="text/css" href="{% static 'table/styles.css' %}">
-        <script src="{% static 'table/table_interaction.js' %}"></script> -->
+        <link rel="stylesheet" type="text/css" href="{% static 'menu/styles.css' %}">
+        <!-- <script src="{% static 'table/table_interaction.js' %}"></script> -->
+        <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     </head>
     <body>
-        {% block body %}
-        {% endblock %}
+        <div class="sidebar">
+            <div class="top">
+                <div class="logo">
+                    <i class="bx bxs-chess"></i>
+                    <span>DinoChess</span>
+                </div>
+                <i class="bx bx-menu" id="btn"></i>
+            </div>
+            <ul>
+                <li>
+                    <a class="sidebar-button" href="{% url 'lobby_index' %}">
+                        <i class="bx bxs-chess"></i>
+                        <span class="nav-item">Play</span>
+                    </a>
+                    <span class="tooltip">Play</span>
+                </li>
+            </ul>
+            {% if user.is_authenticated %}
+            <div class="user">
+                <div>
+                    <p class="bold">{{ user.username }}</p>
+                </div>
+            </div>
+            <ul>
+                <li>
+                    <a class="sidebar-button" href="{% url 'logout' %}">
+                        <i class="bx bx-log-out" ></i>
+                        <span class="nav-item">Log Out</span>
+                    </a>
+                    <span class="tooltip">Log Out</span>
+                </li>
+            </ul>
+            {% endif %}
+            {% if not user.is_authenticated %}
+            <ul>
+                <li>
+                    <a class="sidebar-button" href="{% url 'login' %}">
+                        <i class="bx bx-log-in" ></i>
+                        <span class="nav-item">Log In</span>
+                    </a>
+                    <span class="tooltip">Log In</span>
+                </li>
+                <li>
+                    <a class="sidebar-button" href="{% url 'register' %}">
+                        <i class="bx bx-registered" ></i>
+                        <span class="nav-item">Register</span>
+                    </a>
+                    <span class="tooltip">Register</span>
+                </li>
+            </ul>
+            {% endif %}
+        </div>
+        <div class="main-content">
+            {% block body %}
+            {% endblock %}
+        </div>
     </body>
+    <script>
+        let btn = document.querySelector('#btn');
+        let sidebar = document.querySelector('.sidebar');
+
+        btn.onclick = function () {
+            sidebar.classList.toggle('active');
+        };
+    </script>
 </html>
