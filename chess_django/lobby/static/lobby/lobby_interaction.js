@@ -5,6 +5,7 @@ lobbySocket.onmessage = function(e) {
     console.log(state)
 
     const freeGamesContainer = document.getElementById('free-games');
+    freeGamesContainer.innerHTML = '';
     const games = createTable(state.free_games);
     freeGamesContainer.appendChild(games);
     
@@ -12,6 +13,7 @@ lobbySocket.onmessage = function(e) {
 
 function createTable(data) {
     const table = document.createElement('table');
+    table.className = 'free-games-table';
 
     // Loop through each row in the data array
     data.forEach(gameData => {
@@ -23,23 +25,36 @@ function createTable(data) {
             window.location.href = `table/${gameData[0]}/`;
         });
 
-        const game_id = document.createElement('tr');
+        const game_id = document.createElement('td');
         game_id.innerText = 'Table: ' + gameData[0];
-        
         gameRow.appendChild(game_id);
-        table.appendChild(gameRow);
 
-        const playersRow = document.createElement('tr');
-        
         const white_player = document.createElement('td');
-        white_player.innerText = 'White: ' + gameData[1];
-        playersRow.appendChild(white_player);
+        if (gameData[1] !== null) {
+            if (gameData[3] === true) {
+                white_player.className = 'player-ready'
+            } else {
+                white_player.className = 'player-unready'
+            }
+        } else {
+            gameData[1] = "-"
+        }
+
+        white_player.innerText = gameData[1];
+        gameRow.appendChild(white_player);
         
         const black_player = document.createElement('td');
-        black_player.innerText = 'Black: ' + gameData[2];
-        playersRow.appendChild(black_player);
-
-        gameRow.appendChild(playersRow);
+        if (gameData[2] !== null) {
+            if (gameData[4] === true) {
+                black_player.className = 'player-ready'
+            } else {
+                black_player.className = 'player-unready'
+            }
+        } else {
+            gameData[2] = "-"
+        }
+        black_player.innerText = gameData[2];
+        gameRow.appendChild(black_player);
 
         table.appendChild(gameRow);
     });

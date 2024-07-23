@@ -1,0 +1,25 @@
+html, body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.free-games-table {
+    border-collapse: collapse;
+    margin: 25px 0;
+}
+
+.free-games-table td {
+    padding: 24px 15px;
+    /* border: 1px solid black; */
+    min-width: 200px;
+    text-align: center;
+}
+
+.free-games-table tr {
+    border: 1px solid black;
+}
+
+.player-ready {
+    font-weight: bold;
+}
