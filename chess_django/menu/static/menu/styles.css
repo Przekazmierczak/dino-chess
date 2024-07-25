@@ -1,3 +1,13 @@
+:root {
+    --primary-bg-color: #12171e;
+    --text-color: white;
+    --hover-bg-color: white;
+    --hover-text-color: #12171e;
+    --sidebar-width: 80px;
+    --sidebar-expanded-width: 250px;
+    --transition-speed: 0.5s;
+}
+
 * {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     padding: 0;
@@ -10,7 +20,7 @@
     position: fixed;
     top: 0;
     left: 0;
-    background-color: #12171e;
+    background-color: var(--primary-bg-color);
     padding: .4rem .8rem;
     z-index: 30;
 }
@@ -23,16 +33,16 @@
 
 #sidebar {
     height: 100vh;
-    width: 80px;
+    width: var(--sidebar-width);
 }
 
 #sidebar.active {
-    width: 250px;
+    width: var(--sidebar-expanded-width);
 }
 
 #btn {
     position: absolute;
-    color: white;
+    color: var(--text-color);
     top: .4rem;
     left: 50%;
     font-size: 1.2rem;
@@ -48,7 +58,7 @@
 
 #topbar-logo,
 #sidebar-logo {
-    color: white;
+    color: var(--text-color);
     display: flex;
     height: 50px;
     width: 100%;
@@ -81,7 +91,7 @@
 }
 
 #sidebar-user p {
-    color: white;
+    color: var(--text-color);
     margin-left: 1rem;
     font-weight: 600;
     opacity: 0;
@@ -101,7 +111,7 @@
 }
 
 #sidebar ul li a {
-    color: white;
+    color: var(--text-color);
     display: flex;
     align-items: center;
     text-decoration: none;
@@ -109,8 +119,8 @@
 }
 
 #sidebar ul li a:hover {
-    background-color: white;
-    color: #12171e;
+    background-color: var(--hover-bg-color);
+    color: var(--hover-text-color);
 }
 
 #sidebar ul li a i {
@@ -135,7 +145,7 @@
 
 .tooltip {
     position: absolute;
-    background-color: white;
+    background-color: var(--hover-bg-color);
     left: 125px;
     top: 50%;
     transform: translate(-50%, -50%);
@@ -167,7 +177,7 @@
 
 @media (max-width: 992px) {
     #sidebar {
-        transition: all 0.5s ease;
+        transition: all var(--transition-speed) ease;
     }
     #btn {
         visibility: visible;
@@ -186,7 +196,7 @@
     
     #sidebar.active {
         visibility: visible;
-        transition: all 0.5s ease;
+        transition: all var(--transition-speed) ease;
     }
     
     #sidebar.active ~ #topbar-logo {
