@@ -1,4 +1,11 @@
-{% extends "table/layout.html" %}
+{% extends "menu/layout.html" %}
+{% load static %}
+
+{% block head %}
+<title>Table</title>
+<link rel="stylesheet" type="text/css" href="{% static 'table/styles.css' %}">
+<script src="{% static 'table/table_interaction.js' %}"></script>
+{% endblock %}
 
 {% block body %}
 <div class="container">

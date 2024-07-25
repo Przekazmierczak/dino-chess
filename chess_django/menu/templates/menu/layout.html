@@ -2,15 +2,22 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <title>Menu</title>
+        <meta name="viewport" content="width=device-width">
+        {% block head %}
+        {% endblock %}
         <link rel="stylesheet" type="text/css" href="{% static 'menu/styles.css' %}">
-        <!-- <script src="{% static 'table/table_interaction.js' %}"></script> -->
         <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     </head>
     <body>
-        <div class="sidebar">
-            <div class="top">
-                <div class="logo">
+        <div id="topbar">
+            <div id="topbar-logo">
+                <i class="bx bxs-chess"></i>
+                <span>DinoChess</span>
+            </div>
+        </div>
+        <div id="sidebar">
+            <div id="sidebar-top">
+                <div id="sidebar-logo">
                     <i class="bx bxs-chess"></i>
                     <span>DinoChess</span>
                 </div>
@@ -26,9 +33,9 @@
                 </li>
             </ul>
             {% if user.is_authenticated %}
-            <div class="user">
+            <div id="sidebar-user">
                 <div>
-                    <p class="bold">{{ user.username }}</p>
+                    <p>{{ user.username }}</p>
                 </div>
             </div>
             <ul>
@@ -60,14 +67,27 @@
             </ul>
             {% endif %}
         </div>
-        <div class="main-content">
+        <div id="main-content">
             {% block body %}
             {% endblock %}
         </div>
     </body>
     <script>
         let btn = document.querySelector('#btn');
-        let sidebar = document.querySelector('.sidebar');
+        let sidebar = document.querySelector('#sidebar');
+
+        function handleResize() {
+            const viewportWidth = window.innerWidth;
+    
+            if (viewportWidth < 992) {
+                sidebar.classList.remove('active')
+            } else {
+                sidebar.classList.add('active')
+            }
+        };
+
+        window.addEventListener('load', handleResize);
+        window.addEventListener('resize', handleResize);
 
         btn.onclick = function () {
             sidebar.classList.toggle('active');

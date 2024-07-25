@@ -1,6 +1,12 @@
-{% extends "lobby/layout.html" %}
+{% extends "menu/layout.html" %}
+{% load static %}
+
+{% block head %}
+    <title>Table</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'lobby/styles.css' %}">
+    <script src="{% static 'lobby/lobby_interaction.js' %}"></script>
+{% endblock %}
 
 {% block body %}
-    <!-- <a href="{% url 'create_table' %}">Create a new table</a> -->
     <div id="free-games"></div>
 {% endblock %}

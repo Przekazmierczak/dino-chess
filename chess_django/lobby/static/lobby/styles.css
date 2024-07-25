@@ -6,13 +6,13 @@ html, body {
 
 .free-games-table {
     border-collapse: collapse;
-    margin: 25px 0;
+    margin: 12px 0;
 }
 
 .free-games-table td {
-    padding: 24px 15px;
+    padding: 12px 10px;
     /* border: 1px solid black; */
-    min-width: 200px;
+    min-width: 70px;
     text-align: center;
 }
 
