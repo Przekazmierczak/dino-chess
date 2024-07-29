@@ -1,6 +1,6 @@
 let moveListeners = [];  // To store event listeners for moves
 let intervalId;  // To manage interval for timers
-let style = "dino";  // Default style for pieces
+let style = "classic";  // Default style for pieces
 
 // Runs when the DOM content is fully loaded
 document.addEventListener('DOMContentLoaded', function () {

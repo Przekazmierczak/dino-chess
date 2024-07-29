@@ -1,42 +1,47 @@
 {% extends "menu/layout.html" %}
 
+{% block head %}
+<title>DinoChess - Menu</title>
+<style>
+    #index-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+    }
+
+    #index-container div {
+        width: 70vw;
+        max-width: 400px;
+        min-width: 120px;
+        margin: 0.8rem auto;
+    }
+    
+    #index-container a {
+        display: flex;
+        justify-content: center;
+        color: white;
+        background-color: var(--primary-bg-color);
+        align-items: center;
+        text-decoration: none;
+        border-radius: 0.8rem;
+        line-height: 50px;
+        font-size: 18px;
+    }
+    
+    #index-container a:hover {
+        background-color: white;
+        color: black;
+    }
+</style>
+{% endblock %}
+
 {% block body %}
-    <div><a href="{% url 'lobby_index' %}">New game</a></div>
-    <div><a href="{% url 'register' %}">Register here.</a></div>
-    <div><a href="{% url 'login' %}">Log In here.</a></div>
-    <div><a href="{% url 'logout' %}">Log out.</a></div>
-    <div class="test">
-        hjfshjfghjfg
-    </div>
-    <div class="test">
-        hjfshjfghjfg
-    </div>
-    <div class="test">
-        hjfshjfghjfg
-    </div>
-    <div class="test">
-        hjfshjfghjfg
-    </div>
-    <div class="test">
-        hjfshjfghjfg
-    </div>
-    <div class="test">
-        hjfshjfghjfg
-    </div>
-    <div class="test">
-        hjfshjfghjfg
-    </div>
-    <div class="test">
-        hjfshjfghjfg
-    </div>
-    <div class="test">
-        hjfshjfghjfg
-    </div>
-    <div class="test">
-        hjfshjfghjfg
-    </div>
-    <div class="test">
-        hjfshjfghjfg
+    <div id="index-container">
+        <div><a href="{% url 'lobby_index' %}">Play the game</a></div>
+        <div><a href="{% url 'register' %}">Register</a></div>
+        <div><a href="{% url 'login' %}">Log In</a></div>
+        <div><a href="{% url 'logout' %}">Log out</a></div>
     </div>
 
 {% endblock %}

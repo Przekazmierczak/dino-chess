@@ -2,31 +2,27 @@
 {% load static %}
 
 {% block head %}
-<title>Table</title>
+<title>DinoChess - Table {{ table_id }}</title>
 <link rel="stylesheet" type="text/css" href="{% static 'table/styles.css' %}">
 <script src="{% static 'table/table_interaction.js' %}"></script>
 {% endblock %}
 
 {% block body %}
-<div class="container">
-    <div class="description">
-        <div>Table: {{ table_id }}</div>
-        <div id="moves"></div>
-    </div>
-    <div class="board" >
-        <div class="player-time">
-            <span>
-                <span id="black_player" class="player"></span>
-                {% if user.is_authenticated %}
-                    <button type="button" id="black_player_sit_button" class="hidden">Sit</button>
-                    <button type="button" id="black_player_stand_button" class="hidden">Stand up</button>
-                    <button type="button" id="black_player_ready_button" class="hidden">Ready</button>
-                    <button type="button" id="black_player_unready_button" class="hidden">Unready</button>
-                    {% endif %}
-                </span>
-                <span id="black_time" class="time"></span>
+    <div id="table-container">
+        <div class="grid">
+            <div id="table_number">Table: {{ table_id }}</div>
+            <div id="moves"></div>
+            <div id="black_player" class="player"></div>
+            {% if user.is_authenticated %}
+            <div id="black_buttons">
+                <button type="button" id="black_player_sit_button" class="hidden">Sit</button>
+                <button type="button" id="black_player_stand_button" class="hidden">Stand up</button>
+                <button type="button" id="black_player_ready_button" class="hidden">Ready</button>
+                <button type="button" id="black_player_unready_button" class="hidden">Unready</button>
             </div>
-            <table>
+            {% endif %}
+            <div id="black_time" class="time"></div>
+            <table class="chess-board">
                 {% for row in "76543210" %}
                 <tr>
                     {% for column in "76543210" %}
@@ -35,47 +31,47 @@
                 </tr>
                 {% endfor %}
             </table>
-            <div class="player-time">
-                <span>
-                    <span id="white_player" class="player"></span>
-                    {% if user.is_authenticated %}
-                    <button type="button" id="white_player_sit_button" class="hidden">Sit</button>
-                    <button type="button" id="white_player_stand_button" class="hidden">Stand up</button>
-                    <button type="button" id="white_player_ready_button" class="hidden">Ready</button>
-                    <button type="button" id="white_player_unready_button" class="hidden">Unready</button>
-                {% endif %}
-            </span>
-            <span id="white_time" class="time"></span>
+            <div id="white_player" class="player"></div>
+            {% if user.is_authenticated %}
+            <div id="white_buttons">
+                <button type="button" id="white_player_sit_button" class="hidden">Sit</button>
+                <button type="button" id="white_player_stand_button" class="hidden">Stand up</button>
+                <button type="button" id="white_player_ready_button" class="hidden">Ready</button>
+                <button type="button" id="white_player_unready_button" class="hidden">Unready</button>
+            </div>
+            {% endif %}
+            <div id="white_time" class="time"></div>
+            <div class="modal-promotion" id="modal_promotion">
+                <div class="modal">
+                    <p>
+                        <table id="modal_table">
+                            <tr>
+                                <td id="modal_queen" class="modal_td"></td>
+                                <td id="modal_rook" class="modal_td"></td>
+                                <td id="modal_knight" class="modal_td"></td>
+                                <td id="modal_bishop" class="modal_td"></td>
+                            </tr>
+                        </table>
+                    </p>
+                </div>
+            </div>
+            <div id="border-black"></div>
+            <div id="border-white"></div>
+            <div class="modal-winner" id="modal_winner">
+                <div class="modal">
+                    <p>
+                        <h1 id="winner"></h1>
+                    </p>
+                </div>
+            </div>
         </div>
     </div>
-    <div class="modal-promotion" id="modal_promotion">
-        <div class="modal">
-            <p>
-                <table id="modal_table">
-                    <tr>
-                        <td id="modal_queen" class="modal_td"></td>
-                        <td id="modal_rook" class="modal_td"></td>
-                        <td id="modal_knight" class="modal_td"></td>
-                        <td id="modal_bishop" class="modal_td"></td>
-                    </tr>
-                </table>
-            </p>
-        </div>
-    </div>
-    <div class="modal-winner" id="modal_winner">
-        <div class="modal">
-            <p>
-                <h1 id="winner"></h1>
-            </p>
-        </div>
-    </div>
-</div>
-
-<!-- BUTTONS REMOVE LATER-->
-<div class="container2">
-    <button type="button" id="button_rotate">Rotate</button>
-    <button type="button" id="button_dino">Change to dino!</button>
-</div>
-
-{{ table_id|json_script:"table_id" }}
-{% endblock %}
+    
+    <!-- BUTTONS REMOVE LATER-->
+    <!-- <div class="container2">
+        <button type="button" id="button_rotate">Rotate</button>
+        <button type="button" id="button_dino">Change to dino!</button>
+    </div> -->
+    
+    {{ table_id|json_script:"table_id" }}
+    {% endblock %}

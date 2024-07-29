@@ -2,11 +2,13 @@
 {% load static %}
 
 {% block head %}
-    <title>Table</title>
+    <title>DinoChess - Lobby</title>
     <link rel="stylesheet" type="text/css" href="{% static 'lobby/styles.css' %}">
     <script src="{% static 'lobby/lobby_interaction.js' %}"></script>
 {% endblock %}
 
 {% block body %}
-    <div id="free-games"></div>
+    <div id="lobby-container">
+        <div id="free-games"></div>
+    </div>
 {% endblock %}
