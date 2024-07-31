@@ -1,19 +1,39 @@
+:root {
+    --square-size: min(min(9.5vh, 7.3vw), 80px);
+}
+
+@media (max-width: 992px) {
+    :root {
+        --square-size: min(min(9.5vh, 8.5vw), 80px);
+    }
+}
+
+@media (max-width: 576px) {
+    :root {
+        --square-size: min(min(9.5vh, 9.1vw), 80px);
+    }
+}
+
+
+
 #table-container {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
+    height: 95vh;
 }
 
 .grid {
     display: grid;
-    grid-template-rows: repeat(10, minmax(0, min(10vh, 80px)));
-    grid-template-columns: repeat(13, minmax(0, min(10vh, 80px)));
+    grid-template-rows: repeat(10, minmax(0, var(--square-size)));
+    grid-template-columns: repeat(13, minmax(0, var(--square-size)));
 }
+
 
 #border-black {
     background-color: var(--primary-bg-color);
-    grid-area: 1 / 1 / 11 / 14;
+    grid-row: 1 / 11;
+    grid-column: 1 / 14;
     border-radius: 0.8rem;
 }
 
@@ -91,6 +111,43 @@
     grid-row: 5;
 }
 
+@media (max-aspect-ratio: 16/10) {
+    #table-container {
+        align-items: flex-start;
+        height: fit-content;
+    }
+
+    .grid {
+        grid-template-rows: repeat(12, minmax(0, var(--square-size)));
+        grid-template-columns: repeat(10, minmax(0, var(--square-size)));
+    }
+    
+    #table_number,
+    #moves {
+        grid-column: 2 / 10;
+    }
+    
+    #table_number {
+        grid-row: 11;
+    }
+    
+    #moves {
+        grid-row: 12;
+    }
+
+    #border-black {
+        grid-row: 1 / 14;
+        grid-column: 1 / 11;
+    }
+}
+
+@media (max-width: 576px) {
+    /* .grid {
+        grid-template-rows: repeat(12, minmax(0, var(--square-size)));
+        grid-template-columns: repeat(10, minmax(0, var(--square-size)));
+    } */
+}
+
 .chess-board {
     grid-row: 2 / 10;
     grid-column: 2 / 10;
@@ -108,13 +165,13 @@ td {
 }
 
 td {
-    width: 80px;
-    height: 80px;
+    width: var(--square-size);
+    height: var(--square-size);
 }
 
 .pieceImage {
-    width: 80px;
-    height: 70px;
+    width: var(--square-size);
+    height: calc(var(--square-size) - 1/8 * var(--square-size));
 }
 
 .draggableElement {
