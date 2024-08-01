@@ -1,46 +1,30 @@
 :root {
-    --square-size: min(min(9.5vh, 7.3vw), 80px);
+    --square-size: min(5.5vh, 4.5vw);
 }
 
 @media (max-width: 992px) {
     :root {
-        --square-size: min(min(9.5vh, 8.5vw), 80px);
+        --square-size: min(5.5vh, 5.2vw);
     }
 }
 
 @media (max-width: 576px) {
     :root {
-        --square-size: min(min(9.5vh, 9.1vw), 80px);
+        --square-size: min(5.1vh, 5.8vw);
     }
 }
-
-
 
 #table-container {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 95vh;
+    height: 97vh;
 }
 
 .grid {
     display: grid;
-    grid-template-rows: repeat(10, minmax(0, var(--square-size)));
-    grid-template-columns: repeat(13, minmax(0, var(--square-size)));
-}
-
-
-#border-black {
-    background-color: var(--primary-bg-color);
-    grid-row: 1 / 11;
-    grid-column: 1 / 14;
-    border-radius: 0.8rem;
-}
-
-#border-white {
-    background-color: white;
-    grid-area: 2 / 2 / 10 / 10;
-    z-index: 5;
+    grid-template-rows: repeat(18, minmax(0, var(--square-size)));
+    grid-template-columns: repeat(21, minmax(0, var(--square-size)));
 }
 
 #black_player,
@@ -51,7 +35,7 @@
     align-items: center;
     color: white;
     z-index: 10;
-    font-size: 25px;
+    font-size: min(var(--square-size), 20px);
 }
 
 #black_player,
@@ -61,46 +45,83 @@
 
 #white_player,
 #white_time {
-    grid-row: 10;
+    grid-row: 18;
 }
 
 #black_player,
 #white_player {
-    grid-column: 2 / 5;
+    grid-column: 1 / 7;
 }
 
 #black_time,
 #white_time {
     justify-content: flex-end;
-    grid-column: 7 / 10;
+    grid-column: 14 / 17;
     
 }
 
-#black_buttons,
-#white_buttons {
+.button {
     display: flex;
+    justify-content: center;
     align-items: center;
-    grid-column: 5 / 7;
+    width: 100px;
+    color: white;
+    background-color: var(--primary-bg-color);
+    text-decoration: none;
+    border-radius: 0.8rem;
+    font-size: min(var(--square-size), 20px);
+    margin-bottom: 0.8rem;
+    cursor: pointer;
     z-index: 10;
 }
 
-#black_buttons {
+.button:hover {
+    background-color: white;
+    color: black;
+}
+
+.grid .button {
+    justify-content: center;
+    align-items: center;
+}
+
+#black_player_sit_button,
+#black_player_stand_button {
     grid-row: 1;
+    grid-column: 7;
+}
+
+#black_player_ready_button,
+#black_player_unready_button {
+    grid-row: 1;
+    grid-column: 9;
+}
+
+#white_player_sit_button,
+#white_player_stand_button {
+    grid-row: 18;
+    grid-column: 7;
+}
+
+#white_player_ready_button,
+#white_player_unready_button {
+    grid-row: 18;
+    grid-column: 9;
 }
 
 #white_buttons {
-    grid-row: 10;
+    grid-row: 18;
 }
 
 #table_number,
 #moves {
-    grid-column: 10 / 14;
+    grid-column: 17 / 22;
     display: flex;
     align-items: center;
     justify-content: center;
     color: white;
     z-index: 10;
-    font-size: 30px;
+    font-size: min(var(--square-size), 22px);
 }
 
 #table_number {
@@ -108,50 +129,15 @@
 }
 
 #moves {
-    grid-row: 5;
-}
-
-@media (max-aspect-ratio: 16/10) {
-    #table-container {
-        align-items: flex-start;
-        height: fit-content;
-    }
-
-    .grid {
-        grid-template-rows: repeat(12, minmax(0, var(--square-size)));
-        grid-template-columns: repeat(10, minmax(0, var(--square-size)));
-    }
-    
-    #table_number,
-    #moves {
-        grid-column: 2 / 10;
-    }
-    
-    #table_number {
-        grid-row: 11;
-    }
-    
-    #moves {
-        grid-row: 12;
-    }
-
-    #border-black {
-        grid-row: 1 / 14;
-        grid-column: 1 / 11;
-    }
-}
-
-@media (max-width: 576px) {
-    /* .grid {
-        grid-template-rows: repeat(12, minmax(0, var(--square-size)));
-        grid-template-columns: repeat(10, minmax(0, var(--square-size)));
-    } */
+    grid-row: 4;
 }
 
 .chess-board {
-    grid-row: 2 / 10;
-    grid-column: 2 / 10;
+    grid-row: 2 / 17;
+    grid-column: 1 / 16;
     z-index: 10;
+    background-color: white;
+    border-radius: 0.3rem;
 }
 
 table {
@@ -165,13 +151,38 @@ td {
 }
 
 td {
-    width: var(--square-size);
-    height: var(--square-size);
+    width: calc(2 * var(--square-size));
+    height: calc(2 * var(--square-size));
 }
 
 .pieceImage {
-    width: var(--square-size);
-    height: calc(var(--square-size) - 1/8 * var(--square-size));
+    width: calc(2 * var(--square-size));
+    height: calc(2 * (var(--square-size) - 1/8 * var(--square-size)));
+}
+
+@media (max-aspect-ratio: 16/9) {
+    #table-container {
+        align-items: flex-start;
+        height: fit-content;
+    }
+
+    .grid {
+        grid-template-rows: repeat(20, minmax(0, var(--square-size)));
+        grid-template-columns: repeat(16, minmax(0, var(--square-size)));
+    }
+    
+    #table_number,
+    #moves {
+        grid-column: 1 / 17;
+    }
+    
+    #table_number {
+        grid-row: 19;
+    }
+    
+    #moves {
+        grid-row: 20;
+    }
 }
 
 .draggableElement {
