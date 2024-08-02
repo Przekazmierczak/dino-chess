@@ -14,27 +14,43 @@
             <div id="moves"></div>
             <div id="black_player" class="player"></div>
             {% if user.is_authenticated %}
-            <div id="black_player_sit_button" class="button hidden">Sit</div>
-            <div id="black_player_stand_button" class="button hidden">Stand up</div>
-            <div id="black_player_ready_button" class="button hidden">Ready</div>
-            <div id="black_player_unready_button" class="button hidden">Unready</div>
+            <div id="black_player_sit_button" class="hidden">
+                <div class="button_black">Sit</div>
+            </div>
+            <div id="black_player_stand_button" class="hidden">
+                <div class="button_black">Stand up</div>
+            </div>
+            <div id="black_player_ready_button" class="hidden">
+                <div class="button_black">Ready</div>
+            </div>
+            <div id="black_player_unready_button" class="hidden">
+                <div class="button_black">Unready</div>
+            </div>
             {% endif %}
             <div id="black_time" class="time"></div>
             <table class="chess-board">
                 {% for row in "76543210" %}
-                <tr>
-                    {% for column in "76543210" %}
-                    <td id="square{{ row }}{{ column }}"></td>
-                    {% endfor %}
-                </tr>
+                    <tr>
+                        {% for column in "76543210" %}
+                        <td id="square{{ row }}{{ column }}"></td>
+                        {% endfor %}
+                    </tr>
                 {% endfor %}
             </table>
             <div id="white_player" class="player"></div>
             {% if user.is_authenticated %}
-            <div id="white_player_sit_button" class="button hidden">Sit</div>
-            <div id="white_player_stand_button" class="button hidden">Stand up</div>
-            <div id="white_player_ready_button" class="button hidden">Ready</div>
-            <div id="white_player_unready_button" class="button hidden">Unready</div>
+            <div id="white_player_sit_button" class="hidden">
+                <div class="button_white">Sit</div>
+            </div>
+            <div id="white_player_stand_button" class="hidden">
+                <div class="button_white">Stand up</div>
+            </div>
+            <div id="white_player_ready_button" class="hidden">
+                <div class="button_white">Ready</div>
+            </div>
+            <div id="white_player_unready_button" class="hidden">
+                <div class="button_white">Unready</div>
+            </div>
             {% endif %}
             <div id="white_time" class="time"></div>
             <div class="modal-promotion" id="modal_promotion">
