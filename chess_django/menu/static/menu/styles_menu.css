@@ -1,0 +1,30 @@
+#index-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+}
+
+#index-container div {
+    width: 70vw;
+    max-width: 400px;
+    min-width: 120px;
+    margin: 0.8rem auto;
+}
+
+#index-container a {
+    display: flex;
+    justify-content: center;
+    color: white;
+    background-color: var(--primary-bg-color);
+    align-items: center;
+    text-decoration: none;
+    border-radius: 0.8rem;
+    line-height: 50px;
+    font-size: 18px;
+}
+
+#index-container a:hover {
+    background-color: white;
+    color: black;
+}

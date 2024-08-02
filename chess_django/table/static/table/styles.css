@@ -101,10 +101,21 @@
 }
 
 #black_player_sit_button,
-#black_player_stand_button {
+#black_player_stand_button,
+#black_player_ready_button,
+#black_player_unready_button,
+#white_player_sit_button,
+#white_player_stand_button,
+#white_player_ready_button,
+#white_player_unready_button {
     display: flex;
     justify-content: center;
     align-items: center;
+    z-index: 15;
+}
+
+#black_player_sit_button,
+#black_player_stand_button {
     grid-row: 8 / 9;
     grid-column: 7 / 11;
     z-index: 15;
@@ -112,9 +123,6 @@
 
 #black_player_ready_button,
 #black_player_unready_button {
-    display: flex;
-    justify-content: center;
-    align-items: center;
     grid-row: 6 / 8;
     grid-column: 7 / 11;
     z-index: 15;
@@ -122,9 +130,6 @@
 
 #white_player_sit_button,
 #white_player_stand_button {
-    display: flex;
-    justify-content: center;
-    align-items: center;
     grid-row: 11 / 12;
     grid-column: 7 / 11;
     z-index: 15;
@@ -132,9 +137,6 @@
 
 #white_player_ready_button,
 #white_player_unready_button {
-    display: flex;
-    justify-content: center;
-    align-items: center;
     grid-row: 12 / 14;
     grid-column: 7 / 11;
     z-index: 15;
