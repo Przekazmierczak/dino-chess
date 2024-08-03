@@ -22,6 +22,7 @@
 }
 
 .grid {
+    position: relative;
     display: grid;
     grid-template-rows: repeat(18, minmax(0, var(--square-size)));
     grid-template-columns: repeat(21, minmax(0, var(--square-size)));
@@ -186,8 +187,8 @@
 }
 
 .chess-board {
-    grid-row: 2 / 17;
-    grid-column: 1 / 16;
+    grid-row: 2 / 18;
+    grid-column: 1 / 17;
     z-index: 10;
     background-color: white;
     border-radius: 0.3rem;
@@ -206,6 +207,8 @@ td {
 td {
     width: calc(2 * var(--square-size));
     height: calc(2 * var(--square-size));
+    min-width: calc(2 * var(--square-size));
+    min-height: calc(2 * var(--square-size));
 }
 
 .pieceImage {
@@ -288,11 +291,8 @@ td.checking {
     background-color: rgba(206, 0, 0, 0.65);
 }
 
-.modal-promotion {
+#modal_background {
     background-color: rgba(0, 0, 0, 0.3);
-    display: flex;
-    align-items: center;
-    justify-content: center;
     position: fixed;
     opacity: 0;
     pointer-events: none;
@@ -300,45 +300,32 @@ td.checking {
     left: 0;
     height: 100vh;
     width: 100vw;
+    z-index: 15;
 }
 
-.modal-winner {
-    background-color: rgba(0, 0, 0, 0.3);
+#modal_promotion,
+#modal_winner {
     display: flex;
-    align-items: center;
     justify-content: center;
-    position: fixed;
-    opacity: 0;
-    pointer-events: none;
-    top: 0;
-    left: 0;
-    height: 100vh;
-    width: 100vw;
-}
-
-.modal-promotion.show {
-    pointer-events: auto;
-    opacity: 1;
-}
-
-.modal-winner.show {
-    pointer-events: auto;
-    opacity: 1;
-}
-
-.modal {
-    background-color: #fff;
-    border-radius: 5px;
-    padding: 30px 50px;
-    width: 600px;
-    max-width: 100%;
+    align-items: center;
+    display: none;
+    background-color: white;
+    border-radius: 8px;
     text-align: center;
+    grid-row: 9 / 11;
+    grid-column: 4 / 14;
+    z-index: 20;
+}
+
+#modal_promotion.show,
+#modal_winner.show,
+#modal_background.show {
+    pointer-events: auto;
+    display: table-cell;
 }
 
 .modal_td {
-    width: 120px;
-    height: 120px;
-    position: relative;
+    cursor: pointer;
 }
 
 #modal_table {

@@ -212,7 +212,9 @@ function updatePlayerState(tableSocket, player, playerState, readyState, move, p
 function displayWinner(state) {
     if (state.winner !== null) {
         const modalWinner = document.getElementById("modal_winner");
+        const modalBackground = document.getElementById("modal_background");
         modalWinner.classList.add("show");
+        modalBackground.classList.add("show");
         const htmlWinner = document.getElementById("winner");
         if (state.winner === "draw") {
             htmlWinner.innerHTML = `<p>It's a draw!</p>`;
@@ -384,12 +386,15 @@ function showPromotionModal(move, tableSocket) {
     }
 
     const modalPromotion = document.querySelector("#modal_promotion");
+    const modalBackground = document.getElementById("modal_background");
     modalPromotion.classList.add("show");
+    modalBackground.classList.add("show");
 
     const setPromotionPiece  = function(curr_piece, pieceName, pieceSymbol) {
         curr_piece.innerHTML = `<img src="/static/table/pieces_images/${pieceName}.png" class="pieceImage" alt=${pieceName}></img>`
         curr_piece.addEventListener("click", function() {
             modalPromotion.classList.remove("show");
+            modalBackground.classList.remove("show");
             updatePlayerState(tableSocket, null, null, null, move, pieceSymbol);
         });
     }

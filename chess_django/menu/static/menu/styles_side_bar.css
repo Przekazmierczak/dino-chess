@@ -9,6 +9,7 @@
     --width-big-screen: calc(100% - var(--sidebar-expanded-width));
     --width-medium-screen: calc(100% - var(--sidebar-width));
     --width-small-screen: 100%;
+    --background-color: rgb(54, 54, 54);
 }
 
 * {
@@ -167,7 +168,7 @@
 
 #main-content {
     position: relative;
-    background-color: rgb(54, 54, 54);
+    background-color: var(--background-color);
     left: var(--sidebar-expanded-width);
     width: var(--width-big-screen);
     min-height: 100vh;
