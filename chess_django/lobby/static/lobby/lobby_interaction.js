@@ -19,8 +19,6 @@ function createTable(data) {
     data.forEach(gameData => {
         const gameRow = document.createElement('tr');
 
-        // gameRow.id = 'game-' + gameData[0];
-
         gameRow.addEventListener('click', () => {
             window.location.href = `table/${gameData[0]}/`;
         });
@@ -31,9 +29,7 @@ function createTable(data) {
 
         const white_player = document.createElement('td');
         if (gameData[1] !== null) {
-            if (gameData[3] === true) {
-                white_player.className = 'player-ready'
-            } else {
+            if (gameData[3] !== true) {
                 white_player.className = 'player-unready'
             }
         } else {
@@ -45,9 +41,7 @@ function createTable(data) {
         
         const black_player = document.createElement('td');
         if (gameData[2] !== null) {
-            if (gameData[4] === true) {
-                black_player.className = 'player-ready'
-            } else {
+            if (gameData[4] !== true) {
                 black_player.className = 'player-unready'
             }
         } else {

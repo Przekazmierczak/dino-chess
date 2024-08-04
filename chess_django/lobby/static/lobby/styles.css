@@ -31,6 +31,10 @@
     color: black;
 }
 
+.player-unready {
+    color: rgb(104, 104, 104);
+}
+
 @media (max-width: 576px) {
     #lobby-container tr {
         flex-direction: column;

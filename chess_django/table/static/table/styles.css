@@ -39,6 +39,13 @@
     font-size: min(var(--square-size), 20px);
 }
 
+#black_player.gray,
+#black_time.gray,
+#white_player.gray,
+#white_time.gray {
+    color: gray;
+}
+
 #black_player,
 #black_time {
     grid-row: 1;

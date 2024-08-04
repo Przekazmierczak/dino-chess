@@ -52,26 +52,26 @@ function setupWebSocket() {
         console.log("received updated board");
         
         // ------------------ BUTTONS REMOVE LATER ------------------------
-        const board = document.querySelector(".board");
-        const rotateButton = document.getElementById("button_rotate");
-        const dinoButton = document.getElementById("button_dino");
+        // const board = document.querySelector(".board");
+        // const rotateButton = document.getElementById("button_rotate");
+        // const dinoButton = document.getElementById("button_dino");
         
-        rotateButton.addEventListener("click", function() {
-            if (board.classList.contains("rotate")) {
-                board.classList.remove("rotate");
-            } else {
-                board.classList.add("rotate");
-            }
-        })
+        // rotateButton.addEventListener("click", function() {
+        //     if (board.classList.contains("rotate")) {
+        //         board.classList.remove("rotate");
+        //     } else {
+        //         board.classList.add("rotate");
+        //     }
+        // })
         
-        dinoButton.addEventListener("click", function() {
-            if (style === "classic") {
-                style = "dino";
-            } else {
-                style = "classic";
-            }
-            renderBoard(tableSocket, state);
-        })
+        // dinoButton.addEventListener("click", function() {
+        //     if (style === "classic") {
+        //         style = "dino";
+        //     } else {
+        //         style = "classic";
+        //     }
+        //     renderBoard(tableSocket, state);
+        // })
         // ------------------ BUTTONS REMOVE LATER ------------------------
         
     };
@@ -79,8 +79,15 @@ function setupWebSocket() {
 
 // Function to update player names
 function showPlayers(state) {
-    document.getElementById("white_player").innerHTML = `${state.white_player}`;
-    document.getElementById("black_player").innerHTML = `${state.black_player}`;
+    const players = [
+        { element: document.getElementById("white_player"), name: state.white_player, ready: state.white_player_ready },
+        { element: document.getElementById("black_player"), name: state.black_player, ready: state.black_player_ready }
+    ];
+
+    players.forEach(player => {
+        player.element.innerHTML = `${player.name}`;
+        player.element.classList.toggle("gray", !player.ready);
+    });
 }
 
 // Function to update player times and manage countdown
