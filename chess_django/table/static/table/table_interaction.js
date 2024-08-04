@@ -130,10 +130,12 @@ function addRemovePlayers(tableSocket, state) {
     ];
 
     if (state.white_player_ready !== true || state.black_player_ready !== true) {
+        document.getElementById("modal_background").classList.add("show");
         buttonsConfig.forEach(config => {
             setButtonState(tableSocket, state, config);
         });
     } else {
+        document.getElementById("modal_background").classList.remove("show");
         buttonsConfig.forEach(config => {
             document.getElementById(config.sit).classList.add("hidden");
             document.getElementById(config.stand).classList.add("hidden");

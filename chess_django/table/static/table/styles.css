@@ -75,7 +75,6 @@
     font-size: min(var(--square-size), 20px);
     margin-bottom: 0.8rem;
     cursor: pointer;
-    z-index: 10;
     white-space: nowrap;
 }
 
@@ -112,35 +111,31 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 15;
+    z-index: 20;
 }
 
 #black_player_sit_button,
 #black_player_stand_button {
     grid-row: 8 / 9;
     grid-column: 7 / 11;
-    z-index: 15;
 }
 
 #black_player_ready_button,
 #black_player_unready_button {
     grid-row: 6 / 8;
     grid-column: 7 / 11;
-    z-index: 15;
 }
 
 #white_player_sit_button,
 #white_player_stand_button {
     grid-row: 11 / 12;
     grid-column: 7 / 11;
-    z-index: 15;
 }
 
 #white_player_ready_button,
 #white_player_unready_button {
     grid-row: 12 / 14;
     grid-column: 7 / 11;
-    z-index: 15;
 }
 
 @media (max-width: 992px), (max-height: 650px) {
@@ -209,6 +204,7 @@ td {
     height: calc(2 * var(--square-size));
     min-width: calc(2 * var(--square-size));
     min-height: calc(2 * var(--square-size));
+    font-size: var(--square-size);
 }
 
 .pieceImage {
@@ -251,16 +247,16 @@ td {
 
 td.checking:hover {
     box-shadow: 
-        inset 0 0 0 3px rgb(0, 100, 255),
-        inset 0 0 0 5px rgb(255, 0, 0);
+        inset 0 0 0 0.08em rgb(0, 100, 255),
+        inset 0 0 0 0.12em rgb(255, 0, 0);
 }
 
 td:hover {
-    box-shadow: inset 0 0 0 3px rgb(0, 100, 255);
+    box-shadow: inset 0 0 0 0.08em rgb(0, 100, 255);
 }
 
 td.checking {
-    box-shadow: inset 0 0 0 5px rgb(255, 0, 0);
+    box-shadow: inset 0 0 0 0.08em rgb(255, 0, 0);
 }
 
 .marked {
@@ -294,8 +290,7 @@ td.checking {
 #modal_background {
     background-color: rgba(0, 0, 0, 0.3);
     position: fixed;
-    opacity: 0;
-    pointer-events: none;
+    display: none;
     top: 0;
     left: 0;
     height: 100vh;
@@ -305,13 +300,9 @@ td.checking {
 
 #modal_promotion,
 #modal_winner {
-    display: flex;
-    justify-content: center;
-    align-items: center;
     display: none;
     background-color: white;
     border-radius: 8px;
-    text-align: center;
     grid-row: 9 / 11;
     grid-column: 4 / 14;
     z-index: 20;
@@ -320,17 +311,19 @@ td.checking {
 #modal_promotion.show,
 #modal_winner.show,
 #modal_background.show {
-    pointer-events: auto;
-    display: table-cell;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .modal_td {
     cursor: pointer;
+    text-align: center;
+    vertical-align: middle;
 }
 
-#modal_table {
-    margin-left: auto;
-    margin-right: auto;
+#winner {
+    font-size: min(var(--square-size), 35px);
 }
 
 .rotate {
