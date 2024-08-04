@@ -257,8 +257,6 @@ function setupSquareEvents(row, col) {
     const square = document.querySelector(`#square${row}${col}`);
     square.removeAttribute("draggable");
     square.classList.remove("draggableElement");
-    square.addEventListener("mouseover", () => square.classList.add("mouseover"));
-    square.addEventListener("mouseleave", () => square.classList.remove("mouseover"));
 }
 
 // Function to render a specific square with a piece
