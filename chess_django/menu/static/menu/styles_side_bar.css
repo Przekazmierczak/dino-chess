@@ -61,23 +61,28 @@
 #sidebar-logo {
     color: var(--text-color);
     display: flex;
-    height: 30px;
     width: 100%;
     align-items: center;
-    pointer-events: none;
+    text-decoration: none;
 }
 
 #sidebar-logo {
+    font-size: 19px;
+    height: 50px;
     opacity: 0;
+    max-width: 130px;
+    pointer-events: none;
 }
 
 #topbar-logo {
+    height: 30px;
     justify-content: flex-end;
     opacity: 1;
 }
 
 #sidebar.active #sidebar-logo {
     opacity: 1;
+    pointer-events: auto;
 }
 
 #sidebar-logo i {
