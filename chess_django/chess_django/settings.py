@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'table',
     'menu',
     'lobby',
+    'play_with_computer',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

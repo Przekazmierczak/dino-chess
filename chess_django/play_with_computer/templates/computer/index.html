@@ -1,0 +1,17 @@
+{% extends "menu/layout.html" %}
+{% load static %}
+
+{% block head %}
+    <title>DinoChess - Play with computer</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'lobby/styles.css' %}">
+    <!-- <script src="{% static 'lobby/lobby_interaction.js' %}"></script> -->
+{% endblock %}
+
+{% block body %}
+    <div class="layout-buttons-container">
+        <div><a class="layout-buttons" href="{% url 'table' 1 %}">Easy</a></div>
+        <div><a class="layout-buttons" href="{% url 'table' 1 %}">Medium</a></div>
+        <div><a class="layout-buttons" href="{% url 'table' 1 %}">Hard</a></div>
+        <div><a class="layout-buttons" href="{% url 'table' 1 %}">Impossible</a></div>
+    </div>
+{% endblock %}

@@ -7,14 +7,16 @@
 {% endblock %}
 
 {% block body %}
-    <div id="index-container">
-        <div><a href="{% url 'lobby_index' %}">Play the game</a></div>
+    <div class="layout-buttons-container">
+        <div><a class="layout-buttons" href="{% url 'lobby_index' %}">Play other players</a></div>
+        <div><a class="layout-buttons" href="{% url 'computer_index' %}">Play the computer</a></div>
+        <div><a class="layout-buttons"> Play against youself</a></div>
         {% if not user.is_authenticated %}
-            <div><a href="{% url 'login' %}">Log In</a></div>
-            <div><a href="{% url 'register' %}">Register</a></div>
+            <div><a class="layout-buttons" href="{% url 'login' %}">Log In</a></div>
+            <div><a class="layout-buttons" href="{% url 'register' %}">Register</a></div>
         {% endif %}
         {% if user.is_authenticated %}
-            <div><a href="{% url 'logout' %}">Log out</a></div>
+            <div><a class="layout-buttons" href="{% url 'logout' %}">Log out</a></div>
         {% endif %}
     </div>
 {% endblock %}
