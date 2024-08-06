@@ -1,0 +1,10 @@
+# Ignore the Stockfish directory in the root
+stockfish/
+
+# Ignore the SQLite database file
+chess_django/db.sqlite3
+
+# Ignore __pycache__ directories
+chess_django/menu/__pycache__/
+chess_django/table/__pycache__/
+chess_django/chess_django/__pycache__/
