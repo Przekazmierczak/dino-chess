@@ -43,7 +43,7 @@ class LobbyConsumer(AsyncWebsocketConsumer):
     @staticmethod
     @sync_to_async
     def get_free_games_from_database():
-        free_games = list(Game.objects.filter(Q(white_ready=False) | Q(black_ready=False)).order_by('id'))
+        free_games = list(Game.objects.filter((Q(white_ready=False) | Q(black_ready=False)) & Q(with_ai=False)).order_by('id'))
 
         if len(free_games) < 10:
             for _ in range(10 - len(free_games)):

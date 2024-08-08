@@ -9,9 +9,9 @@
 
 {% block body %}
     <div class="layout-buttons-container">
-        <div><a class="layout-buttons" href="{% url 'create_easy_game' %}">Easy</a></div>
-        <div><a class="layout-buttons" href="{% url 'create_easy_game' %}">Medium</a></div>
-        <div><a class="layout-buttons" href="{% url 'create_easy_game' %}">Hard</a></div>
-        <div><a class="layout-buttons" href="{% url 'create_easy_game' %}">Impossible</a></div>
+        <div><a class="layout-buttons" href="{% url 'create_game' difficulty='Easy' %}">Easy</a></div>
+        <div><a class="layout-buttons" href="{% url 'create_game' difficulty='Medium' %}">Medium</a></div>
+        <div><a class="layout-buttons" href="{% url 'create_game' difficulty='Hard' %}">Hard</a></div>
+        <div><a class="layout-buttons" href="{% url 'create_game' difficulty='Impossible' %}">Impossible</a></div>
     </div>
 {% endblock %}

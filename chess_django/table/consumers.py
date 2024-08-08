@@ -4,7 +4,7 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.layers import get_channel_layer
 from asgiref.sync import sync_to_async
 
-from .models import Game, GameWithAi, Board
+from .models import Game, Board
 from . import pieces
 from .tasks import check_game_timeout
 
@@ -237,11 +237,7 @@ class TableConsumer(AsyncWebsocketConsumer):
     @sync_to_async
     def get_game_from_database(self):
         # Fetch the current game instance from the database
-        if self.table_id[0] == "a":
-            ai_table_id = self.table_id[2:]
-            current_game = GameWithAi.objects.get(pk=ai_table_id)
-        else:
-            current_game = Game.objects.get(pk=self.table_id)
+        current_game = Game.objects.get(pk=self.table_id)
         # Ensuring access to players to avoid lazy loading
         _, _ = current_game.white, current_game.black
         return current_game

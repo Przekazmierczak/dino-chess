@@ -10,14 +10,7 @@ class Game(models.Model):
     white_ready = models.BooleanField(default=False)
     black = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='black_games')
     black_ready = models.BooleanField(default=False)
-
-class GameWithAi(models.Model):
-    winner = models.CharField(max_length=1, null=True, choices=[(None, 'None'), ('w', 'white'), ('b', 'black'), ('d', 'draw')], default=None)
-    started = models.BooleanField(default=False)
-    white = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='white_ai_games')
-    white_ready = models.BooleanField(default=False)
-    black = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='black_ai_games')
-    black_ready = models.BooleanField(default=False)
+    with_ai = models.BooleanField(default=False)
 
 class Board(models.Model):
     game = models.ForeignKey(Game, on_delete=models.CASCADE)
