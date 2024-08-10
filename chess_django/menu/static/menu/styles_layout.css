@@ -1,5 +1,5 @@
 :root {
-    --primary-bg-color: #12171e;
+    --primary-bg-color: #4dc757;
     --text-color: white;
     --hover-bg-color: white;
     --hover-text-color: #12171e;
@@ -173,6 +173,10 @@
 
 #main-content {
     position: relative;
+    background: var(--background-url);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
     background-color: var(--background-color);
     left: var(--sidebar-expanded-width);
     width: var(--width-big-screen);
