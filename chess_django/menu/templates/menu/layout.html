@@ -84,6 +84,14 @@
                 </li>
             </ul>
             {% endif %}
+            <ul>
+                <li>
+                    <button id="theme" class="sidebar-button">
+                        <i class="bx bxs-chess"></i>
+                        <span class="nav-item">Toggle Dino/Classic Mode</span>
+                    </button>
+                </li>
+            </ul>
         </div>
         <div id="main-content">
             {% block body %}
@@ -110,5 +118,23 @@
         btn.onclick = function () {
             sidebar.classList.toggle('active');
         };
+
+        const toggleButton = document.getElementById('theme');
+        const rootElement = document.documentElement;
+
+        const currentTheme = localStorage.getItem('theme');
+        if (currentTheme) {
+            rootElement.classList.add(currentTheme);
+        }
+
+        toggleButton.addEventListener('click', () => {
+            rootElement.classList.toggle('classic-mode');
+    
+            if (rootElement.classList.contains('classic-mode')) {
+                localStorage.setItem('theme', 'classic-mode');
+            } else {
+                localStorage.removeItem('theme');
+            }
+        });
     </script>
 </html>

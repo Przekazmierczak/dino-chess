@@ -1,5 +1,6 @@
 :root {
-    --primary-bg-color: #4dc757;
+    --primary-bg-color: #41231b;
+    /* --primary-bg-color: #4e3c13; */
     --text-color: white;
     --hover-bg-color: white;
     --hover-text-color: #12171e;
@@ -10,6 +11,14 @@
     --width-medium-screen: calc(100% - var(--sidebar-width));
     --width-small-screen: 100%;
     --background-color: rgb(54, 54, 54);
+}
+
+:root.classic-mode {
+    --primary-bg-color: #12171e;
+
+    #main-content {
+        background: var(--background-color);
+    }
 }
 
 * {
