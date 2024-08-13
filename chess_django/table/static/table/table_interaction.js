@@ -1,6 +1,5 @@
 let moveListeners = [];  // To store event listeners for moves
 let intervalId;  // To manage interval for timers
-let style = "classic";  // Default style for pieces
 
 // Runs when the DOM content is fully loaded
 document.addEventListener('DOMContentLoaded', function () {
@@ -34,10 +33,16 @@ function colorBoard() {
 function setupWebSocket() {
     const tableID = JSON.parse(document.getElementById('table_id').textContent);
     const tableSocket = new WebSocket(`ws://${window.location.host}/ws/table/${tableID}/`);
+    let state;
+
+    const changeImagesButton = document.getElementById('theme');
+    changeImagesButton.addEventListener('click', () => {
+        renderBoard(tableSocket, state);
+    });
     
     // Handle incoming messages from the server
     tableSocket.onmessage = function(e) {
-        const state = JSON.parse(e.data);
+        state = JSON.parse(e.data);
         console.log(state)
     
         clearBoard();  // Clear board and listeners
@@ -291,7 +296,8 @@ function getImageSource(piece, player) {
         "queen": {"white": "Queen_white",  "black": "Queen_black"},
         "king": {"white": "King_white",  "black": "King_black"}
     };
-    const prefix = style === "classic" ? "" : "d";
+    const iFclassic = document.documentElement.classList.contains('classic-mode')
+    const prefix = iFclassic ? "" : "d";
     if (piece in pieceImages && player in pieceImages[piece]) {
         return `<img src="/static/table/pieces_images/${prefix}${pieceImages[piece][player]}.png" class="pieceImage" alt="${pieceImages[piece][player]}">`;
     } else {
