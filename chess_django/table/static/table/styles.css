@@ -87,24 +87,23 @@
 
 .button_black {
     color: white;
-    background-color: rgb(44, 44, 44);
-    border: 3px solid black;
+    background-color: var(--black-player-button);
+
 }
 
 .button_white {
     color: var(--primary-bg-color);
-    background-color: white;
-    border: 3px solid rgba(0, 0, 0, 0.541);
+    background-color: var(--white-player-button);
 }
 
 .button_black:hover {
-    background-color: white;
+    background-color: var(--black-player-button-hover);
     color: black;
 }
 
 .button_white:hover {
-    background-color: gray;
-    color: white;
+    background-color: var(--white-player-button-hover);
+    color: black;
 }
 
 #black_player_sit_button,
@@ -204,19 +203,24 @@ table {
 table,
 td {
     border-collapse: collapse;
+    padding: 0px;
 }
 
 td {
     width: calc(2 * var(--square-size));
     height: calc(2 * var(--square-size));
+    max-width: calc(2 * var(--square-size));
+    max-height: calc(2 * var(--square-size));
     min-width: calc(2 * var(--square-size));
     min-height: calc(2 * var(--square-size));
-    font-size: var(--square-size);
 }
 
 .pieceImage {
-    width: calc(2 * var(--square-size));
-    height: calc(2 * (var(--square-size) - 1/8 * var(--square-size)));
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    display: block;
 }
 
 @media (max-aspect-ratio: 16/9) {
@@ -271,11 +275,11 @@ td.checking {
 }
 
 .dark {
-    background-color: rgba(0, 60, 128, 0.589);
+    background-color: var(--dark-square);
 }
 
 .light {
-    background-color: rgba(0, 81, 128, 0.24);
+    background-color: var(--light-square);
 }
 
 .darkGreen {

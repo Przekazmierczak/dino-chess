@@ -10,11 +10,27 @@
     --width-big-screen: calc(100% - var(--sidebar-expanded-width));
     --width-medium-screen: calc(100% - var(--sidebar-width));
     --width-small-screen: 100%;
+
+    --dark-square: #7f745c;
+    --light-square: #e7deca;
+
+    --white-player-button: #9db286;
+    --black-player-button: #d68f52;
+    --white-player-button-hover: #c2d5ae;
+    --black-player-button-hover: #f4b986;
 }
 
 :root.classic-mode {
     --primary-bg-color: #12171e;
     --classic-background-color: rgb(54, 54, 54);
+    
+    --dark-square: rgba(0, 60, 128, 0.589);
+    --light-square: rgba(0, 81, 128, 0.24);
+
+    --white-player-button: white;
+    --black-player-button: rgb(44, 44, 44);
+    --white-player-button-hover: gray;
+    --black-player-button-hover: gray;
 
     #main-content {
         background: var(--classic-background-color);
