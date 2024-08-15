@@ -85,13 +85,14 @@ function setupWebSocket() {
 // Function to update player names
 function showPlayers(state) {
     const players = [
-        { element: document.getElementById("white_player"), name: state.white_player, ready: state.white_player_ready },
-        { element: document.getElementById("black_player"), name: state.black_player, ready: state.black_player_ready }
+        { element: document.getElementById("white_player"), time: document.getElementById("white_time"), name: state.white_player, ready: state.white_player_ready },
+        { element: document.getElementById("black_player"), time: document.getElementById("black_time"), name: state.black_player, ready: state.black_player_ready }
     ];
 
     players.forEach(player => {
         player.element.innerHTML = `${player.name}`;
-        player.element.classList.toggle("gray", !player.ready);
+        player.element.classList.toggle("unready", !player.ready);
+        player.time.classList.toggle("unready", !player.ready);
     });
 }
 

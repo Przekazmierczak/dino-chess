@@ -1,6 +1,9 @@
 :root {
-    --primary-bg-color: #41231b;
-    /* --primary-bg-color: #4e3c13; */
+    /* --primary-bg-color: rgb(25, 48, 17); */
+    /* --primary-bg-color: rgb(44, 68, 30); */
+    /* --primary-bg-color: #41231b; */
+    --primary-bg-color: #4B2E1A;
+    /* --primary-bg-color: #7f745c; */
     --text-color: white;
     --hover-bg-color: white;
     --hover-text-color: #12171e;
@@ -18,6 +21,8 @@
     --black-player-button: #d68f52;
     --white-player-button-hover: #c2d5ae;
     --black-player-button-hover: #f4b986;
+
+    --ball-position: 0%;
 }
 
 :root.classic-mode {
@@ -32,8 +37,17 @@
     --white-player-button-hover: gray;
     --black-player-button-hover: gray;
 
+    --modal-url: None;
+
+    --ball-position: 100%;
+
     #main-content {
         background: var(--classic-background-color);
+    }
+
+    #topbar,
+    #sidebar {
+        background: var(--primary-bg-color);
     }
 }
 
@@ -49,6 +63,10 @@
     position: fixed;
     top: 0;
     left: 0;
+    background: var(--sidebar-background-url);
+    background-size: 250px 1500px;
+    background-position: top;
+    /* background-repeat: no-repeat; */
     background-color: var(--primary-bg-color);
     padding: .4rem .8rem;
     z-index: 30;
@@ -64,7 +82,6 @@
     height: 100vh;
     width: var(--sidebar-expanded-width);
 }
-
 
 #btn {
     position: absolute;
@@ -113,6 +130,23 @@
 #sidebar-logo i {
     font-size: 2rem;
     margin-right: 5px;
+}
+
+#theme {
+    display: flex;
+    background-color: #000;
+    width: 100px;
+    border-radius: 50px;
+}
+
+.ball {
+    width: 50px;
+    height: 50px;
+    background-color: gray;
+    border-radius: 50%;
+    border: 3px solid black;
+    transform: translateX(var(--ball-position));
+    transition: all var(--transition-speed) ease;
 }
 
 #sidebar-user {
@@ -241,10 +275,12 @@
     #sidebar {
         width: var(--sidebar-width);
         transition: all var(--transition-speed) ease;
+        background-size: 80px 500px;
     }
-
+    
     #sidebar.active {
         width: var(--sidebar-expanded-width);
+        background-size: 250px 1500px;
     }
 
     #btn {

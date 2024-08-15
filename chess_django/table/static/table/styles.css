@@ -35,15 +35,15 @@
     display: flex;
     align-items: center;
     color: white;
-    z-index: 10;
+    z-index: 25;
     font-size: min(var(--square-size), 20px);
 }
 
-#black_player.gray,
-#black_time.gray,
-#white_player.gray,
-#white_time.gray {
-    color: gray;
+#black_player.unready,
+#black_time.unready,
+#white_player.unready,
+#white_time.unready {
+    color: rgb(170, 170, 170);
 }
 
 #black_player,
@@ -175,7 +175,7 @@
     align-items: center;
     justify-content: center;
     color: white;
-    z-index: 10;
+    z-index: 25;
     font-size: min(var(--square-size), 22px);
 }
 
@@ -258,16 +258,16 @@ td {
 
 td.checking:hover {
     box-shadow: 
-        inset 0 0 0 0.08em rgb(0, 100, 255),
-        inset 0 0 0 0.12em rgb(255, 0, 0);
+        inset 0 0 0 0.1em rgb(0, 100, 255),
+        inset 0 0 0 0.2em rgb(255, 0, 0);
 }
 
 td:hover {
-    box-shadow: inset 0 0 0 0.08em rgb(0, 100, 255);
+    box-shadow: inset 0 0 0 0.2em rgb(0, 100, 255);
 }
 
 td.checking {
-    box-shadow: inset 0 0 0 0.08em rgb(255, 0, 0);
+    box-shadow: inset 0 0 0 0.2em rgb(255, 0, 0);
 }
 
 .marked {
