@@ -8,7 +8,7 @@
     --hover-bg-color: white;
     --hover-text-color: #12171e;
     --sidebar-width: 80px;
-    --sidebar-expanded-width: 250px;
+    --sidebar-expanded-width: 180px;
     --transition-speed: 0.5s;
     --width-big-screen: calc(100% - var(--sidebar-expanded-width));
     --width-medium-screen: calc(100% - var(--sidebar-width));
@@ -23,6 +23,9 @@
     --black-player-button-hover: #f4b986;
 
     --ball-position: 0%;
+
+    --sidebar-dino-theme-url: var(--sidebar-dino_black-theme-url);
+    --sidebar-classic-theme-url: var(--sidebar-classic_white-theme-url);
 }
 
 :root.classic-mode {
@@ -40,6 +43,9 @@
     --modal-url: None;
 
     --ball-position: 100%;
+
+    --sidebar-dino-theme-url: var(--sidebar-dino_white-theme-url);
+    --sidebar-classic-theme-url: var(--sidebar-classic_black-theme-url);
 
     #main-content {
         background: var(--classic-background-color);
@@ -132,21 +138,60 @@
     margin-right: 5px;
 }
 
+#toggle {
+    margin-top: 30px;
+    margin-left: 11%;
+}
+
 #theme {
     display: flex;
+    position: relative;
     background-color: #000;
+    width: 50px;
+    border-radius: 50px;
+}
+
+#sidebar.active #theme {
     width: 100px;
     border-radius: 50px;
 }
 
 .ball {
-    width: 50px;
-    height: 50px;
-    background-color: gray;
+    width: 25px;
+    height: 25px;
+    background-color: white;
     border-radius: 50%;
     border: 3px solid black;
     transform: translateX(var(--ball-position));
     transition: all var(--transition-speed) ease;
+}
+
+#sidebar.active .ball {
+    width: 50px;
+    height: 50px;
+}
+
+.theme-dino-pic,
+.theme-classic-pic {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.theme-dino-pic {
+    width: 50%;
+    background: var(--sidebar-dino-theme-url);
+    background-size: cover;
+    
+}
+
+.theme-classic-pic {
+    width: 50%;
+    left: 50%;
+    background: var(--sidebar-classic-theme-url);
+    background-size: cover;
 }
 
 #sidebar-user {
@@ -322,5 +367,13 @@
         left: 0;
         width: var(--width-small-screen);
         padding: 0.1rem;
+    }
+
+    #sidebar.active .ball {
+        transition: all var(--transition-speed) ease;
+    }
+
+    .ball {
+        transition: none;
     }
 }

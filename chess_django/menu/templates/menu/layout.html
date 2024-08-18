@@ -23,6 +23,10 @@
                 --background-url: url("{% static 'images/background.png' %}");
                 --modal-url: url("{% static 'images/modal2.png' %}");
                 --sidebar-background-url: url("{% static 'images/sidebar_background.png' %}");
+                --sidebar-dino_white-theme-url: url("{% static 'images/dino_white.png' %}");
+                --sidebar-dino_black-theme-url: url("{% static 'images/dino_black.png' %}");
+                --sidebar-classic_white-theme-url: url("{% static 'images/classic_white.png' %}");
+                --sidebar-classic_black-theme-url: url("{% static 'images/classic_black.png' %}");
             }
         </style>
         
@@ -69,6 +73,8 @@
             <div id="toggle">
                 <div id="theme">
                     <div class="ball"></div>
+                    <div class="theme-dino-pic"></div>
+                    <div class="theme-classic-pic"></div>
                 </div>
             </div>
             {% endif %}
