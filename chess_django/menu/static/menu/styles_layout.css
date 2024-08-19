@@ -1,15 +1,12 @@
 :root {
-    /* --primary-bg-color: rgb(25, 48, 17); */
-    /* --primary-bg-color: rgb(44, 68, 30); */
-    /* --primary-bg-color: #41231b; */
     --primary-bg-color: #4B2E1A;
-    /* --primary-bg-color: #7f745c; */
     --text-color: white;
     --hover-bg-color: white;
     --hover-text-color: #12171e;
     --sidebar-width: 80px;
     --sidebar-expanded-width: 180px;
     --transition-speed: 0.5s;
+
     --width-big-screen: calc(100% - var(--sidebar-expanded-width));
     --width-medium-screen: calc(100% - var(--sidebar-width));
     --width-small-screen: 100%;
@@ -23,7 +20,7 @@
     --black-player-button-hover: #f4b986;
 
     --ball-position: 0%;
-
+    --theme-toggle-background: rgb(44, 23, 19);
     --sidebar-dino-theme-url: var(--sidebar-dino_black-theme-url);
     --sidebar-classic-theme-url: var(--sidebar-classic_white-theme-url);
 }
@@ -32,8 +29,8 @@
     --primary-bg-color: #12171e;
     --classic-background-color: rgb(54, 54, 54);
     
-    --dark-square: rgba(0, 60, 128, 0.589);
-    --light-square: rgba(0, 81, 128, 0.24);
+    --dark-square: rgba(105, 140, 180);
+    --light-square: rgba(194, 213, 225);
 
     --white-player-button: white;
     --black-player-button: rgb(44, 44, 44);
@@ -43,7 +40,7 @@
     --modal-url: None;
 
     --ball-position: 100%;
-
+    --theme-toggle-background: rgb(54, 54, 54);
     --sidebar-dino-theme-url: var(--sidebar-dino_white-theme-url);
     --sidebar-classic-theme-url: var(--sidebar-classic_black-theme-url);
 
@@ -139,14 +136,19 @@
 }
 
 #toggle {
-    margin-top: 30px;
-    margin-left: 11%;
+    position: absolute;
+    bottom: 5%;
+    left: 0%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 #theme {
     display: flex;
     position: relative;
-    background-color: #000;
+    background-color: var(--theme-toggle-background);
     width: 50px;
     border-radius: 50px;
 }
@@ -161,7 +163,7 @@
     height: 25px;
     background-color: white;
     border-radius: 50%;
-    border: 3px solid black;
+    border: 3px solid var(--theme-toggle-background);
     transform: translateX(var(--ball-position));
     transition: all var(--transition-speed) ease;
 }
@@ -183,15 +185,18 @@
 .theme-dino-pic {
     width: 50%;
     background: var(--sidebar-dino-theme-url);
-    background-size: cover;
-    
+    background-size: 90%;
+    background-position: center;
+    background-repeat: no-repeat;
 }
 
 .theme-classic-pic {
     width: 50%;
     left: 50%;
     background: var(--sidebar-classic-theme-url);
-    background-size: cover;
+    background-size: 90%;
+    background-position: center;
+    background-repeat: no-repeat;
 }
 
 #sidebar-user {
@@ -316,7 +321,7 @@
     color: black;
 }
 
-@media (max-width: 992px) {
+@media (max-width: 1300px) {
     #sidebar {
         width: var(--sidebar-width);
         transition: all var(--transition-speed) ease;

@@ -143,12 +143,12 @@ function addRemovePlayers(tableSocket, state) {
     ];
 
     if (state.white_player_ready !== true || state.black_player_ready !== true) {
-        document.getElementById("modal_background").classList.add("show");
+        document.getElementById("modal_background_start").classList.add("show");
         buttonsConfig.forEach(config => {
             setButtonState(tableSocket, state, config);
         });
     } else {
-        document.getElementById("modal_background").classList.remove("show");
+        document.getElementById("modal_background_start").classList.remove("show");
         buttonsConfig.forEach(config => {
             document.getElementById(config.sit).classList.add("hidden");
             document.getElementById(config.stand).classList.add("hidden");
@@ -227,7 +227,7 @@ function updatePlayerState(tableSocket, player, playerState, readyState, move, p
 function displayWinner(state) {
     if (state.winner !== null) {
         const modalWinner = document.getElementById("modal_winner");
-        const modalBackground = document.getElementById("modal_background");
+        const modalBackground = document.getElementById("modal_background_winner");
         modalWinner.classList.add("show");
         modalBackground.classList.add("show");
         const htmlWinner = document.getElementById("winner");
@@ -400,12 +400,15 @@ function showPromotionModal(move, tableSocket) {
     }
 
     const modalPromotion = document.querySelector("#modal_promotion");
-    const modalBackground = document.getElementById("modal_background");
+    const modalBackground = document.getElementById("modal_background_promotion");
     modalPromotion.classList.add("show");
     modalBackground.classList.add("show");
 
+    const iFclassic = document.documentElement.classList.contains('classic-mode');
+    const prefix = iFclassic ? "" : "d";
+
     const setPromotionPiece  = function(curr_piece, pieceName, pieceSymbol) {
-        curr_piece.innerHTML = `<img src="/static/table/pieces_images/${pieceName}.png" class="pieceImage" alt=${pieceName}></img>`
+        curr_piece.innerHTML = `<img src="/static/table/pieces_images/${prefix}${pieceName}.png" class="pieceImage" alt=${pieceName}></img>`
         curr_piece.addEventListener("click", function() {
             modalPromotion.classList.remove("show");
             modalBackground.classList.remove("show");

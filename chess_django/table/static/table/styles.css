@@ -2,7 +2,7 @@
     --square-size: min(5.5vh, 4.5vw);
 }
 
-@media (max-width: 992px) {
+@media (max-width: 1300px) {
     :root {
         --square-size: min(5.5vh, 5.2vw);
     }
@@ -144,7 +144,7 @@
     grid-column: 7 / 11;
 }
 
-@media (max-width: 992px), (max-height: 650px) {
+@media (max-width: 1300px), (max-height: 650px) {
     #black_player_ready_button,
     #black_player_unready_button {
         grid-row: 6 / 7;
@@ -191,8 +191,6 @@
     grid-row: 2 / 18;
     grid-column: 1 / 17;
     z-index: 10;
-    background-color: white;
-    border-radius: 0.3rem;
 }
 
 table {
@@ -283,26 +281,31 @@ td.checking {
 }
 
 .darkGreen {
-    background-color: rgba(28, 138, 0, 0.70);
+    background-color: rgba(96, 173, 76);
 }
 
 .lightGreen {
-    background-color: rgba(28, 138, 0, 0.50);
+    background-color: rgba(141, 196, 127);
 
 }
 .darkRed {
-    background-color: rgba(206, 0, 0, 0.75);
+    background-color: rgba(218, 64, 64);
 }
 
 .lightRed {
-    background-color: rgba(206, 0, 0, 0.65);
+    background-color: rgba(223, 89, 89);
 }
 
-#modal_background {
+#modal_background_start {
     background: var(--modal-url);
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
+}
+
+#modal_background_start,
+#modal_background_promotion,
+#modal_background_winner {
     background-color: rgba(0, 0, 0, 0.3);
     position: absolute;
     display: none;
@@ -316,25 +319,37 @@ td.checking {
 #modal_promotion,
 #modal_winner {
     display: none;
-    background-color: white;
-    border-radius: 8px;
+    /* background-color: black; */
+    /* border-radius: 8px; */
     grid-row: 9 / 11;
-    grid-column: 4 / 14;
+    grid-column: 5 / 13;
     z-index: 20;
 }
 
 #modal_promotion.show,
 #modal_winner.show,
-#modal_background.show {
+#modal_background_start.show,
+#modal_background_promotion.show,
+#modal_background_winner.show {
     display: flex;
+    scale: 1.3;
     justify-content: center;
     align-items: center;
 }
 
-.modal_td {
+.modal_td_dark,
+.modal_td_light {
     cursor: pointer;
     text-align: center;
     vertical-align: middle;
+}
+
+.modal_td_dark {
+    background-color: var(--dark-square);
+}
+
+.modal_td_light {
+    background-color: var(--light-square);
 }
 
 #winner {
