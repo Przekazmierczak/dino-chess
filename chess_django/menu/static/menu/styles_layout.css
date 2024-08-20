@@ -69,7 +69,6 @@
     background: var(--sidebar-background-url);
     background-size: 250px 1500px;
     background-position: top;
-    /* background-repeat: no-repeat; */
     background-color: var(--primary-bg-color);
     padding: .4rem .8rem;
     z-index: 30;
@@ -133,70 +132,6 @@
 #sidebar-logo i {
     font-size: 2rem;
     margin-right: 5px;
-}
-
-#toggle {
-    position: absolute;
-    bottom: 5%;
-    left: 0%;
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-#theme {
-    display: flex;
-    position: relative;
-    background-color: var(--theme-toggle-background);
-    width: 50px;
-    border-radius: 50px;
-}
-
-#sidebar.active #theme {
-    width: 100px;
-    border-radius: 50px;
-}
-
-.ball {
-    width: 25px;
-    height: 25px;
-    background-color: white;
-    border-radius: 50%;
-    border: 3px solid var(--theme-toggle-background);
-    transform: translateX(var(--ball-position));
-    transition: all var(--transition-speed) ease;
-}
-
-#sidebar.active .ball {
-    width: 50px;
-    height: 50px;
-}
-
-.theme-dino-pic,
-.theme-classic-pic {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-}
-
-.theme-dino-pic {
-    width: 50%;
-    background: var(--sidebar-dino-theme-url);
-    background-size: 90%;
-    background-position: center;
-    background-repeat: no-repeat;
-}
-
-.theme-classic-pic {
-    width: 50%;
-    left: 50%;
-    background: var(--sidebar-classic-theme-url);
-    background-size: 90%;
-    background-position: center;
-    background-repeat: no-repeat;
 }
 
 #sidebar-user {
@@ -278,6 +213,70 @@
 
 #sidebar.active .tooltip {
     display: none;
+}
+
+#toggle {
+    position: absolute;
+    bottom: 5%;
+    left: 0%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#theme {
+    display: flex;
+    position: relative;
+    background-color: var(--theme-toggle-background);
+    width: 50px;
+    border-radius: 50px;
+}
+
+#sidebar.active #theme {
+    width: 100px;
+    border-radius: 50px;
+}
+
+.ball {
+    width: 25px;
+    height: 25px;
+    background-color: white;
+    border-radius: 50%;
+    border: 3px solid var(--theme-toggle-background);
+    transform: translateX(var(--ball-position));
+    transition: all var(--transition-speed) ease;
+}
+
+#sidebar.active .ball {
+    width: 50px;
+    height: 50px;
+}
+
+.theme-dino-pic,
+.theme-classic-pic {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.theme-dino-pic {
+    width: 50%;
+    background: var(--sidebar-dino-theme-url);
+    background-size: 90%;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.theme-classic-pic {
+    width: 50%;
+    left: 50%;
+    background: var(--sidebar-classic-theme-url);
+    background-size: 90%;
+    background-position: center;
+    background-repeat: no-repeat;
 }
 
 #main-content {
