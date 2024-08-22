@@ -28,7 +28,7 @@
             </div>
             {% endif %}
             <div id="black_time" class="time"></div>
-            <table class="chess-board">
+            <table id="chess-board">
                 {% for row in "76543210" %}
                     <tr>
                         {% for column in "76543210" %}
@@ -37,6 +37,7 @@
                     </tr>
                 {% endfor %}
             </table>
+            <div class="movingPiece"></div>
             <div id="white_player" class="player"></div>
             {% if user.is_authenticated %}
             <div id="white_player_sit_button" class="hidden">
@@ -56,10 +57,10 @@
             <div id="modal_promotion">
                 <table id="modal_table">
                     <tr>
-                        <td id="modal_queen" class="modal_td_dark"></td>
-                        <td id="modal_rook" class="modal_td_light"></td>
-                        <td id="modal_knight" class="modal_td_dark"></td>
-                        <td id="modal_bishop" class="modal_td_light"></td>
+                        <td id="modal_queen"></td>
+                        <td id="modal_rook"></td>
+                        <td id="modal_knight"></td>
+                        <td id="modal_bishop"></td>
                     </tr>
                 </table>
             </div>

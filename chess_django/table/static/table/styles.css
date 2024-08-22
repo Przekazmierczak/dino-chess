@@ -10,6 +10,36 @@
     --light-square-move: rgb(141, 196, 127);
     --dark-square-attack: rgb(218, 64, 64);
     --light-square-attack: rgb(223, 89, 89);
+
+    --white-pawn: var(--dino-white-pawn);
+    --white-rook: var(--dino-white-rook);
+    --white-bishop: var(--dino-white-bishop);
+    --white-knight: var(--dino-white-knight);
+    --white-queen: var(--dino-white-queen);
+    --white-king: var(--dino-white-king);
+
+    --black-pawn: var(--dino-black-pawn);
+    --black-rook: var(--dino-black-rook);
+    --black-bishop: var(--dino-black-bishop);
+    --black-knight: var(--dino-black-knight);
+    --black-queen: var(--dino-black-queen);
+    --black-king: var(--dino-black-king);
+}
+
+:root.classic-mode {
+    --white-pawn: var(--classic-white-pawn);
+    --white-rook: var(--classic-white-rook);
+    --white-bishop: var(--classic-white-bishop);
+    --white-knight: var(--classic-white-knight);
+    --white-queen: var(--classic-white-queen);
+    --white-king: var(--classic-white-king);
+
+    --black-pawn: var(--classic-black-pawn);
+    --black-rook: var(--classic-black-rook);
+    --black-bishop: var(--classic-black-bishop);
+    --black-knight: var(--classic-black-knight);
+    --black-queen: var(--classic-black-queen);
+    --black-king: var(--classic-black-king);
 }
 
 @media (max-width: 1300px) {
@@ -197,7 +227,7 @@
     grid-row: 4;
 }
 
-.chess-board {
+#chess-board {
     grid-row: 2 / 18;
     grid-column: 1 / 17;
     z-index: 10;
@@ -223,12 +253,64 @@ td {
     min-height: calc(2 * var(--square-size));
 }
 
-.pieceImage {
-    max-width: 100%;
-    max-height: 100%;
-    width: auto;
-    height: auto;
-    display: block;
+.white.pawn {
+    background-image: var(--white-pawn);
+    background-size: cover;
+}
+
+.white.rook {
+    background-image: var(--white-rook);
+    background-size: cover;
+}
+
+.white.bishop {
+    background-image: var(--white-bishop);
+    background-size: cover;
+}
+
+.white.knight {
+    background-image: var(--white-knight);
+    background-size: cover;
+}
+
+.white.queen {
+    background-image: var(--white-queen);
+    background-size: cover;
+}
+
+.white.king {
+    background-image: var(--white-king);
+    background-size: cover;
+}
+
+.black.pawn {
+    background-image: var(--black-pawn);
+    background-size: cover;
+}
+
+.black.rook {
+    background-image: var(--black-rook);
+    background-size: cover;
+}
+
+.black.bishop {
+    background-image: var(--black-bishop);
+    background-size: cover;
+}
+
+.black.knight {
+    background-image: var(--black-knight);
+    background-size: cover;
+}
+
+.black.queen {
+    background-image: var(--black-queen);
+    background-size: cover;
+}
+
+.black.king {
+    background-image: var(--black-king);
+    background-size: cover;
 }
 
 @media (max-aspect-ratio: 16/9) {
@@ -260,7 +342,7 @@ td {
     cursor: grab;
 }
 
-.dragging {
+#chess-board.dragging td {
     cursor: grabbing;
 }
 
@@ -279,6 +361,7 @@ td.checking {
 }
 
 .marked {
+    background-image: none !important;
     background-color: var(--marked-color);
 }
 
@@ -304,6 +387,23 @@ td.checking {
 
 .lightRed {
     background-color: var(--light-square-attack);
+}
+
+.movingPiece {
+    width: calc((2 * var(--square-size) * 1.1));
+    height: calc((2 * var(--square-size) * 1.1));
+    max-width: calc((2 * var(--square-size) * 1.1));
+    max-height: calc((2 * var(--square-size) * 1.1));
+    min-width: calc((2 * var(--square-size) * 1.1));
+    min-height: calc((2 * var(--square-size) * 1.1));
+    position: fixed;
+    pointer-events: none;
+    z-index: 100;
+    display: none;
+}
+
+.showPiece {
+    display: flex;
 }
 
 #modal_background_start {

@@ -3,6 +3,13 @@ let intervalId;  // To manage interval for timers
 
 // Runs when the DOM content is fully loaded
 document.addEventListener('DOMContentLoaded', function () {
+    // PUT IN FUNCTION!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    const board = document.getElementById("chess-board");
+    
+    board.addEventListener('dragstart', (event) => {
+        event.preventDefault();
+    });
+
     colorBoard();  // Initialize the board colors
     setupWebSocket();  // Setup WebSocket for real-time updates
 });
@@ -270,70 +277,66 @@ function renderBoard(tableSocket, state) {
 // Function to setup basic events for each square
 function setupSquareEvents(row, col) {
     const square = document.querySelector(`#square${row}${col}`);
-    square.removeAttribute("draggable");
     square.classList.remove("draggableElement");
 }
 
 // Function to render a specific square with a piece
 function renderSquare(state, row, col, tableSocket) {
     const {piece, player, moves} = state.board[row][col];
-    const image = getImageSource(piece, player);
+    // const image = getImageSource(piece, player);
     const square = document.querySelector(`#square${row}${col}`);
-    square.innerHTML = `${image}`;
+    square.classList.add(piece);
+    square.classList.add(player);
+    // square.innerHTML = `${image}`;
 
     // Enable dragging and click events if it's the player's turn
     if (state.turn === player && state.winner === null && ((player === "white" && state.user === state.white_player) || (player === "black" && state.user === state.black_player))) {
-        enableDraggable(square, row, col, moves, tableSocket);
-    }
-}
-
-// Function to get the image source for a piece based on its type and player
-function getImageSource(piece, player) {
-    const pieceImages = {
-        "pawn": {"white": "Pawn_white", "black": "Pawn_black"},
-        "rook": {"white": "Rook_white",  "black": "Rook_black"},
-        "knight": {"white": "Knight_white",  "black": "Knight_black"},
-        "bishop": {"white": "Bishop_white",  "black": "Bishop_black"},
-        "queen": {"white": "Queen_white",  "black": "Queen_black"},
-        "king": {"white": "King_white",  "black": "King_black"}
-    };
-    const iFclassic = document.documentElement.classList.contains('classic-mode')
-    const prefix = iFclassic ? "" : "d";
-    if (piece in pieceImages && player in pieceImages[piece]) {
-        return `<img src="/static/table/pieces_images/${prefix}${pieceImages[piece][player]}.png" class="pieceImage" alt="${pieceImages[piece][player]}">`;
-    } else {
-        return ""
+        enableDraggable(square, row, col, piece, player, moves, tableSocket);
     }
 }
 
 // Function to enable dragging for a piece
-function enableDraggable(square, row, col, moves, tableSocket) {
-    square.setAttribute("draggable", "true");
+function enableDraggable(square, row, col, piece, player, moves, tableSocket) {
+    square.setAttribute("draggable", "false");
     square.classList.add("draggableElement");
-
-    square.addEventListener('dragstart', () => {
-        square.classList.add("dragging");
-        square.click();
+    const movingPiece = document.querySelector('.movingPiece');
+    const board = document.getElementById("chess-board");
+    
+    board.addEventListener('dragstart', (event) => {
+        event.preventDefault();
     });
 
-    square.addEventListener("dragend", () => square.classList.remove("dragging"));
-
-    square.addEventListener("click", () => {
-        colorBoard();  // Reset board colors
-        removeMoveListeners();  // Remove existing move listeners
+    square.addEventListener('mousedown', event => {
+        board.classList.add("dragging");
+        movingPiece.classList.add("showPiece");
+        movingPiece.classList.add(piece);
+        movingPiece.classList.add(player);
         highlightSelectedSquare(square);  // Highlight selected square
         const isPromotion = moves[2];
         moves[0].forEach(move => addPossibleMove(move, row, col, tableSocket, isPromotion, "move"));
         moves[1].forEach(move => addPossibleMove(move, row, col, tableSocket, isPromotion, "attack"));
     });
+    
+    document.addEventListener("mouseup", event => {
+        board.classList.remove("dragging");
+        movingPiece.classList.remove("showPiece");
+        movingPiece.classList.remove(piece);
+        movingPiece.classList.remove(player);
+        square.classList.remove("marked")
+        colorBoard();  // Reset board colors
+        removeMoveListeners();  // Remove existing move listeners
+    });
+
+    document.addEventListener('mousemove', event => {
+        movingPiece.setAttribute("style", "top: "+(event.clientY - 55)+"px; left: "+(event.clientX - 56)+"px;")
+    })
 }
 
 // Function to remove all move listeners
 function removeMoveListeners() {
     console.log(moveListeners)
     moveListeners.forEach(function(item) {
-        item.element.removeEventListener("click", item.clickListener);
-        item.element.removeEventListener("drop", item.dropListener);
+        item.element.removeEventListener("mouseup", item.mouseUpListener);
     });
     moveListeners = [];
 }
@@ -368,17 +371,8 @@ function addPossibleMove(move, oldRow, oldCol, tableSocket, isPromotion, type) {
 // Function to add move listener to a square
 function addMoveListener(move, square, isPromotion, tableSocket) {
     const moveListener = function() {handleMove(move, isPromotion, tableSocket)};
-
-    const dropListener = function(event) {
-        event.preventDefault();
-        moveListener(event);
-    };
-
-    square.addEventListener("click", moveListener);
-    square.addEventListener("dragover", function(event) {event.preventDefault();});
-    square.addEventListener("drop", dropListener);
-
-    moveListeners.push({element: square, clickListener: moveListener, dropListener: dropListener});
+    square.addEventListener("mouseup", moveListener);
+    moveListeners.push({element: square, mouseUpListener: moveListener});
 }
 
 // Function to handle move and promotion
@@ -393,10 +387,10 @@ function handleMove(move, isPromotion, tableSocket) {
 // Function to show promotion modal and handle promotion selection
 function showPromotionModal(move, tableSocket) {
     const promotionObject = {
-        queen: { id: "modal_queen", white: "Queen_white", whiteSymbol: "Q", black: "Queen_black", blackSymbol: "q" },
-        rook: { id: "modal_rook", white: "Rook_white", whiteSymbol: "R", black: "Rook_black", blackSymbol: "r" },
-        knight: { id: "modal_knight", white: "Knight_white", whiteSymbol: "N", black: "Knight_black", blackSymbol: "n" },
-        bishop: { id: "modal_bishop", white: "Bishop_white", whiteSymbol: "B", black: "Bishop_black", blackSymbol: "b" },
+        queen: { id: "modal_queen", whiteSymbol: "Q", blackSymbol: "q", background: "modal_td_dark" },
+        rook: { id: "modal_rook", whiteSymbol: "R", blackSymbol: "r",background: "modal_td_light" },
+        knight: { id: "modal_knight", whiteSymbol: "N", blackSymbol: "n", background: "modal_td_dark"},
+        bishop: { id: "modal_bishop", whiteSymbol: "B", blackSymbol: "b", background: "modal_td_light" },
     }
 
     const modalPromotion = document.querySelector("#modal_promotion");
@@ -404,11 +398,9 @@ function showPromotionModal(move, tableSocket) {
     modalPromotion.classList.add("show");
     modalBackground.classList.add("show");
 
-    const iFclassic = document.documentElement.classList.contains('classic-mode');
-    const prefix = iFclassic ? "" : "d";
-
-    const setPromotionPiece  = function(curr_piece, pieceName, pieceSymbol) {
-        curr_piece.innerHTML = `<img src="/static/table/pieces_images/${prefix}${pieceName}.png" class="pieceImage" alt=${pieceName}></img>`
+    const setPromotionPiece  = function(curr_piece, pieceType, player, pieceSymbol) {
+        curr_piece.classList.add(pieceType);
+        curr_piece.classList.add(player);
         curr_piece.addEventListener("click", function() {
             modalPromotion.classList.remove("show");
             modalBackground.classList.remove("show");
@@ -424,18 +416,20 @@ function showPromotionModal(move, tableSocket) {
         let removeListeners = curr_piece.cloneNode(true);
         curr_piece.parentNode.replaceChild(removeListeners, curr_piece);
         curr_piece = removeListeners
+        
+        curr_piece.className = '';
+        curr_piece.classList.add(pieceInfo.background)
 
         if (move[0][0] === 6) {
-            setPromotionPiece(curr_piece, pieceInfo.white, pieceInfo.whiteSymbol);
+            setPromotionPiece(curr_piece, pieceType, "white", pieceInfo.whiteSymbol);
         } else {
-            setPromotionPiece(curr_piece, pieceInfo.black, pieceInfo.blackSymbol);
+            setPromotionPiece(curr_piece, pieceType, "black", pieceInfo.blackSymbol);
         }
     }
 }
 
 // Function to clear the board of pieces and listeners
 function clearBoard() {
-    colorBoard();
     for(let row = 0; row < 8; row++) {
         for (let col = 0; col < 8; col++) {
             // Remove all listeners
@@ -443,9 +437,8 @@ function clearBoard() {
             let newElement = square.cloneNode(true);
             square.parentNode.replaceChild(newElement, square);
             // Remove all pieces
-            newElement.innerHTML = "";
-            // Remove all checking
-            newElement.classList.remove("checking");
+            newElement.className = '';
         }
     }
+    colorBoard();
 }
