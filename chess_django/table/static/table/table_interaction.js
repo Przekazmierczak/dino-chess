@@ -283,11 +283,9 @@ function setupSquareEvents(row, col) {
 // Function to render a specific square with a piece
 function renderSquare(state, row, col, tableSocket) {
     const {piece, player, moves} = state.board[row][col];
-    // const image = getImageSource(piece, player);
     const square = document.querySelector(`#square${row}${col}`);
     square.classList.add(piece);
     square.classList.add(player);
-    // square.innerHTML = `${image}`;
 
     // Enable dragging and click events if it's the player's turn
     if (state.turn === player && state.winner === null && ((player === "white" && state.user === state.white_player) || (player === "black" && state.user === state.black_player))) {
@@ -297,8 +295,11 @@ function renderSquare(state, row, col, tableSocket) {
 
 // Function to enable dragging for a piece
 function enableDraggable(square, row, col, piece, player, moves, tableSocket) {
+    let isDragging = false;
+    
     square.setAttribute("draggable", "false");
     square.classList.add("draggableElement");
+
     const movingPiece = document.querySelector('.movingPiece');
     const board = document.getElementById("chess-board");
     
@@ -306,30 +307,50 @@ function enableDraggable(square, row, col, piece, player, moves, tableSocket) {
         event.preventDefault();
     });
 
-    square.addEventListener('mousedown', event => {
+    function handleMouseTouchDown(event) {
+        isDragging = true;
         board.classList.add("dragging");
         movingPiece.classList.add("showPiece");
         movingPiece.classList.add(piece);
         movingPiece.classList.add(player);
+
+        const { clientX, clientY } = event.type === 'touchstart' ? event.touches[0] : event;
+        movingPiece.setAttribute("style", "top: "+(clientY - (0.5 * movingPiece.clientWidth))+"px; left: "+(clientX - (0.5 * movingPiece.clientHeight))+"px;");
+
         highlightSelectedSquare(square);  // Highlight selected square
         const isPromotion = moves[2];
         moves[0].forEach(move => addPossibleMove(move, row, col, tableSocket, isPromotion, "move"));
         moves[1].forEach(move => addPossibleMove(move, row, col, tableSocket, isPromotion, "attack"));
-    });
+    }
     
-    document.addEventListener("mouseup", event => {
-        board.classList.remove("dragging");
-        movingPiece.classList.remove("showPiece");
-        movingPiece.classList.remove(piece);
-        movingPiece.classList.remove(player);
-        square.classList.remove("marked")
-        colorBoard();  // Reset board colors
-        removeMoveListeners();  // Remove existing move listeners
-    });
+    function handleMouseTouchUp(event) {
+        if (isDragging) { 
+            isDragging = false;
+            board.classList.remove("dragging");
+            movingPiece.classList.remove("showPiece");
+            movingPiece.classList.remove(piece);
+            movingPiece.classList.remove(player);
+            colorBoard();  // Reset board colors
+            removeMoveListeners();  // Remove existing move listeners
+            setTimeout(function() {square.classList.remove("marked")}, 50);
+        }
+    }
 
-    document.addEventListener('mousemove', event => {
-        movingPiece.setAttribute("style", "top: "+(event.clientY - 55)+"px; left: "+(event.clientX - 56)+"px;")
-    })
+    function handleMouseTouchMove(event) {
+        if (isDragging) {
+            const { clientX, clientY } = event.type === 'touchmove' ? event.touches[0] : event;
+            movingPiece.setAttribute("style", "top: "+(clientY - (0.5 * movingPiece.clientWidth))+"px; left: "+(clientX - (0.5 * movingPiece.clientHeight))+"px;");
+        }
+    }
+
+    square.addEventListener('mousedown', handleMouseTouchDown);
+    square.addEventListener('touchstart', handleMouseTouchDown);
+
+    document.addEventListener('mouseup', handleMouseTouchUp);
+    document.addEventListener('touchend', handleMouseTouchUp);
+
+    document.addEventListener('mousemove', handleMouseTouchMove);
+    document.addEventListener('touchmove', handleMouseTouchMove);
 }
 
 // Function to remove all move listeners
@@ -337,6 +358,7 @@ function removeMoveListeners() {
     console.log(moveListeners)
     moveListeners.forEach(function(item) {
         item.element.removeEventListener("mouseup", item.mouseUpListener);
+        item.element.removeEventListener("touchend", item.mouseUpListener);
     });
     moveListeners = [];
 }
@@ -372,6 +394,7 @@ function addPossibleMove(move, oldRow, oldCol, tableSocket, isPromotion, type) {
 function addMoveListener(move, square, isPromotion, tableSocket) {
     const moveListener = function() {handleMove(move, isPromotion, tableSocket)};
     square.addEventListener("mouseup", moveListener);
+    square.addEventListener("touchend", moveListener);
     moveListeners.push({element: square, mouseUpListener: moveListener});
 }
 
