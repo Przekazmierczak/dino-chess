@@ -358,7 +358,7 @@ function removeMoveListeners() {
     console.log(moveListeners)
     moveListeners.forEach(function(item) {
         item.element.removeEventListener("mouseup", item.mouseUpListener);
-        item.element.removeEventListener("touchend", item.mouseUpListener);
+        // item.element[0].removeEventListener("touchend", item.touchUpListener);
     });
     moveListeners = [];
 }
@@ -393,9 +393,24 @@ function addPossibleMove(move, oldRow, oldCol, tableSocket, isPromotion, type) {
 // Function to add move listener to a square
 function addMoveListener(move, square, isPromotion, tableSocket) {
     const moveListener = function() {handleMove(move, isPromotion, tableSocket)};
+    const touchListener = function(event) {
+        const touch = event.changedTouches[0];
+        const rect = square.getBoundingClientRect();
+        if (
+            touch.clientX >= rect.left &&
+            touch.clientX <= rect.right &&
+            touch.clientY >= rect.top &&
+            touch.clientY <= rect.bottom
+        ) {
+            handleMove(move, isPromotion, tableSocket);
+        }
+    }
+
     square.addEventListener("mouseup", moveListener);
-    square.addEventListener("touchend", moveListener);
+    document.addEventListener("touchend", touchListener);
+
     moveListeners.push({element: square, mouseUpListener: moveListener});
+    // moveListeners.push({element: [document, square], mouseUpListener: moveListener});
 }
 
 // Function to handle move and promotion

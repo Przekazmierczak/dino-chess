@@ -231,6 +231,7 @@
     grid-row: 2 / 18;
     grid-column: 1 / 17;
     z-index: 10;
+    touch-action: none;
 }
 
 table {
@@ -390,12 +391,12 @@ td.checking {
 }
 
 .movingPiece {
-    width: calc((2 * var(--square-size) * 1.1));
-    height: calc((2 * var(--square-size) * 1.1));
-    max-width: calc((2 * var(--square-size) * 1.1));
-    max-height: calc((2 * var(--square-size) * 1.1));
-    min-width: calc((2 * var(--square-size) * 1.1));
-    min-height: calc((2 * var(--square-size) * 1.1));
+    width: calc((2 * var(--square-size) * 1.15));
+    height: calc((2 * var(--square-size) * 1.15));
+    max-width: calc((2 * var(--square-size) * 1.15));
+    max-height: calc((2 * var(--square-size) * 1.15));
+    min-width: calc((2 * var(--square-size) * 1.15));
+    min-height: calc((2 * var(--square-size) * 1.15));
     position: fixed;
     pointer-events: none;
     z-index: 100;
@@ -488,4 +489,8 @@ td.checking {
 
 .hidden {
     visibility: hidden;
+}
+
+.lock-screen {
+    touch-action: none;
 }
