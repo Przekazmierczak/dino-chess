@@ -1,4 +1,4 @@
-let moveListeners = [];  // To store event listeners for moves
+let moveListeners = {};  // To store event listeners for moves
 let intervalId;  // To manage interval for timers
 
 // Runs when the DOM content is fully loaded
@@ -356,11 +356,11 @@ function enableDraggable(square, row, col, piece, player, moves, tableSocket) {
 // Function to remove all move listeners
 function removeMoveListeners() {
     console.log(moveListeners)
-    moveListeners.forEach(function(item) {
-        item.element.removeEventListener("mouseup", item.mouseUpListener);
-        // item.element[0].removeEventListener("touchend", item.touchUpListener);
+    Object.keys(moveListeners).forEach(key => {
+        const [listener, event, element] = moveListeners[key];
+        element.removeEventListener(event, listener);
     });
-    moveListeners = [];
+    moveListeners = {};
 }
 
 // Function to highlight the selected square
@@ -392,6 +392,9 @@ function addPossibleMove(move, oldRow, oldCol, tableSocket, isPromotion, type) {
 
 // Function to add move listener to a square
 function addMoveListener(move, square, isPromotion, tableSocket) {
+    const squareId = square.id;
+    const board = document.getElementById("chess-board");
+
     const moveListener = function() {handleMove(move, isPromotion, tableSocket)};
     const touchListener = function(event) {
         const touch = event.changedTouches[0];
@@ -404,13 +407,13 @@ function addMoveListener(move, square, isPromotion, tableSocket) {
         ) {
             handleMove(move, isPromotion, tableSocket);
         }
-    }
+    };
 
     square.addEventListener("mouseup", moveListener);
-    document.addEventListener("touchend", touchListener);
+    board.addEventListener("touchend", touchListener);
 
-    moveListeners.push({element: square, mouseUpListener: moveListener});
-    // moveListeners.push({element: [document, square], mouseUpListener: moveListener});
+    moveListeners[`moveListener${squareId}`] = [moveListener, "mouseup", square];
+    moveListeners[`touchListener${squareId}`] = [touchListener, "touchend", board];
 }
 
 // Function to handle move and promotion
