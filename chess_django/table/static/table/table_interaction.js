@@ -1,12 +1,82 @@
 let moveListeners = {};  // To store event listeners for moves
 let intervalId;  // To manage interval for timers
 let isDragging = false;  // Flag to track if a piece is being dragged
+let draggedPiece = {};
 
 // Runs when the DOM content is fully loaded
 document.addEventListener('DOMContentLoaded', function () {
-    colorBoard();  // Initialize the board colors
     setupWebSocket();  // Setup WebSocket for real-time updates
 });
+
+// Function to setup WebSocket connection
+function setupWebSocket() {
+    const tableID = JSON.parse(document.getElementById('table_id').textContent);
+    const tableSocket = new WebSocket(`ws://${window.location.host}/ws/table/${tableID}/`);
+    let state;  // Store the current state of the game
+    
+    // Add event listener for theme change button
+    const changeImagesButton = document.getElementById('theme');
+    changeImagesButton.addEventListener('click', () => {
+        renderBoard(tableSocket, state);  // Re-render the board when theme changes
+    });
+    
+    // Handle incoming messages from the server
+    tableSocket.onmessage = function(e) {
+        state = JSON.parse(e.data); // Parse the received game state
+        console.log(state)
+        
+        clearBoard();  // Clear the board of pieces and listeners
+        colorBoard();  // Color the board
+        showPlayers(state);  // Update player names
+        showTimes(state);  // Update player times
+        addRemovePlayers(tableSocket, state);  // Manage player buttons
+        displayWinner(state);  // Display winner if any
+        updateMoves(state);  // Update move counter
+        highlightChecks(state);  // Highlight checking squares
+        setBoardMoveListeners();  // Set event listeners for move actions
+        renderBoard(tableSocket, state);  // Render the board based on state
+        
+        console.log("received updated board");
+
+        // ------------------ BUTTONS REMOVE LATER ------------------------
+        // const board = document.querySelector(".board");
+        // const rotateButton = document.getElementById("button_rotate");
+        // const dinoButton = document.getElementById("button_dino");
+        
+        // rotateButton.addEventListener("click", function() {
+            //     if (board.classList.contains("rotate")) {
+                //         board.classList.remove("rotate");
+                //     } else {
+                    //         board.classList.add("rotate");
+                    //     }
+                    // })
+                    
+                    // dinoButton.addEventListener("click", function() {
+                        //     if (style === "classic") {
+                            //         style = "dino";
+                            //     } else {
+                                //         style = "classic";
+                                //     }
+                                //     renderBoard(tableSocket, state);
+                                // })
+        // ------------------ BUTTONS REMOVE LATER ------------------------
+
+    };
+}
+
+// Function to clear the board of pieces and listeners
+function clearBoard() {
+    for(let row = 0; row < 8; row++) {
+        for (let col = 0; col < 8; col++) {
+            // Remove all listeners by replacing the element
+            let square = document.querySelector(`#square${row}${col}`);
+            let newElement = square.cloneNode(true);
+            square.parentNode.replaceChild(newElement, square);
+            // Remove all pieces by resetting class list
+            newElement.className = ''; 
+        }
+    }
+}
 
 // Function to color the board with alternating colors
 function colorBoard() {
@@ -29,69 +99,13 @@ function colorBoard() {
         }
     }
 }
-
-// Function to setup WebSocket connection
-function setupWebSocket() {
-    const tableID = JSON.parse(document.getElementById('table_id').textContent);
-    const tableSocket = new WebSocket(`ws://${window.location.host}/ws/table/${tableID}/`);
-    let state;  // Store the current state of the game
-
-    // Add event listener for theme change button
-    const changeImagesButton = document.getElementById('theme');
-    changeImagesButton.addEventListener('click', () => {
-        renderBoard(tableSocket, state);  // Re-render the board when theme changes
-    });
-    
-    // Handle incoming messages from the server
-    tableSocket.onmessage = function(e) {
-        state = JSON.parse(e.data); // Parse the received game state
-        console.log(state)
-    
-        clearBoard();  // Clear board and listeners
-        showPlayers(state);  // Update player names
-        showTimes(state);  // Update player times
-        addRemovePlayers(tableSocket, state);  // Manage player buttons
-        displayWinner(state);  // Display winner if any
-        updateMoves(state);  // Update move counter
-        highlightChecks(state);  // Highlight checking squares
-        setBoardMoveListeners();  // Set event listeners for move actions
-        renderBoard(tableSocket, state);  // Render the board based on state
-    
-        console.log("received updated board");
-        
-        // ------------------ BUTTONS REMOVE LATER ------------------------
-        // const board = document.querySelector(".board");
-        // const rotateButton = document.getElementById("button_rotate");
-        // const dinoButton = document.getElementById("button_dino");
-        
-        // rotateButton.addEventListener("click", function() {
-        //     if (board.classList.contains("rotate")) {
-        //         board.classList.remove("rotate");
-        //     } else {
-        //         board.classList.add("rotate");
-        //     }
-        // })
-        
-        // dinoButton.addEventListener("click", function() {
-        //     if (style === "classic") {
-        //         style = "dino";
-        //     } else {
-        //         style = "classic";
-        //     }
-        //     renderBoard(tableSocket, state);
-        // })
-        // ------------------ BUTTONS REMOVE LATER ------------------------
-        
-    };
-}
-
 // Function to update player names
 function showPlayers(state) {
     const players = [
         { element: document.getElementById("white_player"), time: document.getElementById("white_time"), name: state.white_player, ready: state.white_player_ready },
         { element: document.getElementById("black_player"), time: document.getElementById("black_time"), name: state.black_player, ready: state.black_player_ready }
     ];
-
+    
     // Update each player's display
     players.forEach(player => {
         player.element.innerHTML = `${player.name}`;
@@ -105,18 +119,18 @@ function showTimes(state) {
     if (intervalId) {
         clearInterval(intervalId);  // Clear any existing interval
     }
-
+    
     let whiteTimeInSeconds = state.white_time_left  // Time left for white player
     let blackTimeInSeconds = state.black_time_left  // Time left for black player
     const whiteTime = document.getElementById("white_time");
     const blackTime = document.getElementById("black_time");
-
+    
     updateDisplay();  // Update the initial display
-
+    
     if (state.winner === null) {
         intervalId = setInterval(countDown, 1000);  // Start countdown if there's no winner yet
     }
-
+    
     // Function to decrement time based on current turn
     function countDown() {
         if (state.turn === "white") {
@@ -126,13 +140,13 @@ function showTimes(state) {
         }
         updateDisplay();
     }
-
+    
     // Function to update the time display
     function updateDisplay() {
         whiteTime.innerHTML = formatTime(whiteTimeInSeconds);
         blackTime.innerHTML = formatTime(blackTimeInSeconds);
     }
-
+    
     // Function to format time as MM:SS
     function formatTime(time) {
         if (time < 0) time = 0;
@@ -148,7 +162,7 @@ function addRemovePlayers(tableSocket, state) {
         { player: "white", sit: "white_player_sit_button", stand: "white_player_stand_button", ready: "white_player_ready_button", unready: "white_player_unready_button" },
         { player: "black", sit: "black_player_sit_button", stand: "black_player_stand_button", ready: "black_player_ready_button", unready: "black_player_unready_button" }
     ];
-
+    
     // Show start modal if players are not ready
     if (state.white_player_ready !== true || state.black_player_ready !== true) {
         document.getElementById("modal_background_start").classList.add("show");
@@ -175,7 +189,7 @@ function setButtonState(tableSocket, state, config) {
     const standButton = resetButton(stand);
     const readyButton = resetButton(ready);
     const unreadyButton = resetButton(unready);
-
+    
     // Configure buttons based on the player's role and readiness
     if (player === "white" && state.white_player === "Player 1" || player === "black" && state.black_player === "Player 2") {
         // Show sit button for the appropriate player
@@ -183,7 +197,7 @@ function setButtonState(tableSocket, state, config) {
         standButton.classList.add("hidden");
         readyButton.classList.add("hidden");
         unreadyButton.classList.add("hidden");
-
+        
         sitButton.addEventListener("click", function() {
             updatePlayerState(tableSocket, player, true, null, null, null);  // Sit down player
         });
@@ -197,11 +211,10 @@ function setButtonState(tableSocket, state, config) {
         standButton.addEventListener("click", function() {
             updatePlayerState(tableSocket, player, false, null, null, null);  // Stand up player
         });
-
+        
         readyButton.addEventListener("click", function() {
             updatePlayerState(tableSocket, player, null, true, null, null);  // Mark player as ready
         });
-
     } else if (player === "white" && state.white_player === state.user && state.white_player_ready === true || player === "black" && state.black_player === state.user && state.black_player_ready === true) {
         // Show stand and unready buttons for the appropriate player
         sitButton.classList.add("hidden");
@@ -277,10 +290,12 @@ function setBoardMoveListeners() {
     board.addEventListener('dragstart', (event) => {
         event.preventDefault();
     });
-
+    
     // Handle mouse or touch release event
     function handleMouseTouchUp(event) {
-        if (isDragging) { 
+        if (isDragging) {
+            const {piece, player, square} = draggedPiece;
+            console.log(piece)
             isDragging = false;
             board.classList.remove("dragging");
             movingPiece.classList.remove("showPiece");
@@ -291,7 +306,7 @@ function setBoardMoveListeners() {
             setTimeout(function() {square.classList.remove("marked")}, 50);  // Remove square highlight with a delay
         }
     }
-
+    
     // Handle mouse or touch move event to update the piece's position
     function handleMouseTouchMove(event) {
         if (isDragging) {
@@ -299,11 +314,11 @@ function setBoardMoveListeners() {
             movingPiece.setAttribute("style", "top: "+(clientY - (0.5 * movingPiece.clientWidth))+"px; left: "+(clientX - (0.5 * movingPiece.clientHeight))+"px;");
         }
     }
-
+    
     // Set listeners for mouse and touch release
     document.addEventListener('mouseup', handleMouseTouchUp);
     document.addEventListener('touchend', handleMouseTouchUp);
-
+    
     // Set listeners for mouse and touch move
     document.addEventListener('mousemove', handleMouseTouchMove);
     document.addEventListener('touchmove', handleMouseTouchMove);
@@ -314,27 +329,26 @@ function renderBoard(tableSocket, state) {
     // Iterate over each square and set pieces or events
     for (let row = 0; row < 8; row++) {
         for (let col = 0; col < 8; col++) {
-            setupSquareEvents(row, col);  // Setup events for each square
+            const square = document.querySelector(`#square${row}${col}`);
+            setupSquareEvents(square);  // Setup events for each square
             if (state.board[row][col] !== null) {
-                renderSquare(state, row, col, tableSocket);  // Render pieces on the board
+                renderSquare(state, square, row, col, tableSocket);  // Render pieces on the board
             }
         }
     }
 }
 
 // Function to setup basic events for each square
-function setupSquareEvents(row, col) {
-    const square = document.querySelector(`#square${row}${col}`);
+function setupSquareEvents(square) {
     square.classList.remove("draggableElement");  // Remove draggable class to reset square state
 }
 
 // Function to render a specific square with a piece
-function renderSquare(state, row, col, tableSocket) {
+function renderSquare(state, square, row, col, tableSocket) {
     const {piece, player, moves} = state.board[row][col];
-    const square = document.querySelector(`#square${row}${col}`);
     square.classList.add(piece);  // Add the piece class to the square
     square.classList.add(player);  // Add the player class to the square
-
+    
     // Enable dragging and click events if it's the player's turn
     if (state.turn === player && state.winner === null && ((player === "white" && state.user === state.white_player) || (player === "black" && state.user === state.black_player))) {
         enableDraggable(square, row, col, piece, player, moves, tableSocket);  // Enable dragging for the current piece
@@ -342,28 +356,29 @@ function renderSquare(state, row, col, tableSocket) {
 }
 
 // Function to enable dragging for a piece
-function enableDraggable(square, row, col, piece, player, moves, tableSocket) {eqw
+function enableDraggable(square, row, col, piece, player, moves, tableSocket) {
     const movingPiece = document.querySelector('.movingPiece');
     const board = document.getElementById("chess-board");
     square.classList.add("draggableElement");  // Make the square draggable
-
+    
     // Handle mouse or touch down event to initiate dragging
     function handleMouseTouchDown(event) {
         isDragging = true;
+        draggedPiece = {piece:piece, player:player, square:square}
         board.classList.add("dragging");  // Add dragging class to the board
         movingPiece.classList.add("showPiece");
         movingPiece.classList.add(piece);
         movingPiece.classList.add(player);
-
+        
         const { clientX, clientY } = event.type === 'touchstart' ? event.touches[0] : event;
         movingPiece.setAttribute("style", "top: "+(clientY - (0.5 * movingPiece.clientWidth))+"px; left: "+(clientX - (0.5 * movingPiece.clientHeight))+"px;");
-
+        
         highlightSelectedSquare(square);  // Highlight selected square
         const isPromotion = moves[2];  // Check if the move is a promotion
         moves[0].forEach(move => addPossibleMove(move, row, col, tableSocket, isPromotion, "move"));
         moves[1].forEach(move => addPossibleMove(move, row, col, tableSocket, isPromotion, "attack"));
     }
-
+    
     // Add listeners for initiating drag on mouse or touch down
     square.addEventListener('mousedown', handleMouseTouchDown);
     square.addEventListener('touchstart', handleMouseTouchDown);
@@ -395,7 +410,7 @@ function addPossibleMove(move, oldRow, oldCol, tableSocket, isPromotion, type) {
     const [row, col] = move
     const square = document.querySelector(`#square${row}${col}`);
     const fullMove = [[oldRow, oldCol], [row, col]];
-
+    
     // Highlight possible moves or attacks
     if (square.classList.contains('dark')) {
         square.classList.remove('dark');
@@ -411,7 +426,7 @@ function addPossibleMove(move, oldRow, oldCol, tableSocket, isPromotion, type) {
 function addMoveListener(move, square, isPromotion, tableSocket) {
     const squareId = square.id;
     const board = document.getElementById("chess-board");
-
+    
     const moveListener = function() {handleMove(move, isPromotion, tableSocket)};  // Listener for mouse events
     const touchListener = function(event) {
         const touch = event.changedTouches[0];
@@ -421,20 +436,20 @@ function addMoveListener(move, square, isPromotion, tableSocket) {
             touch.clientX <= rect.right &&
             touch.clientY >= rect.top &&
             touch.clientY <= rect.bottom
-        ) {
-            handleMove(move, isPromotion, tableSocket);  // Listener for touch events
-        }
+            ) {
+                handleMove(move, isPromotion, tableSocket);  // Listener for touch events
+            }
     };
-
+    
     // Add listeners for move execution on mouse or touch events
     square.addEventListener("mouseup", moveListener);
     board.addEventListener("touchend", touchListener);
-
+    
     // Store the listeners to remove them later
     moveListeners[`moveListener${squareId}`] = [moveListener, "mouseup", square];
     moveListeners[`touchListener${squareId}`] = [touchListener, "touchend", board];
 }
-
+    
 // Function to handle move and promotion
 function handleMove(move, isPromotion, tableSocket) {
     if (!isPromotion) {
@@ -443,7 +458,7 @@ function handleMove(move, isPromotion, tableSocket) {
         showPromotionModal(move, tableSocket);  // Show promotion modal if promotion is required
     }
 }
-
+    
 // Function to show promotion modal and handle promotion selection
 function showPromotionModal(move, tableSocket) {
     const promotionObject = {
@@ -457,7 +472,7 @@ function showPromotionModal(move, tableSocket) {
     const modalBackground = document.getElementById("modal_background_promotion");
     modalPromotion.classList.add("show");  // Show promotion modal
     modalBackground.classList.add("show");  // Show modal background
-
+    
     // Helper function to set the promotion piece and handle click event
     const setPromotionPiece  = function(curr_piece, pieceType, player, pieceSymbol) {
         curr_piece.classList.add(pieceType);
@@ -468,7 +483,7 @@ function showPromotionModal(move, tableSocket) {
             updatePlayerState(tableSocket, null, null, null, move, pieceSymbol);  // Update player state with the selected promotion piece
         });
     }
-
+    
     // Iterate through possible promotion pieces and set their respective event listeners
     for (const pieceType in promotionObject) {
         const pieceInfo = promotionObject[pieceType];
@@ -481,7 +496,7 @@ function showPromotionModal(move, tableSocket) {
         
         curr_piece.className = '';  // Reset class list
         curr_piece.classList.add(pieceInfo.background);  // Set the appropriate background
-
+        
         // Set promotion pieces for white or black based on the move
         if (move[0][0] === 6) {
             setPromotionPiece(curr_piece, pieceType, "white", pieceInfo.whiteSymbol);  // Set promotion piece for white
@@ -489,19 +504,4 @@ function showPromotionModal(move, tableSocket) {
             setPromotionPiece(curr_piece, pieceType, "black", pieceInfo.blackSymbol);  // Set promotion piece for black
         }
     }
-}
-
-// Function to clear the board of pieces and listeners
-function clearBoard() {
-    for(let row = 0; row < 8; row++) {
-        for (let col = 0; col < 8; col++) {
-            // Remove all listeners by replacing the element
-            let square = document.querySelector(`#square${row}${col}`);
-            let newElement = square.cloneNode(true);
-            square.parentNode.replaceChild(newElement, square);
-            // Remove all pieces by resetting class list
-            newElement.className = '';
-        }
-    }
-    colorBoard();  // Reset the board colors
 }
