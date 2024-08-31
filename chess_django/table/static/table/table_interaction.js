@@ -295,7 +295,6 @@ function setBoardMoveListeners() {
     function handleMouseTouchUp(event) {
         if (isDragging) {
             const {piece, player, square} = draggedPiece;
-            console.log(piece)
             isDragging = false;
             board.classList.remove("dragging");
             movingPiece.classList.remove("showPiece");
@@ -386,7 +385,6 @@ function enableDraggable(square, row, col, piece, player, moves, tableSocket) {
 
 // Function to remove all move listeners
 function removeMoveListeners() {
-    console.log(moveListeners)
     Object.keys(moveListeners).forEach(key => {
         const [listener, event, element] = moveListeners[key];
         element.removeEventListener(event, listener);  // Remove each move listener
