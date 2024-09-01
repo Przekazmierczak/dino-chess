@@ -561,3 +561,26 @@ def boardSimplify(board):
                     }
 
     return json_class
+
+def get_FEN(board):
+    fen = []
+    count = 0
+    for i in range(7, -1, -1):
+        if count:
+            fen.append(str(count))
+            count = 0
+        if i != 7:
+            fen.append("/")
+        for j in range(7, -1, -1):
+            if board[i][j] != " ":
+                if count:
+                    fen.append(str(count))
+                    count = 0
+                fen.append(board[i][j])
+            else:
+                count += 1
+    
+    return ("").join(fen)
+
+board = [["R", "N", "B", "K", "Q", "B", "N", "R"],["P", "P", "P", " ", "P", "P", "P", "P"],[" ", " ", " ", "P", " ", " ", " ", " "],[" ", " ", " ", " ", " ", " ", " ", " "],[" ", " ", " ", " ", " ", " ", " ", " "],[" ", " ", " ", " ", " ", " ", " ", " "],["p", "p", "p", "p", "p", "p", "p", "p"],["r", "n", "b", "k", "q", "b", "n", "r"]]
+print(get_FEN(board))
