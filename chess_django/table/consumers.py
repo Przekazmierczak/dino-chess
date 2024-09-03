@@ -6,7 +6,7 @@ from asgiref.sync import sync_to_async
 
 from .models import Game, Board
 from . import pieces
-from .tasks import check_game_timeout
+from .tasks import check_game_timeout, computer_move
 
 from math import ceil
 
@@ -136,6 +136,9 @@ class TableConsumer(AsyncWebsocketConsumer):
             # Handle invalid move or disconnection
             return
         
+        if black_player == "Easy_Computer" and prev_state.turn == "white":
+            computer_move.apply_async((self.table_id, next_board, turn, next_castling, next_enpassant, soft_moves, total_moves, white_player, black_player), countdown=1)
+
         # Format the time values for display
         white_time_left, black_time_left = self.format_time(white_time_left, black_time_left)
         

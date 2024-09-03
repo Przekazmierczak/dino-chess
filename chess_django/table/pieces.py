@@ -358,7 +358,7 @@ class Board:
                 if curr_piece and curr_piece.player != self.turn:
                     # Calculate possible moves for opponent's pieces
                     possible_moves[row][col] = curr_piece.check_piece_possible_moves(self, attacked_positions, checkin_pieces, pinned_pieces, self.castling, self.enpassant)
-        print(attacked_positions)
+        
         # Iterate over player's pieces
         for row in range(self.ROWS):
             for col in range(self.COLS):
@@ -407,7 +407,6 @@ class Board:
 
 
     def create_new_json_board(self, move, promotion):
-        print(move)
         # Extract old and new positions from the move
         old_position = tuple(move[0])
         new_position = tuple(move[1])
@@ -562,7 +561,7 @@ def boardSimplify(board):
 
     return json_class
 
-def get_FEN(board):
+def get_fen(board, turn, castling, enpassant, soft_moves, total_moves):
     fen = []
     count = 0
     for i in range(7, -1, -1):
@@ -580,7 +579,28 @@ def get_FEN(board):
             else:
                 count += 1
     
+    fen.append(" w ") if turn == "white" else fen.append(" b ")
+    
+    fen_castling = []
+    for letter in castling:
+        if letter != "_":
+            fen_castling.append(letter)
+    if not fen_castling:
+        fen_castling.append("-")
+    fen_castling.append(" ")
+    
+    fen.extend(fen_castling)
+    
+    fen.append(f"{enpassant} ") if enpassant != "__" else fen.append("- ")
+
+    fen.append(f"{str(soft_moves)} {str(total_moves)}")
+
     return ("").join(fen)
 
-board = [["R", "N", "B", "K", "Q", "B", "N", "R"],["P", "P", "P", " ", "P", "P", "P", "P"],[" ", " ", " ", "P", " ", " ", " ", " "],[" ", " ", " ", " ", " ", " ", " ", " "],[" ", " ", " ", " ", " ", " ", " ", " "],[" ", " ", " ", " ", " ", " ", " ", " "],["p", "p", "p", "p", "p", "p", "p", "p"],["r", "n", "b", "k", "q", "b", "n", "r"]]
-print(get_FEN(board))
+# board = [["R", "N", "B", "K", "Q", "B", "N", "R"],["P", "P", "P", " ", "P", "P", "P", "P"],[" ", " ", " ", "P", " ", " ", " ", " "],[" ", " ", " ", " ", " ", " ", " ", " "],[" ", " ", " ", " ", " ", " ", " ", " "],[" ", " ", " ", " ", " ", " ", " ", " "],["p", "p", "p", "p", "p", "p", "p", "p"],["r", "n", "b", "k", "q", "b", "n", "r"]]
+# turn = "black"
+# castling = "____"
+# enpassant = "e2"
+# soft_moves = 2
+# total_moves = 3
+# print(get_FEN(board, turn, castling, enpassant, soft_moves, total_moves))
