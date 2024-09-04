@@ -131,8 +131,15 @@ def construct_game_state_message(
     }
 
 @shared_task
-def computer_move(game_id, board, turn, castling, enpassant, soft_moves, total_moves, white_player, black_player):
-    fen_board = pieces.get_fen(board, turn, castling, enpassant, soft_moves, total_moves)
+def computer_move(game_id):
+    game = Game.objects.get(pk=game_id)
+    prev_state = Board.objects.filter(game=game).latest('id')
+    prev_boards = list(Board.objects.filter(game=game))
+    prev_board = json.loads(prev_state.board)
+
+    prev_state.turn = "white" if prev_state.turn == "w" else "black"
+    
+    fen_board = pieces.get_fen(prev_board, prev_state.turn, prev_state.castling, prev_state.enpassant, prev_state.soft_moves, prev_state.total_moves)
     computer = Computer(fen_board)
     best_move = computer.best_move()
 
@@ -142,13 +149,6 @@ def computer_move(game_id, board, turn, castling, enpassant, soft_moves, total_m
     letter = {"a": 7, "b": 6, "c": 5, "d": 4, "e": 3, "f": 2, "g": 1, "h": 0}
     move[0] = [int(best_move[1]) - 1, letter[best_move[0]]]
     move[1] = [int(best_move[3]) - 1, letter[best_move[2]]]
-
-    game = Game.objects.get(pk=game_id)
-    prev_state = Board.objects.filter(game=game).latest('id')
-    prev_boards = list(Board.objects.filter(game=game))
-    prev_board = json.loads(prev_state.board)
-
-    prev_state.turn = "white" if prev_state.turn == "w" else "black"
 
     # Create the new board state
     next_board, next_castling, next_enpassant, soft_move = pieces.Board(prev_board, prev_state.turn, prev_state.castling, prev_state.enpassant).create_new_json_board(move, promotion)
@@ -192,7 +192,7 @@ def computer_move(game_id, board, turn, castling, enpassant, soft_moves, total_m
     white_time_left, black_time_left = format_time(white_time_left, black_time_left)
 
     message = construct_game_state_message(
-        white_player, black_player, True,
+        game.white.username, game.black.username, True,
         True, winner, board, turn,
         checking, total_moves, soft_moves,
         white_time_left, black_time_left

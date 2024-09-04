@@ -137,7 +137,7 @@ class TableConsumer(AsyncWebsocketConsumer):
             return
         
         if black_player == "Easy_Computer" and prev_state.turn == "white":
-            computer_move.apply_async((self.table_id, next_board, turn, next_castling, next_enpassant, soft_moves, total_moves, white_player, black_player), countdown=1)
+            computer_move.apply_async((self.table_id,), countdown=1)
 
         # Format the time values for display
         white_time_left, black_time_left = self.format_time(white_time_left, black_time_left)
