@@ -1,3 +1,4 @@
+import asyncio
 import json
 from datetime import datetime, timezone
 
@@ -62,82 +63,14 @@ def check_game_timeout(game_id, turn, total_moves, board_json):
             }
         )
 
-def get_current_time(white_time_left, black_time_left, created_at, turn):
-    # Calculate the remaining time for each player
-    if turn == "white":
-        white_time_left -= datetime.now(timezone.utc) - created_at
-    else:
-        black_time_left -= datetime.now(timezone.utc) - created_at
-    return white_time_left, black_time_left
-
-def is_threefold_repetition(prev_boards, next_board, next_castling, next_enpassant, turn):
-    # Check for threefold repetition to determine if the game should end in a draw
-    repetition = 1
-    next_turn_short = "w" if turn == "white" else "b"
-    for prev_board in prev_boards:
-        if (prev_board.board, prev_board.turn, prev_board.castling, prev_board.enpassant) == (
-            json.dumps(next_board), next_turn_short, next_castling, next_enpassant):
-            repetition += 1
-        if repetition >= 3:
-            return True
-    return False
-
-def push_new_board_to_database(updated_board, turn, castling, enpassant, winner, total_moves, soft_moves, white_time_left, black_time_left, game_id):
-    # Save the new board state to the database
-    game = Game.objects.get(pk=game_id)
-    if winner:
-        db_winner = {"white": "w", "black": "b"}.get(winner, "d")
-        game.winner = db_winner
-        game.save()
-
-    db_turn = "w" if turn == "white" else "b"
-
-    Board.objects.create(
-        game = game,
-        total_moves = total_moves,
-        board = json.dumps(updated_board),
-        turn = db_turn,
-        castling = castling,
-        enpassant = enpassant,
-        soft_moves = soft_moves,
-        white_time_left = white_time_left,
-        black_time_left = black_time_left
-    )
-
-def format_time(white_time_left, black_time_left):
-    # Format time values to ensure compatibility with JSON serialization
-    return white_time_left.total_seconds(), black_time_left.total_seconds()
-
-def construct_game_state_message(
-        white_player, black_player, white_player_ready,
-        black_player_ready, winner, board, turn,
-        checking, total_moves, soft_moves, 
-        white_time_left, black_time_left
-    ):
-    # Constructs a dictionary containing the game state
-    return {
-        "white_player": white_player,
-        "black_player": black_player,
-        "white_player_ready": white_player_ready,
-        "black_player_ready": black_player_ready,
-        "winner": winner,
-        "board": board,
-        "turn": turn,
-        "checking": checking,
-        "total_moves": total_moves,
-        "soft_moves": soft_moves,
-        "white_time_left": white_time_left,
-        "black_time_left": black_time_left,
-    }
-
 @shared_task
 def computer_move(game_id):
-    game = Game.objects.get(pk=game_id)
-    prev_state = Board.objects.filter(game=game).latest('id')
-    prev_boards = list(Board.objects.filter(game=game))
-    prev_board = json.loads(prev_state.board)
+    from .consumers import get_latest_board_from_database, get_prev_boards_from_database, get_current_time, is_threefold_repetition, push_new_board_to_database, format_time, construct_game_state_message
 
-    prev_state.turn = "white" if prev_state.turn == "w" else "black"
+    game = Game.objects.get(pk=game_id)
+    prev_state = asyncio.run(get_latest_board_from_database(game))
+    prev_boards = asyncio.run(get_prev_boards_from_database(game))
+    prev_board = json.loads(prev_state.board)
     
     fen_board = pieces.get_fen(prev_board, prev_state.turn, prev_state.castling, prev_state.enpassant, prev_state.soft_moves, prev_state.total_moves)
     computer = Computer(fen_board)
@@ -183,7 +116,7 @@ def computer_move(game_id):
             check_game_timeout.apply_async((game_id, turn, total_moves, board), countdown=timeout)
 
         # Update database with new board state
-        push_new_board_to_database(next_board, turn, next_castling, next_enpassant, winner, total_moves, soft_moves, white_time_left, black_time_left, game_id)
+        asyncio.run(push_new_board_to_database(game_id, next_board, turn, next_castling, next_enpassant, winner, total_moves, soft_moves, white_time_left, black_time_left))
     else:
         # Handle invalid move or disconnection
         return
