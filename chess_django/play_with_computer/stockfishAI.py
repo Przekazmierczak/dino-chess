@@ -33,8 +33,8 @@ class Computer:
                 else:
                     count += 1
 
-        # if count:
-        #     fen.append(str(count))  # Append any remaining empty squares at the end of the row
+        if count:
+            fen.append(str(count))  # Append any remaining empty squares at the end of the row
         
         # Add the active color (turn) to the FEN string
         fen.append(" w ") if turn == "white" else fen.append(" b ")

@@ -16,7 +16,7 @@ function setupWebSocket() {
     
     // Add event listener for theme change button
     document.getElementById('theme').addEventListener('click', () => {
-        renderBoard(tableSocket, state);  // Re-render the board when theme changes
+        reloadUI(tableSocket, state);
     });
     
     // Handle incoming messages from the server
@@ -63,6 +63,13 @@ function updateUI(tableSocket, state) {
                             //     renderBoard(tableSocket, state);
                             // })
     // ------------------ BUTTONS REMOVE LATER ------------------------
+}
+
+function reloadUI(tableSocket, state) {
+    clearBoard();  // Re-clear the board of pieces and listeners
+    colorBoard();  // Re-color the board
+    highlightChecks(state);  // Highlight checking squares
+    renderBoard(tableSocket, state);  // Re-render the board when theme changes
 }
 
 // Function to clear the board of pieces and listeners
