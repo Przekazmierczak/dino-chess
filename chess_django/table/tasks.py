@@ -66,22 +66,22 @@ def check_game_timeout(game_id, turn, total_moves, board_json):
 @shared_task
 def computer_move(game_id):
     from .consumers import get_latest_board_from_database, get_prev_boards_from_database, get_current_time, is_threefold_repetition, push_new_board_to_database, format_time, construct_game_state_message
-
+    
+    # Fetch the game instance
     game = Game.objects.get(pk=game_id)
+
+    # Fetch the latest board state and previous boards using asyncio.run to execute async functions
     prev_state = asyncio.run(get_latest_board_from_database(game))
     prev_boards = asyncio.run(get_prev_boards_from_database(game))
+
+    # Convert the board state from JSON to a Python list
     prev_board = json.loads(prev_state.board)
     
-    fen_board = pieces.get_fen(prev_board, prev_state.turn, prev_state.castling, prev_state.enpassant, prev_state.soft_moves, prev_state.total_moves)
-    computer = Computer(fen_board)
-    best_move = computer.best_move()
+    # Initialize the Computer instance with the current game state
+    computer = Computer(prev_board, prev_state.turn, prev_state.castling, prev_state.enpassant, prev_state.soft_moves, prev_state.total_moves)
 
-    promotion = best_move[4] if len(best_move) > 4 else None
-    move = [[], []]
-
-    letter = {"a": 7, "b": 6, "c": 5, "d": 4, "e": 3, "f": 2, "g": 1, "h": 0}
-    move[0] = [int(best_move[1]) - 1, letter[best_move[0]]]
-    move[1] = [int(best_move[3]) - 1, letter[best_move[2]]]
+    # Generate the new board state after the computer's move
+    move, promotion = computer.best_move()
 
     # Create the new board state
     next_board, next_castling, next_enpassant, soft_move = pieces.Board(prev_board, prev_state.turn, prev_state.castling, prev_state.enpassant).create_new_json_board(move, promotion)
@@ -115,7 +115,7 @@ def computer_move(game_id):
             
             check_game_timeout.apply_async((game_id, turn, total_moves, board), countdown=timeout)
 
-        # Update database with new board state
+        # Push the new board state to the database (async operation)
         asyncio.run(push_new_board_to_database(game_id, next_board, turn, next_castling, next_enpassant, winner, total_moves, soft_moves, white_time_left, black_time_left))
     else:
         # Handle invalid move or disconnection
@@ -124,6 +124,7 @@ def computer_move(game_id):
     # Format the time values for display
     white_time_left, black_time_left = format_time(white_time_left, black_time_left)
 
+    # Construct a message to update the game state in the frontend
     message = construct_game_state_message(
         game.white.username, game.black.username, True,
         True, winner, board, turn,
@@ -140,5 +141,3 @@ def computer_move(game_id):
             **message
         }
     )
-
-    return best_move
