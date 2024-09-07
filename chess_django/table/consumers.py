@@ -136,7 +136,10 @@ class TableConsumer(AsyncWebsocketConsumer):
             # Handle invalid move or disconnection
             return
         
-        if black_player == "Easy_Computer" and prev_state.turn == "white":
+        # Check if the black player is one of the AI-controlled opponents
+        computer = ["Easy_Computer", "Medium_Computer", "Hard_Computer", "Impossible_Computer"]
+        if black_player in computer and prev_state.turn == "white":
+            # Schedule a task to make the AI move
             computer_move.apply_async((self.table_id,), countdown=1)
 
         # Format the time values for display

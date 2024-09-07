@@ -6,12 +6,15 @@ absolute_path = Path(__file__).resolve().parent.parent.parent
 stockfish_loc = absolute_path / 'stockfish' / 'stockfish-windows-x86-64-avx2.exe'
 
 class Computer:
-    def __init__(self, board, turn, castling, enpassant, soft_moves, total_moves):
+    def __init__(self, board, turn, castling, enpassant, soft_moves, total_moves, elo):
         self.stockfish = Stockfish(path=stockfish_loc)
         # Generate FEN string from the current board state
         self.fen = self.get_fen(board, turn, castling, enpassant, soft_moves, total_moves)
         # Set the FEN position in Stockfish
         self.stockfish.set_fen_position(self.fen)
+        # Set stockfish rating
+        if elo:
+            self.stockfish.set_elo_rating(elo)
 
     def get_fen(self, board, turn, castling, enpassant, soft_moves, total_moves):
         fen = []
