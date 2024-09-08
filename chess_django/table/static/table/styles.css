@@ -69,8 +69,10 @@
 }
 
 #black_player,
+#black_captured,
 #black_time,
 #white_player,
+#white_captured,
 #white_time {
     display: flex;
     align-items: center;
@@ -87,11 +89,13 @@
 }
 
 #black_player,
+#black_captured,
 #black_time {
     grid-row: 1;
 }
 
 #white_player,
+#white_captured,
 #white_time {
     grid-row: 18;
 }
@@ -99,6 +103,11 @@
 #black_player,
 #white_player {
     grid-column: 1 / 7;
+}
+
+#black_captured,
+#white_captured {
+    grid-column: 7 / 11;
 }
 
 #black_time,

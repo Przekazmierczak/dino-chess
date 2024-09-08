@@ -328,21 +328,55 @@ function setBoardMoveListeners() {
 
 // Function to render the board based on the current state
 function renderBoard(tableSocket, state) {
+    // Points for each type of piece
+    const points = {"pawn": 1, "bishop": 3, "knight": 3, "rook": 5, "queen": 9}
+
+    // Track the number of each type of piece captured by white and black
+    let white_captured = {"pawn": 8, "bishop": 2, "knight": 2, "rook": 2, "queen": 1, "sum": 39}
+    let black_captured = {"pawn": 8, "bishop": 2, "knight": 2, "rook": 2, "queen": 1, "sum": 39}
+
     // Iterate over each square and set pieces or events
     for (let row = 0; row < 8; row++) {
         for (let col = 0; col < 8; col++) {
             const square = document.querySelector(`#square${row}${col}`);
-            setupSquareEvents(square);  // Setup events for each square
-            if (state.board[row][col]) {
+
+            // Setup events for each square
+            setupSquareEvents(square);
+
+            const square_object = state.board[row][col]
+
+            // If there's a piece on the square, manage captured pieces and render it
+            if (square_object) {
+                manageCaptured(square_object, points, white_captured, black_captured);
                 renderSquare(state, square, row, col, tableSocket);  // Render pieces on the board
             }
         }
     }
+
+    // Update the displayed captured points
+    document.getElementById("white_captured").innerHTML = white_captured["sum"]
+    document.getElementById("black_captured").innerHTML = black_captured["sum"]
 }
 
 // Function to setup basic events for each square
 function setupSquareEvents(square) {
     square.classList.remove("draggableElement");  // Remove draggable class to reset square state
+}
+
+// Function to manage captured pieces and update the captured points
+function manageCaptured(square_object, points, white_captured, black_captured) {
+    // Only manage pieces that are not kings
+    if (square_object.piece !== "king") {
+        if (square_object.player === "white") {
+            // Update black's captured pieces and their sum
+            black_captured[square_object.piece] -= 1
+            black_captured["sum"] -= points[square_object.piece]
+        } else {
+            // Update white's captured pieces and their sum
+            white_captured[square_object.piece] -= 1
+            white_captured["sum"] -= points[square_object.piece]
+        }
+    }
 }
 
 // Function to render a specific square with a piece
