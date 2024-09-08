@@ -183,6 +183,7 @@
 
 .nav-item {
     white-space: nowrap;
+    pointer-events: none;
 }
 
 #sidebar .nav-item {
