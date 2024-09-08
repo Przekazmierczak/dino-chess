@@ -6,15 +6,28 @@ absolute_path = Path(__file__).resolve().parent.parent.parent
 stockfish_loc = absolute_path / 'stockfish' / 'stockfish-windows-x86-64-avx2.exe'
 
 class Computer:
-    def __init__(self, board, turn, castling, enpassant, soft_moves, total_moves, elo):
+    def __init__(self, board, turn, castling, enpassant, soft_moves, total_moves, user):
+        # Map user difficulty to corresponding ELO rating
+        difficulty = {
+            "Easy_Computer": 50,       # Low ELO for easy difficulty
+            "Medium_Computer": 1200,   # Moderate ELO for medium difficulty
+            "Hard_Computer": 1600,     # High ELO for hard difficulty
+            "Impossible_Computer": None # No limit for the hardest difficulty
+        }
+        self.elo = difficulty[user]
+
+        # Initialize the Stockfish engine with the given path
         self.stockfish = Stockfish(path=stockfish_loc)
+
         # Generate FEN string from the current board state
         self.fen = self.get_fen(board, turn, castling, enpassant, soft_moves, total_moves)
+
         # Set the FEN position in Stockfish
         self.stockfish.set_fen_position(self.fen)
+        
         # Set stockfish rating
-        if elo:
-            self.stockfish.set_elo_rating(elo)
+        if self.elo:
+            self.stockfish.update_engine_parameters({"UCI_LimitStrength": "true", "UCI_Elo": self.elo, "Hash": 1})
 
     def get_fen(self, board, turn, castling, enpassant, soft_moves, total_moves):
         fen = []
@@ -61,7 +74,7 @@ class Computer:
         return ("").join(fen)  # Return the final FEN string
     
     def best_move(self):
-        best_move = self.stockfish.get_best_move()
+        best_move = self.stockfish.get_best_move(1) if self.elo else self.stockfish.get_best_move() # Reduce stockfish strength
 
         promotion = best_move[4] if len(best_move) > 4 else None  # Check if the move involves a promotion
         move = [[], []]

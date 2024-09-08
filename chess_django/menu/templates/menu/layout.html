@@ -83,6 +83,13 @@
                     </a>
                     <span class="tooltip">Play</span>
                 </li>
+                <li>
+                    <a class="sidebar-button" href="{% url 'computer_index' %}">
+                        <i class="bx bx-joystick"></i>
+                        <span class="nav-item">Play AI</span>
+                    </a>
+                    <span class="tooltip">Play AI</span>
+                </li>
             </ul>
             {% if user.is_authenticated %}
             <div id="sidebar-user">

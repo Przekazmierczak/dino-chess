@@ -77,9 +77,8 @@ def computer_move(game_id):
     # Convert the board state from JSON to a Python list
     prev_board = json.loads(prev_state.board)
     
-    # Initialize the Computer instance with the current game state and difficulty
-    difficulty = {"Easy_Computer": 100, "Medium_Computer": 400, "Hard_Computer": 1200, "Impossible_Computer": None}
-    computer = Computer(prev_board, prev_state.turn, prev_state.castling, prev_state.enpassant, prev_state.soft_moves, prev_state.total_moves, difficulty[game.black.username])
+    # Initialize the Computer instance with the current game state
+    computer = Computer(prev_board, prev_state.turn, prev_state.castling, prev_state.enpassant, prev_state.soft_moves, prev_state.total_moves, game.black.username)
 
     # Generate the new board state after the computer's move
     move, promotion = computer.best_move()
