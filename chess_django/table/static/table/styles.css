@@ -10,6 +10,7 @@
     --light-square-move: rgb(141, 196, 127);
     --dark-square-attack: rgb(218, 64, 64);
     --light-square-attack: rgb(223, 89, 89);
+    --border-radius: 10%;
 
     --white-pawn: var(--dino-white-pawn);
     --white-rook: var(--dino-white-rook);
@@ -383,6 +384,16 @@ td.checking {
     background-color: var(--light-square);
 }
 
+.last_move_from.dark,
+.last_move_to.dark {
+    background-color: var(--last-move-dark-square);
+}
+
+.last_move_from.light,
+.last_move_to.light {
+    background-color: var(--last-move-light-square);
+}
+
 .darkGreen {
     background-color: var(--dark-square-move);
 }
@@ -398,6 +409,20 @@ td.checking {
 .lightRed {
     background-color: var(--light-square-attack);
 }
+
+#square00 {
+    border-bottom-right-radius: var(--border-radius);
+}
+#square07 {
+    border-bottom-left-radius: var(--border-radius);
+}
+#square70 {
+    border-top-right-radius: var(--border-radius);
+}
+#square77 {
+    border-top-left-radius: var(--border-radius);
+}
+
 
 .movingPiece {
     width: calc((2 * var(--square-size) * 1.15));

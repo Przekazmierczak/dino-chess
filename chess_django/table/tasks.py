@@ -65,7 +65,7 @@ def check_game_timeout(game_id, turn, total_moves, board_json):
 
 @shared_task
 def computer_move(game_id):
-    from .consumers import get_latest_board_from_database, get_prev_boards_from_database, get_current_time, is_threefold_repetition, push_new_board_to_database, format_time, construct_game_state_message
+    from .consumers import get_latest_board_from_database, get_prev_boards_from_database, get_current_time, is_threefold_repetition, push_new_board_to_database, format_time, construct_game_state_message, change_move_to_string
     
     # Fetch the game instance
     game = Game.objects.get(pk=game_id)
@@ -115,8 +115,11 @@ def computer_move(game_id):
             
             check_game_timeout.apply_async((game_id, turn, total_moves, board), countdown=timeout)
 
+        # Convert the move to a string representation for database storage and WebSocket communication
+        last_move = change_move_to_string(move)
+
         # Push the new board state to the database (async operation)
-        asyncio.run(push_new_board_to_database(game_id, next_board, turn, next_castling, next_enpassant, winner, total_moves, soft_moves, white_time_left, black_time_left))
+        asyncio.run(push_new_board_to_database(game_id, next_board, turn, next_castling, next_enpassant, winner, total_moves, soft_moves, white_time_left, black_time_left, last_move))
     else:
         # Handle invalid move or disconnection
         return
@@ -129,7 +132,7 @@ def computer_move(game_id):
         game.white.username, game.black.username, True,
         True, winner, board, turn,
         checking, total_moves, soft_moves,
-        white_time_left, black_time_left
+        white_time_left, black_time_left, last_move
         )
 
     # Get the channel layer to send a message to the room group

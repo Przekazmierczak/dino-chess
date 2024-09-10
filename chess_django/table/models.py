@@ -11,6 +11,7 @@ class Game(models.Model):
     black = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='black_games')
     black_ready = models.BooleanField(default=False)
     with_ai = models.BooleanField(default=False)
+    boards = models.JSONField(default=list)
 
 class Board(models.Model):
     game = models.ForeignKey(Game, on_delete=models.CASCADE)
@@ -23,3 +24,4 @@ class Board(models.Model):
     white_time_left = models.DurationField(default=timedelta(minutes=15))
     black_time_left = models.DurationField(default=timedelta(minutes=15))
     created_at = models.DateTimeField(auto_now_add=True)
+    last_move = models.CharField(max_length=4, null=True, default=None)

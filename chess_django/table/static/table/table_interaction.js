@@ -35,6 +35,7 @@ function updateUI(tableSocket, state) {
     addRemovePlayers(tableSocket, state);  // Manage player buttons
     displayWinner(state);  // Display winner if any
     updateMoves(state);  // Update move counter
+    displayLastMove(state);  // Function to display last move
     highlightChecks(state);  // Highlight checking squares
     setBoardMoveListeners();  // Set event listeners for move actions
     renderBoard(tableSocket, state);  // Render the board based on state
@@ -68,6 +69,7 @@ function updateUI(tableSocket, state) {
 function reloadUI(tableSocket, state) {
     clearBoard();  // Re-clear the board of pieces and listeners
     colorBoard();  // Re-color the board
+    displayLastMove(state);  // Function to display last move
     highlightChecks(state);  // Highlight checking squares
     renderBoard(tableSocket, state);  // Re-render the board when theme changes
 }
@@ -276,6 +278,26 @@ function displayWinner(state) {
 // Function to update move counter
 function updateMoves(state) {
     document.getElementById("moves").innerHTML = `Moves: ${state.total_moves}`;
+}
+
+// Function to display last move
+function displayLastMove(state) {
+    // Check if state is not the starting position
+    if (state.last_move) {
+        // Extract the starting row and column from the last move string
+        const fromRow = state.last_move.charAt(0);
+        const fromCol = state.last_move.charAt(1);
+
+        // Extract the ending row and column from the last move string
+        const toRow = state.last_move.charAt(2);
+        const toCol = state.last_move.charAt(3);
+
+        // Add the 'last_move_from' class to the square from which the piece was moved
+        document.querySelector(`#square${fromRow}${fromCol}`).classList.add("last_move_from")
+
+        // Add the 'last_move_to' class to the square to which the piece was moved
+        document.querySelector(`#square${toRow}${toCol}`).classList.add("last_move_to")
+    }
 }
 
 // Function to highlight squares that are under check
