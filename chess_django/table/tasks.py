@@ -50,7 +50,8 @@ def check_game_timeout(game_id, turn, total_moves, board_json):
             "total_moves": board.total_moves,
             "soft_moves": board.soft_moves,
             "white_time_left": white_time_left,
-            "black_time_left": black_time_left
+            "black_time_left": black_time_left,
+            "last_move": board.last_move
         }
 
         # Get the channel layer to send a message to the room group

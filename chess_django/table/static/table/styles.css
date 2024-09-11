@@ -410,6 +410,63 @@ td.checking {
     background-color: var(--light-square-attack);
 }
 
+.square {
+    position: relative;
+}
+
+.bottom_right_symbol,
+.top_left_symbol {
+    position: absolute;
+    user-select: none;
+    font-size: min(calc(var(--square-size) / 1.7), 22px);
+    font-family: system-ui, sans-serif;
+}
+
+.bottom_right_symbol {
+    right: 5%;
+    bottom: 5%;
+}
+
+.top_left_symbol {
+    left: 5%;
+    top: 5%;
+}
+
+.dark .bottom_right_symbol,
+.dark .top_left_symbol {
+    color: var(--light-square);
+}
+
+.light .bottom_right_symbol,
+.light .top_left_symbol {
+    color: var(--dark-square);
+}
+
+.darkGreen .bottom_right_symbol,
+.darkGreen .top_left_symbol {
+    color: var(--light-square-move);
+}
+
+.lightGreen .bottom_right_symbol,
+.lightGreen .top_left_symbol {
+    color: var(--dark-square-move);
+}
+
+.darkRed .bottom_right_symbol,
+.darkRed .top_left_symbol {
+    color: var(--light-square-attack);
+}
+
+.lightRed .bottom_right_symbol,
+.lightRed .top_left_symbol {
+    color: var(--dark-square-attack);
+}
+
+.marked .bottom_right_symbol,
+.marked .top_left_symbol {
+    color: var(--light-square-move);
+}
+
 #square00 {
     border-bottom-right-radius: var(--border-radius);
 }
@@ -505,7 +562,7 @@ td.checking {
     font-size: min(var(--square-size), 35px);
 }
 
-.rotate {
+/* .rotate {
     transform: rotate(180deg);
 }
 
@@ -515,11 +572,11 @@ td.checking {
 
 .rotate .player-time {
     transform: rotate(-180deg);
-}
+} */
 
-.container2 {
+/* .container2 {
     display: grid;
-}
+} */
 
 .hidden {
     visibility: hidden;

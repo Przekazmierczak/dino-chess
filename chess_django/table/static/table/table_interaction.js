@@ -41,29 +41,6 @@ function updateUI(tableSocket, state) {
     renderBoard(tableSocket, state);  // Render the board based on state
 
     console.log("received updated board");
-    
-    // ------------------ BUTTONS REMOVE LATER ------------------------
-    // const board = document.querySelector(".board");
-    // const rotateButton = document.getElementById("button_rotate");
-    // const dinoButton = document.getElementById("button_dino");
-    
-    // rotateButton.addEventListener("click", function() {
-        //     if (board.classList.contains("rotate")) {
-            //         board.classList.remove("rotate");
-            //     } else {
-                //         board.classList.add("rotate");
-                //     }
-                // })
-                
-                // dinoButton.addEventListener("click", function() {
-                    //     if (style === "classic") {
-                        //         style = "dino";
-                        //     } else {
-                            //         style = "classic";
-                            //     }
-                            //     renderBoard(tableSocket, state);
-                            // })
-    // ------------------ BUTTONS REMOVE LATER ------------------------
 }
 
 function reloadUI(tableSocket, state) {
@@ -350,6 +327,9 @@ function setBoardMoveListeners() {
 
 // Function to render the board based on the current state
 function renderBoard(tableSocket, state) {
+    const symbols_letters = {"00": "h", "01": "g", "02": "f", "03": "e", "04": "d", "05": "c", "06": "b", "07": "a"}
+    const symbols_numbers = {"07": "1", "17": "2", "27": "3", "37": "4", "47": "5", "57": "6", "67": "7", "77": "8"}
+
     // Points for each type of piece
     const points = {"pawn": 1, "bishop": 3, "knight": 3, "rook": 5, "queen": 9}
 
@@ -361,7 +341,23 @@ function renderBoard(tableSocket, state) {
     for (let row = 0; row < 8; row++) {
         for (let col = 0; col < 8; col++) {
             const square = document.querySelector(`#square${row}${col}`);
-
+            
+            if (row == 0) {
+                square.classList.add("square")
+                let bottomRightSymbol = document.createElement("div");
+                bottomRightSymbol.classList.add("bottom_right_symbol");
+                bottomRightSymbol.textContent = symbols_letters[`${row}${col}`]
+                square.appendChild(bottomRightSymbol);
+            }
+            
+            if (col == 7) {
+                square.classList.add("square")
+                let topLeftSymbol = document.createElement("div");
+                topLeftSymbol.classList.add("top_left_symbol");
+                topLeftSymbol.textContent = symbols_numbers[`${row}${col}`]
+                square.appendChild(topLeftSymbol);
+            }
+            
             // Setup events for each square
             setupSquareEvents(square);
 
