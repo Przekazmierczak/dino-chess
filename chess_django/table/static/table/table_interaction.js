@@ -327,42 +327,37 @@ function setBoardMoveListeners() {
 
 // Function to render the board based on the current state
 function renderBoard(tableSocket, state) {
-    const symbols_letters = {"00": "h", "01": "g", "02": "f", "03": "e", "04": "d", "05": "c", "06": "b", "07": "a"}
-    const symbols_numbers = {"07": "1", "17": "2", "27": "3", "37": "4", "47": "5", "57": "6", "67": "7", "77": "8"}
+    // Define the symbols for the letters and numbers on the chessboard
+    const symbols_letters = {"00": "h", "01": "g", "02": "f", "03": "e", "04": "d", "05": "c", "06": "b", "07": "a"};
+    const symbols_numbers = {"07": "1", "17": "2", "27": "3", "37": "4", "47": "5", "57": "6", "67": "7", "77": "8"};
 
     // Points for each type of piece
-    const points = {"pawn": 1, "bishop": 3, "knight": 3, "rook": 5, "queen": 9}
+    const points = {"pawn": 1, "bishop": 3, "knight": 3, "rook": 5, "queen": 9};
 
     // Track the number of each type of piece captured by white and black
-    let white_captured = {"pawn": 8, "bishop": 2, "knight": 2, "rook": 2, "queen": 1, "sum": 39}
-    let black_captured = {"pawn": 8, "bishop": 2, "knight": 2, "rook": 2, "queen": 1, "sum": 39}
+    let white_captured = {"pawn": 8, "bishop": 2, "knight": 2, "rook": 2, "queen": 1, "sum": 39};
+    let black_captured = {"pawn": 8, "bishop": 2, "knight": 2, "rook": 2, "queen": 1, "sum": 39};
 
     // Iterate over each square and set pieces or events
     for (let row = 0; row < 8; row++) {
         for (let col = 0; col < 8; col++) {
             const square = document.querySelector(`#square${row}${col}`);
             
+            // Add letter symbols at the bottom of the board (for row 0)
             if (row == 0) {
-                square.classList.add("square")
-                let bottomRightSymbol = document.createElement("div");
-                bottomRightSymbol.classList.add("bottom_right_symbol");
-                bottomRightSymbol.textContent = symbols_letters[`${row}${col}`]
-                square.appendChild(bottomRightSymbol);
+                addSymbolLetters(square, row, col, symbols_letters);
             }
             
+            // Add number symbols at the right of the board (for column 7)
             if (col == 7) {
-                square.classList.add("square")
-                let topLeftSymbol = document.createElement("div");
-                topLeftSymbol.classList.add("top_left_symbol");
-                topLeftSymbol.textContent = symbols_numbers[`${row}${col}`]
-                square.appendChild(topLeftSymbol);
+                addSymbolNumbers(square, row, col, symbols_numbers);
             }
             
             // Setup events for each square
             setupSquareEvents(square);
-
-            const square_object = state.board[row][col]
-
+            
+            const square_object = state.board[row][col];
+            
             // If there's a piece on the square, manage captured pieces and render it
             if (square_object) {
                 manageCaptured(square_object, points, white_captured, black_captured);
@@ -370,10 +365,28 @@ function renderBoard(tableSocket, state) {
             }
         }
     }
-
+    
     // Update the displayed captured points
-    document.getElementById("white_captured").innerHTML = white_captured["sum"]
-    document.getElementById("black_captured").innerHTML = black_captured["sum"]
+    document.getElementById("white_captured").innerHTML = white_captured["sum"];
+    document.getElementById("black_captured").innerHTML = black_captured["sum"];
+}
+
+// Function to add letter symbols to the bottom-right of the squares (for the letter coordinates)
+function addSymbolLetters(square, row, col, symbols_letters) {
+    square.classList.add("square");  // Ensure square has the "square" class
+    let bottomRightSymbol = document.createElement("div");  // Create a div for the letter symbol
+    bottomRightSymbol.classList.add("bottom_right_symbol");  // Add the class to position the symbol
+    bottomRightSymbol.textContent = symbols_letters[`${row}${col}`];  // Set the letter symbol as content
+    square.appendChild(bottomRightSymbol);  // Append the symbol to the square
+}
+
+// Function to add number symbols to the top-left of the squares (for the number coordinates)
+function addSymbolNumbers(square, row, col, symbols_numbers) {
+    square.classList.add("square");  // Ensure square has the "square" class
+    let topLeftSymbol = document.createElement("div");  // Create a div for the number symbol
+    topLeftSymbol.classList.add("top_left_symbol");  // Add the class to position the symbol
+    topLeftSymbol.textContent = symbols_numbers[`${row}${col}`];  // Set the number symbol as content
+    square.appendChild(topLeftSymbol);  // Append the symbol to the square
 }
 
 // Function to setup basic events for each square
