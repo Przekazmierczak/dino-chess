@@ -39,7 +39,7 @@ function updateUI(tableSocket, state) {
     highlightChecks(state);  // Highlight checking squares
     setBoardMoveListeners();  // Set event listeners for move actions
     renderBoard(tableSocket, state);  // Render the board based on state
-
+    renderLastMoves(state)
     console.log("received updated board");
 }
 
@@ -63,6 +63,11 @@ function clearBoard() {
             newElement.className = ''; 
         }
     }
+    clearLastMovesTable()
+}
+
+function clearLastMovesTable() {
+    document.getElementById("last_moves").innerHTML = ""
 }
 
 // Function to color the board with alternating colors
@@ -582,4 +587,31 @@ function setPromotionPieceListener(curr_piece, pieceType, player, pieceSymbol, m
 function hidePromotionModal() {
     document.querySelector("#modal_promotion").classList.remove("show");  // Hide promotion modal
     document.getElementById("modal_background_promotion").classList.remove("show");  // Hide modal background
+}
+
+function renderLastMoves(state) {
+    const letters = {7: "a", 6: "b", 5: "c", 4: "d", 3: "e", 2: "f", 1: "g", 0: "h"};
+    let count = 1;
+    let round;
+    last_moves_table = document.getElementById("last_moves");
+
+    for (const board of state.prev_boards_id_moves) {
+        if (count % 1 === 0) {
+            round = `<br>${parseInt(count)}: `;
+        } else {
+            round = "";
+        }
+        last_moves_table.innerHTML += `${decodeMoves(board[1], round, letters)} `;
+        count += 0.5;
+    }
+}
+
+function decodeMoves(move, round, letters) {
+
+    const col1 = letters[move.charAt(1)];
+    const row1 = parseInt(move.charAt(0)) + 1;
+    const col2 = letters[move.charAt(3)];
+    const row2 = parseInt(move.charAt(2)) + 1;
+
+    return `${round}${col1}${row1}-${col2}${row2}`
 }

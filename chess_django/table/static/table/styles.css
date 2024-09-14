@@ -219,14 +219,19 @@
 }
 
 #table_number,
-#moves {
+#moves,
+#last_moves {
     grid-column: 17 / 22;
     display: flex;
-    align-items: center;
     justify-content: center;
     color: white;
     z-index: 25;
     font-size: min(var(--square-size), 22px);
+}
+
+#table_number,
+#moves {
+    align-items: center;
 }
 
 #table_number {
@@ -235,6 +240,10 @@
 
 #moves {
     grid-row: 4;
+}
+
+#last_moves {
+    grid-row: 5 / 18;
 }
 
 #chess-board {
