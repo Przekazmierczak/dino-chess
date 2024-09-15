@@ -218,8 +218,7 @@
     }
 }
 
-#table_number,
-#moves {
+#table_number {
     grid-column: 17 / 22;
     display: flex;
     justify-content: center;
@@ -262,21 +261,16 @@
     color: var(--black-player-button);
 }
 
-#table_number,
-#moves {
+#table_number {
     align-items: center;
 }
 
 #table_number {
-    grid-row: 3;
-}
-
-#moves {
-    grid-row: 4;
+    grid-row: 2;
 }
 
 #prev_moves {
-    grid-row: 5 / 18;
+    grid-row: 3 / 17;
 }
 
 #chess-board {

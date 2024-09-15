@@ -34,7 +34,6 @@ function updateUI(tableSocket, state) {
     showTimes(state);  // Update player times
     addRemovePlayers(tableSocket, state);  // Manage player buttons
     displayWinner(state);  // Display winner if any
-    updateMoves(state);  // Update move counter
     displayLastMove(state);  // Function to display last move
     highlightChecks(state);  // Highlight checking squares
     setBoardMoveListeners();  // Set event listeners for move actions
@@ -255,11 +254,6 @@ function displayWinner(state) {
             htmlWinner.innerHTML = `<p>${state.winner} has won!</p>`;
         }
     }
-}
-
-// Function to update move counter
-function updateMoves(state) {
-    document.getElementById("moves").innerHTML = `Moves: ${state.total_moves}`;
 }
 
 // Function to display last move
