@@ -219,14 +219,47 @@
 }
 
 #table_number,
-#moves,
-#last_moves {
+#moves {
     grid-column: 17 / 22;
     display: flex;
     justify-content: center;
     color: white;
     z-index: 25;
     font-size: min(var(--square-size), 22px);
+}
+
+#last_moves {
+    grid-column: 17 / 22;
+    color: white;
+    z-index: 25;
+    font-size: min(var(--square-size), 22px);
+    overflow: auto;
+}
+
+.moves_container {
+    display: flex;
+}
+
+.moves_container span {
+    padding: 5px;
+    text-align: center;
+}
+
+.round {
+    flex: 1 1 20%;
+}
+
+.movesListWhite,
+.movesListBlack {
+    flex: 1 1 40%;
+}
+
+.movesListWhite {
+    color: var(--white-player-button);
+}
+
+.movesListBlack {
+    color: var(--black-player-button);
 }
 
 #table_number,

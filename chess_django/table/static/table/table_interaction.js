@@ -590,28 +590,63 @@ function hidePromotionModal() {
 }
 
 function renderLastMoves(state) {
+    // Mapping of numeric indices to chess column letters
     const letters = {7: "a", 6: "b", 5: "c", 4: "d", 3: "e", 2: "f", 1: "g", 0: "h"};
-    let count = 1;
-    let round;
-    last_moves_table = document.getElementById("last_moves");
+    // Get the table element where moves will be appended
+    const last_moves_table = document.getElementById("last_moves");
+    let newLine;
+    
+    // Iterate over each move in the array
+    for (let i = 0; i < state.prev_boards_id_moves.length; i++) {
+        const move_counter = i;
 
-    for (const board of state.prev_boards_id_moves) {
-        if (count % 1 === 0) {
-            round = `<br>${parseInt(count)}: `;
-        } else {
-            round = "";
+        // Create a new line every two moves
+        if (move_counter % 2 === 0) {
+            newLine = document.createElement("div");
+            newLine.classList.add("moves_container");
         }
-        last_moves_table.innerHTML += `${decodeMoves(board[1], round, letters)} `;
-        count += 0.5;
+
+        // Decode the move and add it to the current line
+        newLine = decodeMoves(state.prev_boards_id_moves[move_counter][1], newLine, move_counter, letters);
+
+        // If it's the last move and a new line was created, add a placeholder
+        if (move_counter === state.prev_boards_id_moves.length - 1 && move_counter % 2 === 0) {
+            placeHolder = document.createElement("span");
+            placeHolder.classList.add("movesListBlack");
+            newLine.appendChild(placeHolder);
+        }
+
+        // Append the current line to the table
+        last_moves_table.appendChild(newLine);
     }
 }
 
-function decodeMoves(move, round, letters) {
+function decodeMoves(move, newLine, move_counter, letters) {
+    // Create a span element for the move details
+    const decodedMove = document.createElement("span");
 
-    const col1 = letters[move.charAt(1)];
-    const row1 = parseInt(move.charAt(0)) + 1;
-    const col2 = letters[move.charAt(3)];
-    const row2 = parseInt(move.charAt(2)) + 1;
+    // Check if the move is a white or black move based on the counter
+    if (move_counter % 2 === 0) {
+        decodedMove.classList.add("movesListWhite"); // Add class for white move
+        // Create a span element for the round number
+        const round = document.createElement("span");
+        round.classList.add("round"); // Add class for round number styling
+        // Set the round number text content
+        round.textContent = `${parseInt((move_counter / 2) + 1)}:`;
+        newLine.appendChild(round); // Append round number to the line
+    } else {
+        decodedMove.classList.add("movesListBlack"); // Add class for black move
+    }
 
-    return `${round}${col1}${row1}-${col2}${row2}`
+    // Decode the move string to get the column and row information
+    const col1 = letters[move.charAt(1)]; // Column for the start position
+    const row1 = parseInt(move.charAt(0)) + 1; // Row for the start position
+    const col2 = letters[move.charAt(3)]; // Column for the end position
+    const row2 = parseInt(move.charAt(2)) + 1; // Row for the end position
+    
+    // Set the text content of the move span to the decoded move
+    decodedMove.textContent = `${col1}${row1}-${col2}${row2}`;
+    newLine.appendChild(decodedMove); // Append the move details to the line
+
+    return newLine; // Return the updated line element
 }
