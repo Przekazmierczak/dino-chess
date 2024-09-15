@@ -39,7 +39,7 @@ function updateUI(tableSocket, state) {
     highlightChecks(state);  // Highlight checking squares
     setBoardMoveListeners();  // Set event listeners for move actions
     renderBoard(tableSocket, state);  // Render the board based on state
-    renderLastMoves(state)
+    renderPrevMoves(state)
     console.log("received updated board");
 }
 
@@ -63,11 +63,11 @@ function clearBoard() {
             newElement.className = ''; 
         }
     }
-    clearLastMovesTable()
+    clearPrevMovesTable()
 }
 
-function clearLastMovesTable() {
-    document.getElementById("last_moves").innerHTML = ""
+function clearPrevMovesTable() {
+    document.getElementById("prev_moves").innerHTML = ""
 }
 
 // Function to color the board with alternating colors
@@ -589,11 +589,11 @@ function hidePromotionModal() {
     document.getElementById("modal_background_promotion").classList.remove("show");  // Hide modal background
 }
 
-function renderLastMoves(state) {
+function renderPrevMoves(state) {
     // Mapping of numeric indices to chess column letters
     const letters = {7: "a", 6: "b", 5: "c", 4: "d", 3: "e", 2: "f", 1: "g", 0: "h"};
     // Get the table element where moves will be appended
-    const last_moves_table = document.getElementById("last_moves");
+    const prev_moves_table = document.getElementById("prev_moves");
     let newLine;
     
     // Iterate over each move in the array
@@ -617,7 +617,7 @@ function renderLastMoves(state) {
         }
 
         // Append the current line to the table
-        last_moves_table.appendChild(newLine);
+        prev_moves_table.appendChild(newLine);
     }
 }
 

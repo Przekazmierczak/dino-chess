@@ -228,7 +228,7 @@
     font-size: min(var(--square-size), 22px);
 }
 
-#last_moves {
+#prev_moves {
     grid-column: 17 / 22;
     color: white;
     z-index: 25;
@@ -275,7 +275,7 @@
     grid-row: 4;
 }
 
-#last_moves {
+#prev_moves {
     grid-row: 5 / 18;
 }
 
