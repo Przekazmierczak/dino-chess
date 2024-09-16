@@ -584,63 +584,76 @@ function hidePromotionModal() {
 }
 
 function renderPrevMoves(state) {
-    // Mapping of numeric indices to chess column letters
+    // Mapping of numeric indices to chess column letters (for decoding moves)
     const letters = {7: "a", 6: "b", 5: "c", 4: "d", 3: "e", 2: "f", 1: "g", 0: "h"};
-    // Get the table element where moves will be appended
+
+    // Get the table element where previous moves will be displayed
     const prev_moves_table = document.getElementById("prev_moves");
     let newLine;
     
-    // Iterate over each move in the array
+    // Iterate over each move stored in the state
     for (let i = 0; i < state.prev_boards_id_moves.length; i++) {
-        const move_counter = i;
+        const move_counter = i; // Keep track of the current move index
 
-        // Create a new line every two moves
+        // Create a new line (div) every two moves (i.e., for each round)
         if (move_counter % 2 === 0) {
             newLine = document.createElement("div");
-            newLine.classList.add("moves_container");
+            newLine.classList.add("moves_container"); // Add class for styling the container
         }
 
-        // Decode the move and add it to the current line
-        newLine = decodeMoves(state.prev_boards_id_moves[move_counter][1], newLine, move_counter, letters);
+        // Decode the current move and append it to the newly created line
+        newLine = decodeMoves(state.prev_boards_id_moves[move_counter], newLine, move_counter, letters);
 
-        // If it's the last move and a new line was created, add a placeholder
+        // If it's the last move and it's an even index (white's move), add a placeholder for black
         if (move_counter === state.prev_boards_id_moves.length - 1 && move_counter % 2 === 0) {
+            // Create a placeholder span for the black move
             placeHolder = document.createElement("span");
-            placeHolder.classList.add("movesListBlack");
-            newLine.appendChild(placeHolder);
+            placeHolder.classList.add("movesListBlack"); // Add class for black move placeholder styling
+            newLine.appendChild(placeHolder); // Append the placeholder to the line
         }
 
-        // Append the current line to the table
+        // Append the fully constructed line (with 1 or 2 moves) to the previous moves table
         prev_moves_table.appendChild(newLine);
     }
 }
 
 function decodeMoves(move, newLine, move_counter, letters) {
-    // Create a span element for the move details
-    const decodedMove = document.createElement("span");
+    // Create a span element to hold the move's details (piece + move)
+    const pieceAndMove = document.createElement("span");
 
-    // Check if the move is a white or black move based on the counter
+    // If it's an even move (white's move), add round number and white move classes
     if (move_counter % 2 === 0) {
-        decodedMove.classList.add("movesListWhite"); // Add class for white move
-        // Create a span element for the round number
+        pieceAndMove.classList.add("movesListWhite"); // Style the white move
+
+        // Create a span for the round number (e.g., "1:", "2:")
         const round = document.createElement("span");
         round.classList.add("round"); // Add class for round number styling
-        // Set the round number text content
-        round.textContent = `${parseInt((move_counter / 2) + 1)}:`;
-        newLine.appendChild(round); // Append round number to the line
+        round.textContent = `${parseInt((move_counter / 2) + 1)}:`; // Calculate and set round number
+        newLine.appendChild(round); // Append the round number to the current line
     } else {
-        decodedMove.classList.add("movesListBlack"); // Add class for black move
+        pieceAndMove.classList.add("movesListBlack"); // Style the black move
     }
 
-    // Decode the move string to get the column and row information
-    const col1 = letters[move.charAt(1)]; // Column for the start position
-    const row1 = parseInt(move.charAt(0)) + 1; // Row for the start position
-    const col2 = letters[move.charAt(3)]; // Column for the end position
-    const row2 = parseInt(move.charAt(2)) + 1; // Row for the end position
-    
-    // Set the text content of the move span to the decoded move
-    decodedMove.textContent = `${col1}${row1}-${col2}${row2}`;
-    newLine.appendChild(decodedMove); // Append the move details to the line
+    // Create a span for the piece involved in the move
+    const piece = document.createElement("span");
+    piece.classList.add(move[2][0]); // Add class for the piece type (e.g., pawn, knight)
+    piece.classList.add(move[2][1]); // Add class for the color (white/black)
+    piece.classList.add("movesListPiece"); // Add class for general piece styling
+    pieceAndMove.appendChild(piece); // Append the piece span to the move details
 
-    return newLine; // Return the updated line element
+    // Create a span for the decoded move (end position)
+    const decodedMove = document.createElement("span");
+    const col2 = letters[move[1].charAt(3)]; // Get the ending column letter from the move string
+    const row2 = parseInt(move[1].charAt(2)) + 1; // Get the ending row number from the move string
+    decodedMove.textContent = `${col2}${row2}`; // Set the decoded move text (e.g., "e4", "d5")
+    decodedMove.classList.add("movesListMove"); // Add class for styling the move text
+
+    // Append the decoded move (e.g., "e4") to the pieceAndMove span
+    pieceAndMove.appendChild(decodedMove);
+    
+    // Append the fully constructed pieceAndMove (piece + move) to the current line
+    newLine.appendChild(pieceAndMove);
+
+    // Return the updated line to be further processed in renderPrevMoves
+    return newLine;
 }

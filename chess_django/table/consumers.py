@@ -133,9 +133,11 @@ class TableConsumer(AsyncWebsocketConsumer):
             # Convert the move to a string representation for database storage and WebSocket communication
             last_move = change_move_to_string(move)
 
+            moved_piece = (board[move[1][0]][move[1][1]]["piece"] if not promotion else "pawn", prev_state.turn)
+
             # Update database with new board state
-            new_board_id = await push_new_board_to_database(self.table_id, next_board, turn, next_castling, next_enpassant, winner, total_moves, soft_moves, white_time_left, black_time_left, last_move)
-            prev_boards_id_moves.append((new_board_id, last_move))
+            new_board_id = await push_new_board_to_database(self.table_id, next_board, turn, next_castling, next_enpassant, winner, total_moves, soft_moves, white_time_left, black_time_left, last_move, moved_piece)
+            prev_boards_id_moves.append((new_board_id, last_move, moved_piece))
         else:
             # Handle invalid move or disconnection
             return
@@ -269,7 +271,7 @@ def get_prev_boards_from_database(game):
 
     
 @sync_to_async
-def push_new_board_to_database(table_id, updated_board, turn, castling, enpassant, winner, total_moves, soft_moves, white_time_left, black_time_left, last_move):
+def push_new_board_to_database(table_id, updated_board, turn, castling, enpassant, winner, total_moves, soft_moves, white_time_left, black_time_left, last_move, moved_piece):
     # Save the new board state to the database
     game = Game.objects.get(pk=table_id)
 
@@ -291,7 +293,7 @@ def push_new_board_to_database(table_id, updated_board, turn, castling, enpassan
     if winner:
         db_winner = {"white": "w", "black": "b"}.get(winner, "d")
         game.winner = db_winner
-    game.boards.append((board.id, last_move))
+    game.boards.append((board.id, last_move, moved_piece))
     game.save()
 
     return board.id
