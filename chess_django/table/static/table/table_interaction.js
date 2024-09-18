@@ -38,7 +38,7 @@ function updateUI(tableSocket, state) {
     highlightChecks(state);  // Highlight checking squares
     setBoardMoveListeners();  // Set event listeners for move actions
     renderBoard(tableSocket, state);  // Render the board based on state
-    renderPrevMoves(state)
+    renderPrevMoves(tableSocket, state)
     console.log("received updated board");
 }
 
@@ -190,7 +190,7 @@ function setButtonState(tableSocket, state, config) {
         unreadyButton.classList.add("hidden");
         
         sitButton.addEventListener("click", function() {
-            updatePlayerState(tableSocket, player, true, null, null, null);  // Sit down player
+            updateState(tableSocket, player, true, null, null, null, null);  // Sit down player
         });
     } else if (player === "white" && state.white_player === state.user && state.white_player_ready === false || player === "black" && state.black_player === state.user && state.black_player_ready === false) {
         // Show stand and ready buttons for the appropriate player
@@ -200,11 +200,11 @@ function setButtonState(tableSocket, state, config) {
         unreadyButton.classList.add("hidden");
         
         standButton.addEventListener("click", function() {
-            updatePlayerState(tableSocket, player, false, null, null, null);  // Stand up player
+            updateState(tableSocket, player, false, null, null, null, null);  // Stand up player
         });
         
         readyButton.addEventListener("click", function() {
-            updatePlayerState(tableSocket, player, null, true, null, null);  // Mark player as ready
+            updateState(tableSocket, player, null, true, null, null, null);  // Mark player as ready
         });
     } else if (player === "white" && state.white_player === state.user && state.white_player_ready === true || player === "black" && state.black_player === state.user && state.black_player_ready === true) {
         // Show stand and unready buttons for the appropriate player
@@ -214,7 +214,7 @@ function setButtonState(tableSocket, state, config) {
         unreadyButton.classList.remove("hidden");
         
         unreadyButton.addEventListener("click", function() {
-            updatePlayerState(tableSocket, player, null, false, null, null);  // Mark player as unready
+            updateState(tableSocket, player, null, false, null, null, null);  // Mark player as unready
         });
     }
 }
@@ -227,15 +227,16 @@ function resetButton(buttonId) {
     return newButton;
 }
 
-// Function to update player state on the server
-function updatePlayerState(tableSocket, player, playerState, readyState, move, promotion) {
+// Function to update state on the server
+function updateState(tableSocket, player, playerState, readyState, move, promotion, requested_board) {
     const update = {
         white_player: player === "white" ? playerState : null,
         black_player: player === "black" ? playerState : null,
         white_player_ready: player === "white" ? readyState : null,
         black_player_ready: player === "black" ? readyState : null,
         move: move,
-        promotion: promotion
+        promotion: promotion,
+        requested_board: requested_board
     };
     tableSocket.send(JSON.stringify(update));
 }
@@ -524,7 +525,7 @@ function isTouchInsideSquare(touch, rect) {
 // Function to handle move and promotion
 function handleMove(move, isPromotion, tableSocket) {
     if (!isPromotion) {
-        updatePlayerState(tableSocket, null, null, null, move, null);  // Update player state without promotion
+        updateState(tableSocket, null, null, null, move, null, null);  // Update state without promotion
     } else {
         showPromotionModal(move, tableSocket);  // Show promotion modal if promotion is required
     }
@@ -573,7 +574,7 @@ function setPromotionPieceListener(curr_piece, pieceType, player, pieceSymbol, m
     curr_piece.classList.add(player);
     curr_piece.addEventListener("click", function() {
         hidePromotionModal();
-        updatePlayerState(tableSocket, null, null, null, move, pieceSymbol);  // Update player state with the selected promotion piece
+        updateState(tableSocket, null, null, null, move, pieceSymbol, null);  // Update state with the selected promotion piece
     });
 }
 
@@ -583,29 +584,29 @@ function hidePromotionModal() {
     document.getElementById("modal_background_promotion").classList.remove("show");  // Hide modal background
 }
 
-function renderPrevMoves(state) {
+function renderPrevMoves(tableSocket, state) {
     // Mapping of numeric indices to chess column letters (for decoding moves)
-    const letters = {7: "a", 6: "b", 5: "c", 4: "d", 3: "e", 2: "f", 1: "g", 0: "h"};
+    const columnLetters = {7: "a", 6: "b", 5: "c", 4: "d", 3: "e", 2: "f", 1: "g", 0: "h"};
 
     // Get the table element where previous moves will be displayed
-    const prev_moves_table = document.getElementById("prev_moves");
+    const prevMovesTable = document.getElementById("prev_moves");
     let newLine;
     
-    // Iterate over each move stored in the state
+    // Iterate over each move in the previous boards and moves array
     for (let i = 0; i < state.prev_boards_id_moves.length; i++) {
-        const move_counter = i; // Keep track of the current move index
+        const moveIndex = i; // Keep track of the current move index
 
         // Create a new line (div) every two moves (i.e., for each round)
-        if (move_counter % 2 === 0) {
+        if (moveIndex % 2 === 0) {
             newLine = document.createElement("div");
             newLine.classList.add("moves_container"); // Add class for styling the container
         }
 
         // Decode the current move and append it to the newly created line
-        newLine = decodeMoves(state.prev_boards_id_moves[move_counter], newLine, move_counter, letters);
+        newLine = decodeMoves(tableSocket, state.prev_boards_id_moves[moveIndex], newLine, moveIndex, columnLetters, state.board_id);
 
         // If it's the last move and it's an even index (white's move), add a placeholder for black
-        if (move_counter === state.prev_boards_id_moves.length - 1 && move_counter % 2 === 0) {
+        if (moveIndex === state.prev_boards_id_moves.length - 1 && moveIndex % 2 === 0) {
             // Create a placeholder span for the black move
             placeHolder = document.createElement("span");
             placeHolder.classList.add("movesListBlack"); // Add class for black move placeholder styling
@@ -613,43 +614,58 @@ function renderPrevMoves(state) {
         }
 
         // Append the fully constructed line (with 1 or 2 moves) to the previous moves table
-        prev_moves_table.appendChild(newLine);
+        prevMovesTable.appendChild(newLine);
     }
 }
 
-function decodeMoves(move, newLine, move_counter, letters) {
+function decodeMoves(tableSocket, prevBoardsIdMoves, newLine, moveIndex, columnLetters, currentBoard) {
+    // Destructure the elements of prevBoardsIdMove array into separate variables
+    const [ boardId, move, pieceImage ] = prevBoardsIdMoves;
+
     // Create a span element to hold the move's details (piece + move)
     const pieceAndMove = document.createElement("span");
 
-    // If it's an even move (white's move), add round number and white move classes
-    if (move_counter % 2 === 0) {
-        pieceAndMove.classList.add("movesListWhite"); // Style the white move
-
-        // Create a span for the round number (e.g., "1:", "2:")
-        const round = document.createElement("span");
-        round.classList.add("round"); // Add class for round number styling
-        round.textContent = `${parseInt((move_counter / 2) + 1)}:`; // Calculate and set round number
-        newLine.appendChild(round); // Append the round number to the current line
-    } else {
-        pieceAndMove.classList.add("movesListBlack"); // Style the black move
+    // If the current board is the one being displayed, apply a specific class to highlight it
+    if (boardId === currentBoard) {
+        pieceAndMove.classList.add("currentBoard");
     }
 
-    // Create a span for the piece involved in the move
-    const piece = document.createElement("span");
-    piece.classList.add(move[2][0]); // Add class for the piece type (e.g., pawn, knight)
-    piece.classList.add(move[2][1]); // Add class for the color (white/black)
-    piece.classList.add("movesListPiece"); // Add class for general piece styling
-    pieceAndMove.appendChild(piece); // Append the piece span to the move details
+    // Determine if the move is made by White (even moveCounter) or Black (odd moveCounter)
+    if (moveIndex % 2 === 0) {
+        // If White's move, style the move container as 'movesListWhite'
+        pieceAndMove.classList.add("movesListWhite");
+
+        // Create a span for the round number (e.g., "1:", "2:")
+        const roundSpan = document.createElement("span");
+        roundSpan.classList.add("round"); // Add class for round number styling
+        roundSpan.textContent = `${parseInt((moveIndex / 2) + 1)}:`; // Calculate and set round number
+        newLine.appendChild(roundSpan); // Append the round number to the current line
+    } else {
+        // If Black's move, style the move container as 'movesListBlack'
+        pieceAndMove.classList.add("movesListBlack");
+    }
+
+    // Create a span for the piece involved in the move (e.g., pawn, knight)
+    const pieceSpan = document.createElement("span");
+    pieceSpan.classList.add(pieceImage[0]); // Add class for the piece type (e.g., pawn, knight)
+    pieceSpan.classList.add(pieceImage[1]); // Add class for the color (white/black)
+    pieceSpan.classList.add("movesListPiece"); // Add class for general piece styling
+    pieceAndMove.appendChild(pieceSpan); // Append the piece span to the move details
 
     // Create a span for the decoded move (end position)
-    const decodedMove = document.createElement("span");
-    const col2 = letters[move[1].charAt(3)]; // Get the ending column letter from the move string
-    const row2 = parseInt(move[1].charAt(2)) + 1; // Get the ending row number from the move string
-    decodedMove.textContent = `${col2}${row2}`; // Set the decoded move text (e.g., "e4", "d5")
-    decodedMove.classList.add("movesListMove"); // Add class for styling the move text
+    const movePositionSpan = document.createElement("span");
+    const endColumn = columnLetters[move.charAt(3)]; // Get the ending column letter from the move string
+    const endRow = parseInt(move.charAt(2)) + 1; // Get the ending row number from the move string
+    movePositionSpan.textContent = `${endColumn}${endRow}`; // Set the decoded move text (e.g., "e4", "d5")
+    movePositionSpan.classList.add("movesListMove"); // Add class for styling the move text
 
     // Append the decoded move (e.g., "e4") to the pieceAndMove span
-    pieceAndMove.appendChild(decodedMove);
+    pieceAndMove.appendChild(movePositionSpan);
+
+    // Add a click event listener to the move that triggers an update of the game state to the selected board
+    pieceAndMove.addEventListener('click', () => {
+        updateState(tableSocket, null, null, null, null, null, boardId);  // Update the game state to reflect the selected move/board
+    });
     
     // Append the fully constructed pieceAndMove (piece + move) to the current line
     newLine.appendChild(pieceAndMove);

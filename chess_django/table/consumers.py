@@ -45,6 +45,7 @@ class TableConsumer(AsyncWebsocketConsumer):
             current_state = await get_latest_board_from_database(current_game)
             winner = {"w": "white", "b": "black"}.get(current_game.winner, "draw") if current_game.winner else None
             turn, total_moves, soft_moves, last_move = current_state.turn, current_state.total_moves, current_state.soft_moves, current_state.last_move
+            board_id = current_state.id
 
             # Calculate the remaining time for each player
             white_time_left, black_time_left = get_current_time(current_state.white_time_left, current_state.black_time_left, current_state.created_at, turn)
@@ -66,11 +67,12 @@ class TableConsumer(AsyncWebsocketConsumer):
             board = pieces.boardSimplify(None)
             winner, turn, checking, total_moves, soft_moves =  None, None, None, 0, 0
             white_time_left, black_time_left, last_move = None, None, None
+            board_id = None
         
         # Construct and send the game state message to the room group
         message = construct_game_state_message(
             white_player, black_player, current_game.white_ready,
-            current_game.black_ready, winner, board, turn,
+            current_game.black_ready, winner, board_id, board, turn,
             checking, total_moves, soft_moves,
             white_time_left, black_time_left, last_move, prev_boards_id_moves
             )
@@ -82,11 +84,20 @@ class TableConsumer(AsyncWebsocketConsumer):
         current_game = await get_game_from_database(self.table_id)
         user = self.scope["user"]
 
-        # Handle a move if the game has started
+        # If the message contains a move, handle the move
         if text_data_json["move"]:
             await self.handle_move(current_game, user, text_data_json["move"], text_data_json["promotion"])
+
+        # If the client is requesting the most recent board and it's the current one, send the current state
+        elif text_data_json["requested_board"] and text_data_json["requested_board"] == current_game.boards[-1][0]:
+            await self.send_current_state()
+
+        # If the client is requesting a previous board, handle the request
+        elif text_data_json["requested_board"]:
+            await self.handle_board_request(current_game, user, text_data_json["requested_board"])
+        
+        # Handle other user actions
         else:
-            # Handle other user actions
             await self.handle_user_action(current_game, user, text_data_json)
 
     async def handle_move(self, current_game, user, move, promotion):
@@ -154,11 +165,44 @@ class TableConsumer(AsyncWebsocketConsumer):
         # Construct and send the game state message to the room group
         message = construct_game_state_message(
             white_player, black_player, current_game.white_ready,
-            current_game.black_ready, winner, board, turn,
+            current_game.black_ready, winner, new_board_id, board, turn,
             checking, total_moves, soft_moves,
             white_time_left, black_time_left, last_move, prev_boards_id_moves
             )
         await self.send_game_state_to_room_group(message)
+
+    async def handle_board_request(self, current_game, user, board_id):
+        # Get the latest board state from the database
+        latest_board_state  = await get_latest_board_from_database(current_game)
+
+        # Extract the usernames of the white and black players from the game object
+        white_player = current_game.white.username
+        black_player = current_game.black.username
+
+        # Fetch the list of previous boards and their associated moves from the game object
+        previous_boards_and_moves = current_game.boards
+
+        # Calculate the remaining time for each player
+        white_time_left, black_time_left = get_current_time(latest_board_state.white_time_left, latest_board_state.black_time_left, latest_board_state.created_at, latest_board_state.turn)
+
+        # Fetch the specific board requested by board_id from the database
+        requested_board_data  = await get_board_from_database(board_id)
+
+        # Convert the board JSON data to a simplified format for easier processing on the front-end
+        board_json = json.loads(requested_board_data .board)
+        simplified_board = pieces.boardSimplify(board_json)
+
+        # Format the time values for display
+        white_time_left, black_time_left = format_time(white_time_left, black_time_left)
+        
+        # Construct and send the game state message to the user
+        message = construct_game_state_message(
+            white_player, black_player, current_game.white_ready,
+            current_game.black_ready, None, board_id, simplified_board, latest_board_state .turn,
+            [], latest_board_state .total_moves, latest_board_state .soft_moves,
+            white_time_left, black_time_left, requested_board_data .last_move, previous_boards_and_moves
+            )
+        await self.send_game_state_to_websocket(message)
         
     async def handle_user_action(self, current_game, user, text_data_json):
         # Update player states in the database
@@ -176,6 +220,7 @@ class TableConsumer(AsyncWebsocketConsumer):
             current_board_json = json.loads(current_state.board)
             board, winner, checking = pieces.Board(current_board_json, current_state.turn, current_state.castling, current_state.enpassant).create_json_class()
             turn, total_moves, soft_moves, last_move = current_state.turn, current_state.total_moves, current_state.soft_moves, current_state.last_move
+            board_id = current_state.id
 
             # Calculate the remaining time for each player
             white_time_left, black_time_left = format_time(current_state.white_time_left, current_state.black_time_left)
@@ -188,11 +233,12 @@ class TableConsumer(AsyncWebsocketConsumer):
             board = pieces.boardSimplify(None)
             winner, turn, checking, total_moves, soft_moves =  None, None, None, 0, 0
             white_time_left, black_time_left, last_move = None, None, None
+            board_id = None
 
         # Construct and send the game state message to the room group
         message = construct_game_state_message(
             white_player, black_player, current_game.white_ready,
-            current_game.black_ready, winner, board, turn,
+            current_game.black_ready, winner, board_id, board, turn,
             checking, total_moves, soft_moves,
             white_time_left, black_time_left, last_move, []
             )
@@ -210,7 +256,7 @@ class TableConsumer(AsyncWebsocketConsumer):
         # Construct and send game state message from the room group event
         message = construct_game_state_message(
             event["white_player"], event["black_player"], event["white_player_ready"], 
-            event["black_player_ready"], event["winner"], event["board"], 
+            event["black_player_ready"], event["winner"], event["board_id"], event["board"], 
             event["turn"], event["checking"], event["total_moves"], event["soft_moves"],
             event["white_time_left"], event["black_time_left"], event["last_move"], event["prev_boards_id_moves"]
         )
@@ -226,7 +272,7 @@ class TableConsumer(AsyncWebsocketConsumer):
 
 def construct_game_state_message(
         white_player, black_player, white_player_ready,
-        black_player_ready, winner, board, turn,
+        black_player_ready, winner, board_id, board, turn,
         checking, total_moves, soft_moves, 
         white_time_left, black_time_left, last_move, prev_boards_id_moves
     ):
@@ -237,6 +283,7 @@ def construct_game_state_message(
         "white_player_ready": white_player_ready,
         "black_player_ready": black_player_ready,
         "winner": winner,
+        "board_id": board_id,
         "board": board,
         "turn": turn,
         "checking": checking,
@@ -269,6 +316,11 @@ def get_prev_boards_from_database(game):
     prev_boards = list(Board.objects.filter(game=game))
     return prev_boards
 
+@sync_to_async
+def get_board_from_database(board_id):
+    # Fetch the board instance from the database
+    board = Board.objects.get(pk=board_id)
+    return board
     
 @sync_to_async
 def push_new_board_to_database(table_id, updated_board, turn, castling, enpassant, winner, total_moves, soft_moves, white_time_left, black_time_left, last_move, moved_piece):
