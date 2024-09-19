@@ -66,7 +66,17 @@ function clearBoard() {
 }
 
 function clearPrevMovesTable() {
-    document.getElementById("prev_moves").innerHTML = ""
+    document.getElementById("prev_moves").innerHTML = "";
+
+    let previous_button = document.getElementById("previous_button");
+    let newElement = previous_button.cloneNode(true);
+    previous_button.parentNode.replaceChild(newElement, previous_button);
+    newElement.className = '';
+
+    let next_button = document.getElementById("next_button");
+    newElement = next_button.cloneNode(true);
+    next_button.parentNode.replaceChild(newElement, next_button);
+    newElement.className = '';
 }
 
 // Function to color the board with alternating colors
@@ -593,9 +603,7 @@ function renderPrevMoves(tableSocket, state) {
     let newLine;
     
     // Iterate over each move in the previous boards and moves array
-    for (let i = 0; i < state.prev_boards_id_moves.length; i++) {
-        const moveIndex = i; // Keep track of the current move index
-
+    for (let moveIndex = 0; moveIndex < state.prev_boards_id_moves.length; moveIndex++) {
         // Create a new line (div) every two moves (i.e., for each round)
         if (moveIndex % 2 === 0) {
             newLine = document.createElement("div");
@@ -603,7 +611,7 @@ function renderPrevMoves(tableSocket, state) {
         }
 
         // Decode the current move and append it to the newly created line
-        newLine = decodeMoves(tableSocket, state.prev_boards_id_moves[moveIndex], newLine, moveIndex, columnLetters, state.board_id);
+        newLine = decodeMoves(tableSocket, state, moveIndex, newLine, moveIndex, columnLetters);
 
         // If it's the last move and it's an even index (white's move), add a placeholder for black
         if (moveIndex === state.prev_boards_id_moves.length - 1 && moveIndex % 2 === 0) {
@@ -618,23 +626,18 @@ function renderPrevMoves(tableSocket, state) {
     }
 }
 
-function decodeMoves(tableSocket, prevBoardsIdMoves, newLine, moveIndex, columnLetters, currentBoard) {
-    // Destructure the elements of prevBoardsIdMove array into separate variables
-    const [ boardId, move, pieceImage ] = prevBoardsIdMoves;
+function decodeMoves(tableSocket, state, moveIndex, newLine, moveIndex, columnLetters) {
+    // Destructure the elements of prev_boards_id_moves array into separate variables
+    const [ boardId, move, pieceImage ] = state.prev_boards_id_moves[moveIndex];
 
     // Create a span element to hold the move's details (piece + move)
     const pieceAndMove = document.createElement("span");
-
-    // If the current board is the one being displayed, apply a specific class to highlight it
-    if (boardId === currentBoard) {
-        pieceAndMove.classList.add("currentBoard");
-    }
 
     // Determine if the move is made by White (even moveCounter) or Black (odd moveCounter)
     if (moveIndex % 2 === 0) {
         // If White's move, style the move container as 'movesListWhite'
         pieceAndMove.classList.add("movesListWhite");
-
+        
         // Create a span for the round number (e.g., "1:", "2:")
         const roundSpan = document.createElement("span");
         roundSpan.classList.add("round"); // Add class for round number styling
@@ -644,23 +647,48 @@ function decodeMoves(tableSocket, prevBoardsIdMoves, newLine, moveIndex, columnL
         // If Black's move, style the move container as 'movesListBlack'
         pieceAndMove.classList.add("movesListBlack");
     }
-
+    
     // Create a span for the piece involved in the move (e.g., pawn, knight)
     const pieceSpan = document.createElement("span");
     pieceSpan.classList.add(pieceImage[0]); // Add class for the piece type (e.g., pawn, knight)
     pieceSpan.classList.add(pieceImage[1]); // Add class for the color (white/black)
     pieceSpan.classList.add("movesListPiece"); // Add class for general piece styling
     pieceAndMove.appendChild(pieceSpan); // Append the piece span to the move details
-
+    
     // Create a span for the decoded move (end position)
     const movePositionSpan = document.createElement("span");
     const endColumn = columnLetters[move.charAt(3)]; // Get the ending column letter from the move string
     const endRow = parseInt(move.charAt(2)) + 1; // Get the ending row number from the move string
     movePositionSpan.textContent = `${endColumn}${endRow}`; // Set the decoded move text (e.g., "e4", "d5")
     movePositionSpan.classList.add("movesListMove"); // Add class for styling the move text
-
+    
     // Append the decoded move (e.g., "e4") to the pieceAndMove span
     pieceAndMove.appendChild(movePositionSpan);
+    
+    // If the current board is the one being displayed, apply a specific class to highlight it
+    if (boardId === state.board_id) {
+        pieceAndMove.classList.add("currentBoard");
+
+        // Enable previous board button navigation if available
+        if (moveIndex > 0) {
+            const prev_board = state.prev_boards_id_moves[moveIndex - 1][0];
+            const previous_button = document.getElementById("previous_button");
+            previous_button.addEventListener('click', () => {
+                updateState(tableSocket, null, null, null, null, null, prev_board);
+            });
+            previous_button.classList.add("active")
+
+        }
+        // Enable next board button navigation if available
+        if (moveIndex < state.prev_boards_id_moves.length - 1) {
+            const next_board = state.prev_boards_id_moves[moveIndex + 1][0];
+            const next_button = document.getElementById("next_button");
+            next_button.addEventListener('click', () => {
+                updateState(tableSocket, null, null, null, null, null, next_board);
+            });
+            next_button.classList.add("active")
+        }
+    }
 
     // Add a click event listener to the move that triggers an update of the game state to the selected board
     pieceAndMove.addEventListener('click', () => {

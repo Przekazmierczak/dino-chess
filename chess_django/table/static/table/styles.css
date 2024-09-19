@@ -227,6 +227,45 @@
     font-size: min(var(--square-size), 22px);
 }
 
+#prev_moves_button {
+    grid-column: 17 / 22;
+    display: flex;
+}
+
+#previous_button,
+#next_button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-size: 18px;
+    background-color: gray;
+    border-radius: 0.8rem;
+    margin-left: 3px;
+    margin-right: 3px;
+    user-select: none;
+}
+
+#previous_button.active,
+#next_button.active {
+    cursor: pointer;
+    background-color: var(--primary-bg-color);
+}
+
+#previous_button.active:hover,
+#next_button.active:hover {
+    background-color: white;
+    color: black;
+}
+
+#previous_button {
+    flex: 1 1 50%;
+}
+
+#next_button {
+    flex: 1 1 50%;
+}
+
 #prev_moves {
     grid-column: 17 / 22;
     color: white;
@@ -286,8 +325,12 @@
     grid-row: 2;
 }
 
+#prev_moves_button {
+    grid-row: 3;
+}
+
 #prev_moves {
-    grid-row: 3 / 17;
+    grid-row: 4 / 17;
 }
 
 #chess-board {

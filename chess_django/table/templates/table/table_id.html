@@ -11,6 +11,10 @@
     <div id="table-container">
         <div class="grid">
             <div id="table_number">Table: {{ table_id }}</div>
+            <div id="prev_moves_button">
+                <span id="previous_button">Previous</span>
+                <span id="next_button">Next</span>
+            </div>
             <div id="prev_moves"></div>
             <div id="black_player" class="player"></div>
             {% if user.is_authenticated %}
