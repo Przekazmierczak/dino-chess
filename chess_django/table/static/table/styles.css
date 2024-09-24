@@ -59,7 +59,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 97vh;
+    height: 96vh;
 }
 
 .grid {
@@ -238,7 +238,7 @@
     justify-content: center;
     align-items: center;
     color: white;
-    font-size: 18px;
+    font-size: min(var(--square-size), 18px);
     background-color: gray;
     border-radius: 0.8rem;
     margin-left: 3px;
@@ -420,33 +420,95 @@ td {
     background-size: cover;
 }
 
-@media (max-aspect-ratio: 16/9) {
+@media (min-aspect-ratio: 16/9) {
+    .grid {
+        grid-template-columns: repeat(23, minmax(0, var(--square-size)));
+    }
+
+    #table_number {
+        grid-column: 17 / 24;
+    }
+
+    #prev_moves {
+        grid-column: 17 / 24;
+    }
+
+    #prev_moves_button {
+        grid-column: 17 / 24;
+    }
+
+}
+
+@media (min-aspect-ratio: 22/9) {
+    .grid {
+        grid-template-columns: repeat(25, minmax(0, var(--square-size)));
+    }
+
+    #table_number {
+        grid-column: 17 / 26;
+    }
+
+    #prev_moves {
+        grid-column: 17 / 26;
+    }
+
+    #prev_moves_button {
+        grid-column: 17 / 26;
+    }
+}
+
+@media (max-aspect-ratio: 12/9) {
     #table-container {
         align-items: flex-start;
         height: fit-content;
     }
-
+    
     .grid {
         grid-template-rows: repeat(30, minmax(0, var(--square-size)));
         grid-template-columns: repeat(16, minmax(0, var(--square-size)));
     }
     
-    #table_number,
-    #moves {
-        grid-column: 1 / 17;
-    }
-    
     #table_number {
+        grid-column: 1 / 17;
         grid-row: 19;
     }
     
-    #moves {
-        grid-row: 20;
+    #prev_moves {
+        grid-column: 5 / 12;
+        grid-row: 21 / 30;
     }
+    
+    #prev_moves_button {
+        grid-column: 5 / 12;
+        grid-row: 20 / 21;
+    }
+}
 
+@media (max-aspect-ratio: 6/9) {
+    #table_number {
+        grid-column: 1 / 17;
+    }
+    
+    #prev_moves {
+        grid-column: 4 / 13;
+    }
+    
+    #prev_moves_button {
+        grid-column: 4 / 13;
+    }
+}
+
+@media (max-aspect-ratio: 3/9) {
+    #table_number {
+        grid-column: 1 / 17;
+    }
+    
     #prev_moves {
         grid-column: 3 / 14;
-        grid-row: 20 / 30;
+    }
+    
+    #prev_moves_button {
+        grid-column: 3 / 14;
     }
 }
 
