@@ -1,5 +1,5 @@
 import json
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.layers import get_channel_layer
 from asgiref.sync import sync_to_async
@@ -23,13 +23,13 @@ class TableConsumer(AsyncWebsocketConsumer):
         await self.accept()
 
         # Send the current game state to the new connection
-        await self.send_current_state()
+        await self.send_current_state(False)
 
     async def disconnect(self, close_code):
         # Leave the room group
         await self.channel_layer.group_discard(self.table_group_id, self.channel_name)
 
-    async def send_current_state(self):
+    async def send_current_state(self, play_audio):
         # Get the current game from the database
         current_game = await get_game_from_database(self.table_id)
         user = self.scope["user"].username
@@ -74,7 +74,8 @@ class TableConsumer(AsyncWebsocketConsumer):
             white_player, black_player, current_game.white_ready,
             current_game.black_ready, winner, board_id, board, turn,
             checking, total_moves, soft_moves,
-            white_time_left, black_time_left, last_move, prev_boards_id_moves
+            white_time_left, black_time_left, last_move,
+            prev_boards_id_moves, play_audio
             )
         await self.send_game_state_to_websocket(message)
 
@@ -90,7 +91,7 @@ class TableConsumer(AsyncWebsocketConsumer):
 
         # If the client is requesting the most recent board and it's the current one, send the current state
         elif text_data_json["requested_board"] and text_data_json["requested_board"] == current_game.boards[-1][0]:
-            await self.send_current_state()
+            await self.send_current_state(True)
 
         # If the client is requesting a previous board, handle the request
         elif text_data_json["requested_board"]:
@@ -167,7 +168,8 @@ class TableConsumer(AsyncWebsocketConsumer):
             white_player, black_player, current_game.white_ready,
             current_game.black_ready, winner, new_board_id, board, turn,
             checking, total_moves, soft_moves,
-            white_time_left, black_time_left, last_move, prev_boards_id_moves
+            white_time_left, black_time_left, last_move,
+            prev_boards_id_moves, True
             )
         await self.send_game_state_to_room_group(message)
 
@@ -200,7 +202,8 @@ class TableConsumer(AsyncWebsocketConsumer):
             white_player, black_player, current_game.white_ready,
             current_game.black_ready, None, board_id, simplified_board, latest_board_state .turn,
             [], latest_board_state .total_moves, latest_board_state .soft_moves,
-            white_time_left, black_time_left, requested_board_data .last_move, previous_boards_and_moves
+            white_time_left, black_time_left, requested_board_data .last_move,
+            previous_boards_and_moves, True
             )
         await self.send_game_state_to_websocket(message)
         
@@ -240,7 +243,8 @@ class TableConsumer(AsyncWebsocketConsumer):
             white_player, black_player, current_game.white_ready,
             current_game.black_ready, winner, board_id, board, turn,
             checking, total_moves, soft_moves,
-            white_time_left, black_time_left, last_move, []
+            white_time_left, black_time_left, last_move,
+            [], False
             )
         await self.send_game_state_to_room_group(message)
 
@@ -258,7 +262,8 @@ class TableConsumer(AsyncWebsocketConsumer):
             event["white_player"], event["black_player"], event["white_player_ready"], 
             event["black_player_ready"], event["winner"], event["board_id"], event["board"], 
             event["turn"], event["checking"], event["total_moves"], event["soft_moves"],
-            event["white_time_left"], event["black_time_left"], event["last_move"], event["prev_boards_id_moves"]
+            event["white_time_left"], event["black_time_left"], event["last_move"],
+            event["prev_boards_id_moves"], event["play_audio"]
         )
         await self.send_game_state_to_websocket(message)
     
@@ -274,7 +279,8 @@ def construct_game_state_message(
         white_player, black_player, white_player_ready,
         black_player_ready, winner, board_id, board, turn,
         checking, total_moves, soft_moves, 
-        white_time_left, black_time_left, last_move, prev_boards_id_moves
+        white_time_left, black_time_left, last_move,
+        prev_boards_id_moves, play_audio
     ):
     # Constructs a dictionary containing the game state
     return {
@@ -292,7 +298,8 @@ def construct_game_state_message(
         "white_time_left": white_time_left,
         "black_time_left": black_time_left,
         "last_move": last_move,
-        "prev_boards_id_moves": prev_boards_id_moves
+        "prev_boards_id_moves": prev_boards_id_moves,
+        "play_audio": play_audio
     }
         
 @sync_to_async
@@ -390,8 +397,8 @@ def push_players_state_to_db(game, user, data):
             castling = "KQkq",
             enpassant = "__",
             soft_moves = 0,
-            # white_time_left = timedelta(minutes=1),
-            # black_time_left = timedelta(minutes=1)
+            white_time_left = timedelta(minutes=1),
+            black_time_left = timedelta(minutes=1)
         )
     game.save()
     

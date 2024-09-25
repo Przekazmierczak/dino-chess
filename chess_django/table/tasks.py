@@ -44,6 +44,7 @@ def check_game_timeout(game_id, turn, total_moves, board_json):
             "white_player_ready": game.white_ready,
             "black_player_ready": game.black_ready,
             "winner": winner,
+            "board_id": board.id,
             "board": board_json,
             "turn": board.turn,
             "checking": None,
@@ -51,7 +52,9 @@ def check_game_timeout(game_id, turn, total_moves, board_json):
             "soft_moves": board.soft_moves,
             "white_time_left": white_time_left,
             "black_time_left": black_time_left,
-            "last_move": board.last_move
+            "last_move": board.last_move,
+            "prev_boards_id_moves": game.boards,
+            "play_audio": False
         }
 
         # Get the channel layer to send a message to the room group
@@ -77,6 +80,8 @@ def computer_move(game_id):
 
     # Convert the board state from JSON to a Python list
     prev_board = json.loads(prev_state.board)
+
+    prev_boards_id_moves = game.boards
     
     # Initialize the Computer instance with the current game state
     computer = Computer(prev_board, prev_state.turn, prev_state.castling, prev_state.enpassant, prev_state.soft_moves, prev_state.total_moves, game.black.username)
@@ -119,8 +124,11 @@ def computer_move(game_id):
         # Convert the move to a string representation for database storage and WebSocket communication
         last_move = change_move_to_string(move)
 
+        moved_piece = (board[move[1][0]][move[1][1]]["piece"] if not promotion else "pawn", prev_state.turn)
+
         # Push the new board state to the database (async operation)
-        asyncio.run(push_new_board_to_database(game_id, next_board, turn, next_castling, next_enpassant, winner, total_moves, soft_moves, white_time_left, black_time_left, last_move))
+        new_board_id = asyncio.run(push_new_board_to_database(game_id, next_board, turn, next_castling, next_enpassant, winner, total_moves, soft_moves, white_time_left, black_time_left, last_move, moved_piece))
+        prev_boards_id_moves.append((new_board_id, last_move, moved_piece))
     else:
         # Handle invalid move or disconnection
         return
@@ -131,9 +139,10 @@ def computer_move(game_id):
     # Construct a message to update the game state in the frontend
     message = construct_game_state_message(
         game.white.username, game.black.username, True,
-        True, winner, board, turn,
+        True, winner, new_board_id, board, turn,
         checking, total_moves, soft_moves,
-        white_time_left, black_time_left, last_move
+        white_time_left, black_time_left, last_move,
+        prev_boards_id_moves, True
         )
 
     # Get the channel layer to send a message to the room group

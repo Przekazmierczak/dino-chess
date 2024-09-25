@@ -38,7 +38,8 @@ function updateUI(tableSocket, state) {
     highlightChecks(state);  // Highlight checking squares
     setBoardMoveListeners();  // Set event listeners for move actions
     renderBoard(tableSocket, state);  // Render the board based on state
-    renderPrevMoves(tableSocket, state)
+    renderPrevMoves(tableSocket, state);
+    playMoveSound(state);
     console.log("received updated board");
 }
 
@@ -539,12 +540,6 @@ function handleMove(move, isPromotion, tableSocket) {
     } else {
         showPromotionModal(move, tableSocket);  // Show promotion modal if promotion is required
     }
-    playMoveSound();
-}
-
-function playMoveSound() {
-    var move_sound = new Audio('/static/table/sounds/move_sound.mp3');
-    move_sound.play();
 }
     
 // Function to show promotion modal and handle promotion selection
@@ -659,7 +654,6 @@ function decodeMoves(tableSocket, state, moveIndex, moveContainer, columnLetters
         // Add a click event listener to the move that triggers an update of the game state to the selected board
         pieceAndMove.addEventListener('click', () => {
             updateState(tableSocket, null, null, null, null, null, boardId);  // Update the game state to reflect the selected move/board
-            playMoveSound();  // Play sound effect for the move
         });
     }
     
@@ -704,7 +698,6 @@ function addNavigationButtonsListeners(tableSocket, state, moveIndex) {
         const prev_board = state.prev_boards_id_moves[moveIndex - 1][0];
         previous_button.addEventListener('click', () => {
             updateState(tableSocket, null, null, null, null, null, prev_board);  // Update state to previous board
-            playMoveSound();
         });
         previous_button.classList.add("active");  // Activate the button
     }
@@ -715,8 +708,14 @@ function addNavigationButtonsListeners(tableSocket, state, moveIndex) {
         const next_button = document.getElementById("next_button");
         next_button.addEventListener('click', () => {
             updateState(tableSocket, null, null, null, null, null, next_board);  // Update state to next board
-            playMoveSound();
         });
         next_button.classList.add("active");  // Activate the button
+    }
+}
+
+function playMoveSound(state) {
+    if (state.play_audio) {
+        var move_sound = new Audio('/static/table/sounds/move_sound.mp3');
+        move_sound.play();
     }
 }
