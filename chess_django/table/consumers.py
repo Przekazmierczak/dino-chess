@@ -60,7 +60,7 @@ class TableConsumer(AsyncWebsocketConsumer):
                 board, _, checking = pieces.Board(current_board_json, current_state.turn, current_state.castling, current_state.enpassant).create_json_class()
             else:
                 board = pieces.boardSimplify(current_board_json)
-                checking = None
+                checking = current_state.checking
 
         else:
             # Set up the initial board state if the game hasn't started
@@ -147,8 +147,10 @@ class TableConsumer(AsyncWebsocketConsumer):
 
             moved_piece = (board[move[1][0]][move[1][1]]["piece"] if not promotion else "pawn", prev_state.turn)
 
+            checking = [] if not checking else checking
+
             # Update database with new board state
-            new_board_id = await push_new_board_to_database(self.table_id, next_board, turn, next_castling, next_enpassant, winner, total_moves, soft_moves, white_time_left, black_time_left, last_move, moved_piece)
+            new_board_id = await push_new_board_to_database(self.table_id, next_board, turn, next_castling, next_enpassant, winner, total_moves, soft_moves, white_time_left, black_time_left, last_move, moved_piece, checking)
             prev_boards_id_moves.append((new_board_id, last_move, moved_piece))
         else:
             # Handle invalid move or disconnection
@@ -201,7 +203,7 @@ class TableConsumer(AsyncWebsocketConsumer):
         message = construct_game_state_message(
             white_player, black_player, current_game.white_ready,
             current_game.black_ready, None, board_id, simplified_board, latest_board_state .turn,
-            [], latest_board_state .total_moves, latest_board_state .soft_moves,
+            requested_board_data.checking, latest_board_state .total_moves, latest_board_state .soft_moves,
             white_time_left, black_time_left, requested_board_data .last_move,
             previous_boards_and_moves, True
             )
@@ -330,7 +332,7 @@ def get_board_from_database(board_id):
     return board
     
 @sync_to_async
-def push_new_board_to_database(table_id, updated_board, turn, castling, enpassant, winner, total_moves, soft_moves, white_time_left, black_time_left, last_move, moved_piece):
+def push_new_board_to_database(table_id, updated_board, turn, castling, enpassant, winner, total_moves, soft_moves, white_time_left, black_time_left, last_move, moved_piece, checking):
     # Save the new board state to the database
     game = Game.objects.get(pk=table_id)
 
@@ -346,7 +348,8 @@ def push_new_board_to_database(table_id, updated_board, turn, castling, enpassan
         soft_moves = soft_moves,
         white_time_left = white_time_left,
         black_time_left = black_time_left,
-        last_move = last_move
+        last_move = last_move,
+        checking = checking
     )
 
     if winner:

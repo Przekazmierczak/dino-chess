@@ -223,13 +223,14 @@
     display: flex;
     justify-content: center;
     color: white;
-    z-index: 25;
+    z-index: 15;
     font-size: min(var(--square-size), 22px);
 }
 
 #prev_moves_button {
     grid-column: 17 / 22;
     display: flex;
+    z-index: 15;
 }
 
 #previous_button,
@@ -269,7 +270,7 @@
 #prev_moves {
     grid-column: 17 / 22;
     color: white;
-    z-index: 25;
+    z-index: 15;
     font-size: min(var(--square-size), 22px);
     overflow: auto;
 }

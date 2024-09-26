@@ -25,3 +25,4 @@ class Board(models.Model):
     black_time_left = models.DurationField(default=timedelta(minutes=15))
     created_at = models.DateTimeField(auto_now_add=True)
     last_move = models.CharField(max_length=4, null=True, default=None)
+    checking = models.JSONField(default=list)
