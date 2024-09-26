@@ -256,15 +256,22 @@ function updateState(tableSocket, player, playerState, readyState, move, promoti
 function displayWinner(state) {
     if (state.winner) {
         const modalWinner = document.getElementById("modal_winner");
-        const modalBackground = document.getElementById("modal_background_winner");
         modalWinner.classList.add("show");
+
+        const modalBackground = document.getElementById("modal_background_winner");
         modalBackground.classList.add("show");
+
         const htmlWinner = document.getElementById("winner");
         if (state.winner === "draw") {
             htmlWinner.innerHTML = `<p>It's a draw!</p>`;
         } else {
             htmlWinner.innerHTML = `<p>${state.winner} has won!</p>`;
         }
+
+        modalBackground.addEventListener("click", function() {
+            modalWinner.classList.remove("show");
+            modalBackground.classList.remove("show");
+        })
     }
 }
 
