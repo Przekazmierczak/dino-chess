@@ -309,6 +309,8 @@
     flex: 1 1 40%;
     width: 110%;
     height: 110%;
+    max-width: 50px;
+    max-height: 50px;
     background-size: contain;
     background-position: right;
 }
@@ -421,7 +423,7 @@ td {
     background-size: cover;
 }
 
-@media (min-aspect-ratio: 16/9) {
+@media (min-aspect-ratio: 16/9) and (max-height: 600px) {
     .grid {
         grid-template-columns: repeat(23, minmax(0, var(--square-size)));
     }
@@ -440,7 +442,7 @@ td {
 
 }
 
-@media (min-aspect-ratio: 22/9) {
+@media (min-aspect-ratio: 22/9) and (max-height: 600px) {
     .grid {
         grid-template-columns: repeat(25, minmax(0, var(--square-size)));
     }
