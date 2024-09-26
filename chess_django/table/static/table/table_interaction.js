@@ -426,8 +426,17 @@ function renderSquare(state, square, row, col, tableSocket) {
     const {piece, player, moves} = state.board[row][col];
     square.classList.add(piece, player);  // Add piece and player class to the square
     
-    // Enable dragging and click events if it's the player's turn
-    if (state.turn === player && state.winner === null && ((player === "white" && state.user === state.white_player) || (player === "black" && state.user === state.black_player))) {
+    // Enable dragging and click events if it's the player's turn, there is no winner and it's not a previous board
+    if (
+        state.turn === player &&
+        state.winner === null &&
+        state.board_id === state.prev_boards_id_moves[state.prev_boards_id_moves.length - 1][0] &&
+        (
+            (player === "white" && state.user === state.white_player) ||
+            (player === "black" && state.user === state.black_player)
+        )
+        
+    ) {
         enableDraggable(square, row, col, piece, player, moves, tableSocket);  // Enable dragging for the current piece
     }
 }
