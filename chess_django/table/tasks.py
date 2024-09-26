@@ -126,8 +126,10 @@ def computer_move(game_id):
 
         moved_piece = (board[move[1][0]][move[1][1]]["piece"] if not promotion else "pawn", prev_state.turn)
 
+        checking = [] if not checking else checking
+
         # Push the new board state to the database (async operation)
-        new_board_id = asyncio.run(push_new_board_to_database(game_id, next_board, turn, next_castling, next_enpassant, winner, total_moves, soft_moves, white_time_left, black_time_left, last_move, moved_piece))
+        new_board_id = asyncio.run(push_new_board_to_database(game_id, next_board, turn, next_castling, next_enpassant, winner, total_moves, soft_moves, white_time_left, black_time_left, last_move, moved_piece, checking))
         prev_boards_id_moves.append((new_board_id, last_move, moved_piece))
     else:
         # Handle invalid move or disconnection
