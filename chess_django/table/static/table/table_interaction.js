@@ -104,8 +104,18 @@ function colorBoard() {
 // Function to update player names
 function showPlayers(state) {
     const players = [
-        { element: document.getElementById("white_player"), time: document.getElementById("white_time"), name: state.white_player, ready: state.white_player_ready },
-        { element: document.getElementById("black_player"), time: document.getElementById("black_time"), name: state.black_player, ready: state.black_player_ready }
+        {
+            element: document.getElementById("white_player"),
+            time: document.getElementById("white_time"),
+            name: state.white_player,
+            ready: state.white_player_ready
+        },
+        {
+            element: document.getElementById("black_player"),
+            time: document.getElementById("black_time"),
+            name: state.black_player,
+            ready: state.black_player_ready
+        }
     ];
     
     // Update each player's display
@@ -161,8 +171,20 @@ function showTimes(state) {
 // Function to manage player buttons for sitting, standing, and ready states
 function addRemovePlayers(tableSocket, state) {
     const buttonsConfig = [
-        { player: "white", sit: "white_player_sit_button", stand: "white_player_stand_button", ready: "white_player_ready_button", unready: "white_player_unready_button" },
-        { player: "black", sit: "black_player_sit_button", stand: "black_player_stand_button", ready: "black_player_ready_button", unready: "black_player_unready_button" }
+        {
+            player: "white",
+            sit: "white_player_sit_button",
+            stand: "white_player_stand_button",
+            ready: "white_player_ready_button",
+            unready: "white_player_unready_button"
+        },
+        {
+            player: "black",
+            sit: "black_player_sit_button",
+            stand: "black_player_stand_button",
+            ready: "black_player_ready_button",
+            unready: "black_player_unready_button"
+        }
     ];
     
     // Show start modal if players are not ready
@@ -193,7 +215,10 @@ function setButtonState(tableSocket, state, config) {
     const unreadyButton = resetButton(unready);
     
     // Configure buttons based on the player's role and readiness
-    if (player === "white" && state.white_player === "Player 1" || player === "black" && state.black_player === "Player 2") {
+    if (
+        player === "white" && state.white_player === "Player 1" ||
+        player === "black" && state.black_player === "Player 2"
+    ) {
         // Show sit button for the appropriate player
         sitButton.classList.remove("hidden");
         standButton.classList.add("hidden");
@@ -203,7 +228,10 @@ function setButtonState(tableSocket, state, config) {
         sitButton.addEventListener("click", function() {
             updateState(tableSocket, player, true, null, null, null, null);  // Sit down player
         });
-    } else if (player === "white" && state.white_player === state.user && state.white_player_ready === false || player === "black" && state.black_player === state.user && state.black_player_ready === false) {
+    } else if (
+        player === "white" && state.white_player === state.user && state.white_player_ready === false ||
+        player === "black" && state.black_player === state.user && state.black_player_ready === false
+    ) {
         // Show stand and ready buttons for the appropriate player
         sitButton.classList.add("hidden");
         standButton.classList.remove("hidden");
@@ -217,7 +245,10 @@ function setButtonState(tableSocket, state, config) {
         readyButton.addEventListener("click", function() {
             updateState(tableSocket, player, null, true, null, null, null);  // Mark player as ready
         });
-    } else if (player === "white" && state.white_player === state.user && state.white_player_ready === true || player === "black" && state.black_player === state.user && state.black_player_ready === true) {
+    } else if (
+        player === "white" && state.white_player === state.user && state.white_player_ready === true ||
+        player === "black" && state.black_player === state.user && state.black_player_ready === true
+    ) {
         // Show stand and unready buttons for the appropriate player
         sitButton.classList.add("hidden");
         standButton.classList.add("hidden");
@@ -437,7 +468,10 @@ function renderSquare(state, square, row, col, tableSocket) {
     if (
         state.turn === player &&
         state.winner === null &&
-        state.board_id === state.prev_boards_id_moves[state.prev_boards_id_moves.length - 1][0] &&
+        (
+            state.prev_boards_id_moves.length === 0 ||
+            state.board_id === state.prev_boards_id_moves[state.prev_boards_id_moves.length - 1][0]
+        ) &&
         (
             (player === "white" && state.user === state.white_player) ||
             (player === "black" && state.user === state.black_player)
