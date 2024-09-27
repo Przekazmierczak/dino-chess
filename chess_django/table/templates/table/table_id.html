@@ -12,10 +12,14 @@
         <div class="grid">
             <div id="table_number">Table: {{ table_id }}</div>
             <div id="prev_moves_button">
-                <span id="previous_button">Previous</span>
-                <span id="next_button">Next</span>
+                <span id="previous_button"><i class='bx bxs-left-arrow'></i><span>Previous</span></span>
+                <span id="next_button"><i class='bx bxs-right-arrow'></i><span>Next</span></span>
             </div>
             <div id="prev_moves"></div>
+            <div id="resign_draw_button">
+                <span id="draw_button"><i class='bx bxs-hand bx-rotate-90' ></i><span>Draw</span></span>
+                <span id="resign_button"><i class='bx bx-flag'></i><span>Resign</span></span>
+            </div>
             <div id="black_player" class="player"></div>
             {% if user.is_authenticated %}
             <div id="black_player_sit_button" class="hidden">

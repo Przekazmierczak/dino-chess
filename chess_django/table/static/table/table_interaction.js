@@ -49,6 +49,7 @@ function reloadUI(tableSocket, state) {
     displayLastMove(state);  // Function to display last move
     highlightChecks(state);  // Highlight checking squares
     renderBoard(tableSocket, state);  // Re-render the board when theme changes
+    renderPrevMoves(tableSocket, state);
 }
 
 // Function to clear the board of pieces and listeners
@@ -258,6 +259,12 @@ function setButtonState(tableSocket, state, config) {
         unreadyButton.addEventListener("click", function() {
             updateState(tableSocket, player, null, false, null, null, null);  // Mark player as unready
         });
+    } else {
+        // Hide all buttons
+        sitButton.classList.add("hidden");
+        standButton.classList.add("hidden");
+        readyButton.classList.add("hidden");
+        unreadyButton.classList.add("hidden");
     }
 }
 

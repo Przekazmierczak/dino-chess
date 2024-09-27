@@ -400,8 +400,8 @@ def push_players_state_to_db(game, user, data):
             castling = "KQkq",
             enpassant = "__",
             soft_moves = 0,
-            white_time_left = timedelta(minutes=1),
-            black_time_left = timedelta(minutes=1)
+            # white_time_left = timedelta(minutes=1),
+            # black_time_left = timedelta(minutes=1)
         )
     game.save()
     

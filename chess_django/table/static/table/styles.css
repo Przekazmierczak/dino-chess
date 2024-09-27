@@ -227,14 +227,17 @@
     font-size: min(var(--square-size), 22px);
 }
 
-#prev_moves_button {
+#prev_moves_button,
+#resign_draw_button {
     grid-column: 17 / 22;
     display: flex;
     z-index: 15;
 }
 
 #previous_button,
-#next_button {
+#next_button,
+#resign_button,
+#draw_button {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -247,6 +250,28 @@
     user-select: none;
 }
 
+#previous_button i,
+#next_button i,
+#resign_button i,
+#draw_button i {
+    flex: 1 1 40%;
+    display: flex;
+    justify-content: center;
+}
+
+#previous_button span,
+#next_button span,
+#resign_button span,
+#draw_button span {
+    flex: 1 1 60%;
+}
+
+#resign_button,
+#draw_button {
+    cursor: pointer;
+    background-color: var(--primary-bg-color);
+}
+
 #previous_button.active,
 #next_button.active {
     cursor: pointer;
@@ -254,16 +279,17 @@
 }
 
 #previous_button.active:hover,
-#next_button.active:hover {
+#next_button.active:hover,
+#resign_button:hover,
+#draw_button:hover {
     background-color: white;
     color: black;
 }
 
-#previous_button {
-    flex: 1 1 50%;
-}
-
-#next_button {
+#previous_button,
+#next_button,
+#resign_button,
+#draw_button {
     flex: 1 1 50%;
 }
 
@@ -330,6 +356,10 @@
 
 #prev_moves_button {
     grid-row: 3;
+}
+
+#resign_draw_button {
+    grid-row: 17;
 }
 
 #prev_moves {
@@ -436,7 +466,8 @@ td {
         grid-column: 17 / 24;
     }
 
-    #prev_moves_button {
+    #prev_moves_button,
+    #resign_draw_button {
         grid-column: 17 / 24;
     }
 
@@ -455,7 +486,8 @@ td {
         grid-column: 17 / 26;
     }
 
-    #prev_moves_button {
+    #prev_moves_button,
+    #resign_draw_button {
         grid-column: 17 / 26;
     }
 }
@@ -481,9 +513,17 @@ td {
         grid-row: 21 / 30;
     }
     
-    #prev_moves_button {
+    #prev_moves_button,
+    #resign_draw_button {
         grid-column: 5 / 12;
+    }
+
+    #prev_moves_button {
         grid-row: 20 / 21;
+    }
+
+    #resign_draw_button {
+        grid-row: 30 / 31;
     }
 }
 
@@ -496,7 +536,8 @@ td {
         grid-column: 4 / 13;
     }
     
-    #prev_moves_button {
+    #prev_moves_button,
+    #resign_draw_button {
         grid-column: 4 / 13;
     }
 }
@@ -510,7 +551,8 @@ td {
         grid-column: 3 / 14;
     }
     
-    #prev_moves_button {
+    #prev_moves_button,
+    #resign_draw_button {
         grid-column: 3 / 14;
     }
 }
