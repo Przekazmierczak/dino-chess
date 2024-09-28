@@ -285,10 +285,9 @@
     z-index: 15;
 }
 
-#previous_button,
-#next_button,
-#resign_button,
-#draw_button {
+#previous_button, #next_button,
+#resign_button, #draw_button,
+#resign_button, #draw_button {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -299,6 +298,36 @@
     margin-left: 3px;
     margin-right: 3px;
     user-select: none;
+}
+
+#previous_button.active, #next_button.active,
+#resign_button.active, #draw_button.active {
+    cursor: pointer;
+    background-color: var(--primary-bg-color);
+}
+
+#previous_button.active:hover,
+#next_button.active:hover,
+#resign_button.active:hover,
+#draw_button.active:hover {
+    background-color: white;
+    color: black;
+}
+
+#resign_button.active:active {
+    background-image: linear-gradient(to right, #ff4b4b 0%, #ff4b4b 50%, white 50%, white 100%);
+    background-size: 200% 100%;
+    background-position: 100%;
+    animation: confirmation 1.5s ease-out forwards;
+}
+
+@keyframes confirmation {
+    from {
+        background-position: 100%;
+    }
+    to {
+        background-position: 0%;
+    }
 }
 
 #previous_button i,
@@ -315,26 +344,6 @@
 #resign_button span,
 #draw_button span {
     flex: 1 1 60%;
-}
-
-#resign_button,
-#draw_button {
-    cursor: pointer;
-    background-color: var(--primary-bg-color);
-}
-
-#previous_button.active,
-#next_button.active {
-    cursor: pointer;
-    background-color: var(--primary-bg-color);
-}
-
-#previous_button.active:hover,
-#next_button.active:hover,
-#resign_button:hover,
-#draw_button:hover {
-    background-color: white;
-    color: black;
 }
 
 #previous_button,
@@ -388,6 +397,7 @@
     max-width: 50px;
     max-height: 50px;
     background-size: contain;
+    background-repeat: no-repeat;
     background-position: right;
 }
 .movesListWhite .movesListMove,

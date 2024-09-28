@@ -56,7 +56,7 @@ class TableConsumer(AsyncWebsocketConsumer):
 
             # Determine current player's view
             if ((current_state.turn == "white" and current_game.white.username == user) or
-                (current_state.turn == "black" and current_game.black.username == user) and not winner):
+                (current_state.turn == "black" and current_game.black.username == user)) and not winner:
                 board, _, checking = pieces.Board(current_board_json, current_state.turn, current_state.castling, current_state.enpassant).create_json_class()
             else:
                 board = pieces.boardSimplify(current_board_json)
@@ -96,6 +96,9 @@ class TableConsumer(AsyncWebsocketConsumer):
         # If the client is requesting a previous board, handle the request
         elif text_data_json["requested_board"]:
             await self.handle_board_request(current_game, user, text_data_json["requested_board"])
+
+        elif text_data_json["resign"]:
+            await self.handle_resign(current_game, user)
         
         # Handle other user actions
         else:
@@ -208,6 +211,44 @@ class TableConsumer(AsyncWebsocketConsumer):
             previous_boards_and_moves, True
             )
         await self.send_game_state_to_websocket(message)
+    
+    async def handle_resign(self, current_game, user):
+        # Retrieve the latest board state for the current game from the database
+        current_board = await get_latest_board_from_database(current_game)
+
+        # Get the usernames of the white and black players
+        white_player = current_game.white.username
+        black_player = current_game.black.username
+
+        # Load the current board state from JSON and simplify it
+        current_board_json = json.loads(current_board.board)
+        board = pieces.boardSimplify(current_board_json)
+
+        # Calculate the remaining time for each player
+        white_time_left, black_time_left = get_current_time(current_board.white_time_left, current_board.black_time_left, current_board.created_at, current_board.turn)
+
+        # Format the time values for display
+        white_time_left, black_time_left = format_time(white_time_left, black_time_left)
+
+        # Determine the winner based on who resigned
+        if user.username == white_player:
+            winner = "black"
+        elif user.username == black_player:
+            winner = "white"
+        else:
+            winner = None
+        
+        await push_winner_to_database(self.table_id, winner)
+        
+        # Construct and send the game state message to the room group
+        message = construct_game_state_message(
+            white_player, black_player, current_game.white_ready,
+            current_game.black_ready, winner, current_board.id, board, current_board.turn,
+            current_board.checking, current_board.total_moves, current_board.soft_moves,
+            white_time_left, black_time_left, current_board.last_move,
+            current_game.boards, False
+            )
+        await self.send_game_state_to_room_group(message)
         
     async def handle_user_action(self, current_game, user, text_data_json):
         # Update player states in the database
@@ -359,6 +400,19 @@ def push_new_board_to_database(table_id, updated_board, turn, castling, enpassan
     game.save()
 
     return board.id
+
+@sync_to_async
+def push_winner_to_database(table_id, winner):
+    # Save the new board state to the database
+    game = Game.objects.get(pk=table_id)
+    print("here")
+
+    if winner:
+        db_winner = {"white": "w", "black": "b"}.get(winner, "d")
+        game.winner = db_winner
+        print("here")
+
+    game.save()
 
 @sync_to_async
 def push_players_state_to_db(game, user, data):

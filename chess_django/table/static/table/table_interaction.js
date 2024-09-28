@@ -39,8 +39,9 @@ function updateUI(tableSocket, state) {
     highlightChecks(state);  // Highlight checking squares
     setBoardMoveListeners();  // Set event listeners for move actions
     renderBoard(tableSocket, state);  // Render the board based on state
-    renderPrevMoves(tableSocket, state);
-    playMoveSound(state);
+    renderPrevMoves(tableSocket, state);  // Display the previous moves made in the game
+    playMoveSound(state);  // Play sound related to the last move
+    renderResignButton(tableSocket, state);  // Show or update the "Resign" button depending on the game state
     console.log("received updated board");
 }
 
@@ -50,7 +51,8 @@ function reloadUI(tableSocket, state) {
     displayLastMove(state);  // Function to display last move
     highlightChecks(state);  // Highlight checking squares
     renderBoard(tableSocket, state);  // Re-render the board when theme changes
-    renderPrevMoves(tableSocket, state);
+    renderPrevMoves(tableSocket, state);  // Re-render the previous moves made in the game
+    renderResignButton(tableSocket, state);  // Re-render the "Resign" button depending on the game state
 }
 
 // Function to clear the board of pieces and listeners
@@ -65,7 +67,8 @@ function clearBoard() {
             newElement.className = ''; 
         }
     }
-    clearPrevMovesTable()
+    clearPrevMovesTable();
+    clearResignDrawButtons();
 }
 
 function clearPrevMovesTable() {
@@ -79,6 +82,13 @@ function clearPrevMovesTable() {
     let next_button = document.getElementById("next_button");
     newElement = next_button.cloneNode(true);
     next_button.parentNode.replaceChild(newElement, next_button);
+    newElement.className = '';
+}
+
+function clearResignDrawButtons() {
+    let resign_button = document.getElementById("resign_button");
+    let newElement = resign_button.cloneNode(true);
+    resign_button.parentNode.replaceChild(newElement, resign_button);
     newElement.className = '';
 }
 
@@ -228,7 +238,7 @@ function setButtonState(tableSocket, state, config) {
         unreadyButton.classList.add("hidden");
         
         sitButton.addEventListener("click", function() {
-            updateState(tableSocket, player, true, null, null, null, null);  // Sit down player
+            updateState(tableSocket, player, true, null, null, null, null, null, null);  // Sit down player
         });
     } else if (
         player === "white" && state.white_player === state.user && state.white_player_ready === false ||
@@ -241,11 +251,11 @@ function setButtonState(tableSocket, state, config) {
         unreadyButton.classList.add("hidden");
         
         standButton.addEventListener("click", function() {
-            updateState(tableSocket, player, false, null, null, null, null);  // Stand up player
+            updateState(tableSocket, player, false, null, null, null, null, null, null);  // Stand up player
         });
         
         readyButton.addEventListener("click", function() {
-            updateState(tableSocket, player, null, true, null, null, null);  // Mark player as ready
+            updateState(tableSocket, player, null, true, null, null, null, null, null);  // Mark player as ready
         });
     } else if (
         player === "white" && state.white_player === state.user && state.white_player_ready === true ||
@@ -258,7 +268,7 @@ function setButtonState(tableSocket, state, config) {
         unreadyButton.classList.remove("hidden");
         
         unreadyButton.addEventListener("click", function() {
-            updateState(tableSocket, player, null, false, null, null, null);  // Mark player as unready
+            updateState(tableSocket, player, null, false, null, null, null, null, null);  // Mark player as unready
         });
     } else {
         // Hide all buttons
@@ -278,7 +288,7 @@ function resetButton(buttonId) {
 }
 
 // Function to update state on the server
-function updateState(tableSocket, player, playerState, readyState, move, promotion, requested_board) {
+function updateState(tableSocket, player, playerState, readyState, move, promotion, requested_board, resign, draw) {
     const update = {
         white_player: player === "white" ? playerState : null,
         black_player: player === "black" ? playerState : null,
@@ -286,7 +296,9 @@ function updateState(tableSocket, player, playerState, readyState, move, promoti
         black_player_ready: player === "black" ? readyState : null,
         move: move,
         promotion: promotion,
-        requested_board: requested_board
+        requested_board: requested_board,
+        resign: resign,
+        draw: draw
     };
     tableSocket.send(JSON.stringify(update));
 }
@@ -594,7 +606,7 @@ function isTouchInsideSquare(touch, rect) {
 // Function to handle move and promotion
 function handleMove(move, isPromotion, tableSocket) {
     if (!isPromotion) {
-        updateState(tableSocket, null, null, null, move, null, null);  // Update state without promotion
+        updateState(tableSocket, null, null, null, move, null, null, null, null);  // Update state without promotion
     } else {
         showPromotionModal(move, tableSocket);  // Show promotion modal if promotion is required
     }
@@ -643,7 +655,7 @@ function setPromotionPieceListener(curr_piece, pieceType, player, pieceSymbol, m
     curr_piece.classList.add(player);
     curr_piece.addEventListener("click", function() {
         hidePromotionModal();
-        updateState(tableSocket, null, null, null, move, pieceSymbol, null);  // Update state with the selected promotion piece
+        updateState(tableSocket, null, null, null, move, pieceSymbol, null, null, null);  // Update state with the selected promotion piece
     });
 }
 
@@ -711,7 +723,7 @@ function decodeMoves(tableSocket, state, moveIndex, moveContainer, columnLetters
     } else {
         // Add a click event listener to the move that triggers an update of the game state to the selected board
         pieceAndMove.addEventListener('click', () => {
-            updateState(tableSocket, null, null, null, null, null, boardId);  // Update the game state to reflect the selected move/board
+            updateState(tableSocket, null, null, null, null, null, boardId, null, null);  // Update the game state to reflect the selected move/board
         });
     }
     
@@ -755,7 +767,7 @@ function addNavigationButtonsListeners(tableSocket, state, moveIndex) {
         const previous_button = document.getElementById("previous_button");
         const prev_board = state.prev_boards_id_moves[moveIndex - 1][0];
         previous_button.addEventListener('click', () => {
-            updateState(tableSocket, null, null, null, null, null, prev_board);  // Update state to previous board
+            updateState(tableSocket, null, null, null, null, null, prev_board, null, null);  // Update state to previous board
         });
         previous_button.classList.add("active");  // Activate the button
     }
@@ -765,7 +777,7 @@ function addNavigationButtonsListeners(tableSocket, state, moveIndex) {
         const next_board = state.prev_boards_id_moves[moveIndex + 1][0];
         const next_button = document.getElementById("next_button");
         next_button.addEventListener('click', () => {
-            updateState(tableSocket, null, null, null, null, null, next_board);  // Update state to next board
+            updateState(tableSocket, null, null, null, null, null, next_board, null, null);  // Update state to next board
         });
         next_button.classList.add("active");  // Activate the button
     }
@@ -795,5 +807,41 @@ function playMoveSound(state) {
         move_sound.volume = 0.4;  // Set the volume to a quieter level (40% of maximum)
         move_sound.playbackRate = 1.5;  // Speed up the playback rate of the sound (1.5x faster than normal)
         move_sound.play();  // Play the sound
+    }
+}
+
+function renderResignButton(tableSocket, state) {
+    // Check if the user is either the white or black player, and if there is at least one previous move.
+    // Also, ensure that the current board is the latest one and no winner has been determined yet.
+    if (
+        (state.user === state.white_player || state.user === state.black_player) &&  // Verify user is a player in the game
+        state.prev_boards_id_moves.length > 0 &&  // Ensure there are previous moves
+        state.board_id === state.prev_boards_id_moves[state.prev_boards_id_moves.length - 1][0] &&  // Confirm this is the latest board
+        state.winner == null  // Ensure no winner has been declared yet
+        ) {
+        const resignButton = document.getElementById("resign_button");  // Get the resign button element from the DOM
+        resignButton.classList.add("active");  // Add 'active' class to make the button visible or enabled
+
+        const timeout = 1500;  // Set the timeout duration (1.5 seconds) for holding the button
+        let resignTimer;  // Variable to store the timer
+        let isHoldingButton;  // Flag to track if the button is being held
+
+        // Listen for the 'mousedown' event when the player starts holding down the resign button
+        resignButton.addEventListener("mousedown", function() {
+            isHoldingButton = true;  // Set the flag to true, indicating the button is being held
+            resignTimer = setTimeout(function() {
+                // After 1.5 seconds, execute the resignation by calling updateState with resign=true
+                updateState(tableSocket, null, null, null, null, null, null, true, null);
+            }, timeout);  // Timer runs after the timeout duration
+        });
+
+        // Listen for the 'mouseup' event when the player releases the button
+        window.addEventListener("mouseup", function() {
+            if (isHoldingButton) {  // Only clear the timer if the button was being held
+                if (resignTimer) {
+                    this.clearTimeout(resignTimer);  // Cancel the resignation if the mouse was released before the timer ended
+                }
+            }
+        });
     }
 }
