@@ -780,15 +780,14 @@ function playMoveSound(state) {
             move_sound.currentTime = 0;
         }
 
-        let piece;   // Variable to store the name of the audio file to play
+        let piece;  // Variable to store the name of the audio file to play
         let htmlElement = document.documentElement;  // Get the <html> element of the document
         
         // Check if the <html> element has a class of "classic-mode"
         if (htmlElement.classList.contains("classic-mode")) {
             piece = "classic_sound";  // Use a generic classic sound if in "classic-mode"
         } else {
-            // Get the last moved piece
-            piece = state.board[state.last_move[2]][state.last_move[3]]["piece"];
+            piece = state.board[state.last_move[2]][state.last_move[3]]["piece"];  // Get the last moved piece
         }
 
         // Create a new Audio object for the move sound based on the piece's name
