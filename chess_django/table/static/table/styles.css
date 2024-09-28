@@ -55,6 +55,66 @@
     }
 }
 
+.white.pawn {
+    background-image: var(--white-pawn);
+    background-size: cover;
+}
+
+.white.rook {
+    background-image: var(--white-rook);
+    background-size: cover;
+}
+
+.white.bishop {
+    background-image: var(--white-bishop);
+    background-size: cover;
+}
+
+.white.knight {
+    background-image: var(--white-knight);
+    background-size: cover;
+}
+
+.white.queen {
+    background-image: var(--white-queen);
+    background-size: cover;
+}
+
+.white.king {
+    background-image: var(--white-king);
+    background-size: cover;
+}
+
+.black.pawn {
+    background-image: var(--black-pawn);
+    background-size: cover;
+}
+
+.black.rook {
+    background-image: var(--black-rook);
+    background-size: cover;
+}
+
+.black.bishop {
+    background-image: var(--black-bishop);
+    background-size: cover;
+}
+
+.black.knight {
+    background-image: var(--black-knight);
+    background-size: cover;
+}
+
+.black.queen {
+    background-image: var(--black-queen);
+    background-size: cover;
+}
+
+.black.king {
+    background-image: var(--black-king);
+    background-size: cover;
+}
+
 #table-container {
     display: flex;
     justify-content: center;
@@ -69,23 +129,18 @@
     grid-template-columns: repeat(21, minmax(0, var(--square-size)));
 }
 
-#black_player,
-#black_captured,
-#black_time,
-#white_player,
-#white_captured,
-#white_time {
+#black_player, #black_captured,
+#black_time, #white_player,
+#white_captured, #white_time {
     display: flex;
     align-items: center;
+    font-size: min(var(--square-size), 20px);
     color: var(--ready-player);
     z-index: 25;
-    font-size: min(var(--square-size), 20px);
 }
 
-#black_player.unready,
-#black_time.unready,
-#white_player.unready,
-#white_time.unready {
+#black_player.unready, #black_time.unready,
+#white_player.unready, #white_time.unready {
     color: var(--unready-player);
 }
 
@@ -131,8 +186,8 @@
     border-radius: var(--button-radius);
     font-size: min(var(--square-size), 20px);
     margin-bottom: var(--button-radius);
-    cursor: pointer;
     white-space: nowrap;
+    cursor: pointer;
 }
 
 .button_black {
@@ -156,14 +211,10 @@
     color: black;
 }
 
-#black_player_sit_button,
-#black_player_stand_button,
-#black_player_ready_button,
-#black_player_unready_button,
-#white_player_sit_button,
-#white_player_stand_button,
-#white_player_ready_button,
-#white_player_unready_button {
+#black_player_sit_button, #black_player_stand_button,
+#black_player_ready_button, #black_player_unready_button,
+#white_player_sit_button, #white_player_stand_button,
+#white_player_ready_button, #white_player_unready_button {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -306,7 +357,6 @@
 }
 
 .moves_container span {
-    /* padding-top: 5px; */
     text-align: center;
 }
 
@@ -391,66 +441,6 @@ td {
     max-height: calc(2 * var(--square-size));
     min-width: calc(2 * var(--square-size));
     min-height: calc(2 * var(--square-size));
-}
-
-.white.pawn {
-    background-image: var(--white-pawn);
-    background-size: cover;
-}
-
-.white.rook {
-    background-image: var(--white-rook);
-    background-size: cover;
-}
-
-.white.bishop {
-    background-image: var(--white-bishop);
-    background-size: cover;
-}
-
-.white.knight {
-    background-image: var(--white-knight);
-    background-size: cover;
-}
-
-.white.queen {
-    background-image: var(--white-queen);
-    background-size: cover;
-}
-
-.white.king {
-    background-image: var(--white-king);
-    background-size: cover;
-}
-
-.black.pawn {
-    background-image: var(--black-pawn);
-    background-size: cover;
-}
-
-.black.rook {
-    background-image: var(--black-rook);
-    background-size: cover;
-}
-
-.black.bishop {
-    background-image: var(--black-bishop);
-    background-size: cover;
-}
-
-.black.knight {
-    background-image: var(--black-knight);
-    background-size: cover;
-}
-
-.black.queen {
-    background-image: var(--black-queen);
-    background-size: cover;
-}
-
-.black.king {
-    background-image: var(--black-king);
-    background-size: cover;
 }
 
 @media (min-aspect-ratio: 16/9) and (max-height: 600px) {
@@ -687,7 +677,6 @@ td.checking {
 #square77 {
     border-top-left-radius: var(--border-radius);
 }
-
 
 .movingPiece {
     width: calc((2 * var(--square-size) * 1.15));

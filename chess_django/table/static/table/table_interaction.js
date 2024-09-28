@@ -2,6 +2,7 @@ let moveListeners = {};  // To store event listeners for moves
 let intervalId;  // To manage interval for timers
 let isDragging = false;  // Flag to track if a piece is being dragged
 let draggedPiece = {};
+var move_sound;
 
 // Runs when the DOM content is fully loaded
 document.addEventListener('DOMContentLoaded', function () {
@@ -771,8 +772,29 @@ function addNavigationButtonsListeners(tableSocket, state, moveIndex) {
 }
 
 function playMoveSound(state) {
+    // Check if sound should be played based on the state
     if (state.play_audio) {
-        var move_sound = new Audio('/static/table/sounds/move_sound.mp3');
-        move_sound.play();
+        // If there is an existing sound playing, pause it and reset its time to avoid overlap
+        if (move_sound) {
+            move_sound.pause();
+            move_sound.currentTime = 0;
+        }
+
+        let piece;   // Variable to store the name of the audio file to play
+        let htmlElement = document.documentElement;  // Get the <html> element of the document
+        
+        // Check if the <html> element has a class of "classic-mode"
+        if (htmlElement.classList.contains("classic-mode")) {
+            piece = "classic_sound";  // Use a generic classic sound if in "classic-mode"
+        } else {
+            // Get the last moved piece
+            piece = state.board[state.last_move[2]][state.last_move[3]]["piece"];
+        }
+
+        // Create a new Audio object for the move sound based on the piece's name
+        move_sound = new Audio(`/static/table/sounds/${piece}.mp3`);
+        move_sound.volume = 0.4;  // Set the volume to a quieter level (40% of maximum)
+        move_sound.playbackRate = 1.5;  // Speed up the playback rate of the sound (1.5x faster than normal)
+        move_sound.play();  // Play the sound
     }
 }
