@@ -127,6 +127,7 @@
     display: grid;
     grid-template-rows: repeat(18, minmax(0, var(--square-size)));
     grid-template-columns: repeat(21, minmax(0, var(--square-size)));
+    user-select: none;
 }
 
 #black_player, #black_captured,
@@ -321,6 +322,13 @@
     animation: confirmation 1.5s ease-out forwards;
 }
 
+#draw_button.active:active {
+    background-image: linear-gradient(to right, rgb(62, 133, 62) 0%, rgb(62, 133, 62) 50%, white 50%, white 100%);
+    background-size: 200% 100%;
+    background-position: 100%;
+    animation: confirmation 1.5s ease-out forwards;
+}
+
 @keyframes confirmation {
     from {
         background-position: 100%;
@@ -328,6 +336,22 @@
     to {
         background-position: 0%;
     }
+}
+
+#draw_button.active.player_draw_request {
+    background-color: rgb(62, 133, 62)
+}
+
+#draw_button.active.player_draw_request:hover {
+    background-color: rgb(137, 221, 137)
+}
+
+#draw_button.active.opponent_draw_request {
+    background-color: rgb(192, 102, 0)
+}
+
+#draw_button.active.opponent_draw_request:hover {
+    background-color: rgb(255, 200, 100)
 }
 
 #previous_button i,
@@ -343,14 +367,14 @@
 #next_button span,
 #resign_button span,
 #draw_button span {
-    flex: 1 1 60%;
+    flex: 1 1 70%;
 }
 
 #previous_button,
 #next_button,
 #resign_button,
 #draw_button {
-    flex: 1 1 50%;
+    flex: 1 1 30%;
 }
 
 #prev_moves {

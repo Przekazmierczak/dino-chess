@@ -75,7 +75,7 @@ class TableConsumer(AsyncWebsocketConsumer):
             current_game.black_ready, winner, board_id, board, turn,
             checking, total_moves, soft_moves,
             white_time_left, black_time_left, last_move,
-            prev_boards_id_moves, play_audio
+            prev_boards_id_moves, play_audio, current_game.white_draw, current_game.black_draw
             )
         await self.send_game_state_to_websocket(message)
 
@@ -97,8 +97,13 @@ class TableConsumer(AsyncWebsocketConsumer):
         elif text_data_json["requested_board"]:
             await self.handle_board_request(current_game, user, text_data_json["requested_board"])
 
+        # If the user clicked resign button, handle the request
         elif text_data_json["resign"]:
             await self.handle_resign(current_game, user)
+
+        # If the user clicked draw button, handle the request
+        elif text_data_json["draw"]:
+            await self.handle_draw(current_game, user)
         
         # Handle other user actions
         else:
@@ -174,7 +179,7 @@ class TableConsumer(AsyncWebsocketConsumer):
             current_game.black_ready, winner, new_board_id, board, turn,
             checking, total_moves, soft_moves,
             white_time_left, black_time_left, last_move,
-            prev_boards_id_moves, True
+            prev_boards_id_moves, True, current_game.white_draw, current_game.black_draw
             )
         await self.send_game_state_to_room_group(message)
 
@@ -208,7 +213,7 @@ class TableConsumer(AsyncWebsocketConsumer):
             current_game.black_ready, None, board_id, simplified_board, latest_board_state .turn,
             requested_board_data.checking, latest_board_state .total_moves, latest_board_state .soft_moves,
             white_time_left, black_time_left, requested_board_data .last_move,
-            previous_boards_and_moves, True
+            previous_boards_and_moves, True, False, False
             )
         await self.send_game_state_to_websocket(message)
     
@@ -239,6 +244,67 @@ class TableConsumer(AsyncWebsocketConsumer):
             winner = None
         
         await push_winner_to_database(self.table_id, winner)
+
+        # Construct and send the game state message to the room group
+        message = construct_game_state_message(
+            white_player, black_player, current_game.white_ready,
+            current_game.black_ready, winner, current_board.id, board, current_board.turn,
+            current_board.checking, current_board.total_moves, current_board.soft_moves,
+            white_time_left, black_time_left, current_board.last_move,
+            current_game.boards, False, False, False
+            )
+        await self.send_game_state_to_room_group(message)
+
+    async def handle_draw(self, current_game, user):
+        # Retrieve the latest board state for the current game from the database
+        current_board = await get_latest_board_from_database(current_game)
+
+        # Get the usernames of the white and black players
+        white_player = current_game.white.username
+        black_player = current_game.black.username
+
+        # Load the current board state from JSON and simplify it
+        current_board_json = json.loads(current_board.board)
+        board, _, _ = pieces.Board(current_board_json, current_board.turn, current_board.castling, current_board.enpassant).create_json_class()
+
+        # Calculate the remaining time for each player
+        white_time_left, black_time_left = get_current_time(current_board.white_time_left, current_board.black_time_left, current_board.created_at, current_board.turn)
+
+        # Format the time values for display
+        white_time_left, black_time_left = format_time(white_time_left, black_time_left)
+
+        # No winner initially
+        winner = None
+
+        # Retrieve the current draw states for both players
+        white_draw = current_game.white_draw
+        black_draw = current_game.black_draw
+
+        # Handle the draw request logic for the white player
+        if user.username == white_player:
+            if current_game.white_draw:  # If white has already requested a draw, cancel the request
+                await push_draw_request_to_database(self.table_id, "white", False)
+                white_draw = False
+            else:  # Otherwise, proceed with the draw request logic
+                if current_game.black_draw:  # If black has already requested a draw, declare the game a draw
+                    await push_winner_to_database(self.table_id, "draw")
+                    winner = "draw"
+                else:  # If black hasn't requested, set white's draw request to True
+                    await push_draw_request_to_database(self.table_id, "white", True)
+                    white_draw = True
+
+        # Handle the draw request logic for the black player            
+        elif user.username == black_player:
+            if current_game.black_draw:  # If black has already requested a draw, cancel the request
+                await push_draw_request_to_database(self.table_id, "black", False)
+                black_draw = False
+            else:  # Otherwise, proceed with the draw request logic
+                if current_game.white_draw:  # If white has already requested a draw, declare the game a draw
+                    await push_winner_to_database(self.table_id, "draw")
+                    winner = "draw"
+                else:  # If white hasn't requested, set black's draw request to True
+                    await push_draw_request_to_database(self.table_id, "black", True)
+                    black_draw = True
         
         # Construct and send the game state message to the room group
         message = construct_game_state_message(
@@ -246,7 +312,7 @@ class TableConsumer(AsyncWebsocketConsumer):
             current_game.black_ready, winner, current_board.id, board, current_board.turn,
             current_board.checking, current_board.total_moves, current_board.soft_moves,
             white_time_left, black_time_left, current_board.last_move,
-            current_game.boards, False
+            current_game.boards, False, white_draw, black_draw
             )
         await self.send_game_state_to_room_group(message)
         
@@ -287,7 +353,7 @@ class TableConsumer(AsyncWebsocketConsumer):
             current_game.black_ready, winner, board_id, board, turn,
             checking, total_moves, soft_moves,
             white_time_left, black_time_left, last_move,
-            [], False
+            [], False, current_game.white_draw, current_game.black_draw
             )
         await self.send_game_state_to_room_group(message)
 
@@ -306,7 +372,7 @@ class TableConsumer(AsyncWebsocketConsumer):
             event["black_player_ready"], event["winner"], event["board_id"], event["board"], 
             event["turn"], event["checking"], event["total_moves"], event["soft_moves"],
             event["white_time_left"], event["black_time_left"], event["last_move"],
-            event["prev_boards_id_moves"], event["play_audio"]
+            event["prev_boards_id_moves"], event["play_audio"], event["white_draw"], event["black_draw"]
         )
         await self.send_game_state_to_websocket(message)
     
@@ -323,7 +389,7 @@ def construct_game_state_message(
         black_player_ready, winner, board_id, board, turn,
         checking, total_moves, soft_moves, 
         white_time_left, black_time_left, last_move,
-        prev_boards_id_moves, play_audio
+        prev_boards_id_moves, play_audio, white_draw, black_draw
     ):
     # Constructs a dictionary containing the game state
     return {
@@ -342,7 +408,9 @@ def construct_game_state_message(
         "black_time_left": black_time_left,
         "last_move": last_move,
         "prev_boards_id_moves": prev_boards_id_moves,
-        "play_audio": play_audio
+        "play_audio": play_audio,
+        "white_draw": white_draw,
+        "black_draw": black_draw
     }
         
 @sync_to_async
@@ -405,13 +473,26 @@ def push_new_board_to_database(table_id, updated_board, turn, castling, enpassan
 def push_winner_to_database(table_id, winner):
     # Save the new board state to the database
     game = Game.objects.get(pk=table_id)
-    print("here")
 
     if winner:
+        # Map the winner value to 'w' for white, 'b' for black, or 'd' for draw
         db_winner = {"white": "w", "black": "b"}.get(winner, "d")
+        # Assign the mapped winner to the game's winner field
         game.winner = db_winner
-        print("here")
 
+    # Save the updated game state in the database
+    game.save()
+
+@sync_to_async
+def push_draw_request_to_database(table_id, player, request):
+    # Save the new board state to the database
+    game = Game.objects.get(pk=table_id)
+
+    # Set the white_draw or black_draw field based on the player and request status
+    game.white_draw = True if player == "white" and request else False
+    game.black_draw = True if player == "black" and request else False
+
+    # Save the updated game state in the database
     game.save()
 
 @sync_to_async

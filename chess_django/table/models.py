@@ -12,6 +12,8 @@ class Game(models.Model):
     black_ready = models.BooleanField(default=False)
     with_ai = models.BooleanField(default=False)
     boards = models.JSONField(default=list)
+    white_draw = models.BooleanField(default=False)
+    black_draw = models.BooleanField(default=False)
 
 class Board(models.Model):
     game = models.ForeignKey(Game, on_delete=models.CASCADE)

@@ -42,6 +42,7 @@ function updateUI(tableSocket, state) {
     renderPrevMoves(tableSocket, state);  // Display the previous moves made in the game
     playMoveSound(state);  // Play sound related to the last move
     renderResignButton(tableSocket, state);  // Show or update the "Resign" button depending on the game state
+    renderDrawButton(tableSocket, state);  // Show or update the "Draw" button depending on the game state
     console.log("received updated board");
 }
 
@@ -53,6 +54,7 @@ function reloadUI(tableSocket, state) {
     renderBoard(tableSocket, state);  // Re-render the board when theme changes
     renderPrevMoves(tableSocket, state);  // Re-render the previous moves made in the game
     renderResignButton(tableSocket, state);  // Re-render the "Resign" button depending on the game state
+    renderDrawButton(tableSocket, state);  // Re-render the "Draw" button depending on the game state
 }
 
 // Function to clear the board of pieces and listeners
@@ -87,9 +89,14 @@ function clearPrevMovesTable() {
 
 function clearResignDrawButtons() {
     let resign_button = document.getElementById("resign_button");
-    let newElement = resign_button.cloneNode(true);
-    resign_button.parentNode.replaceChild(newElement, resign_button);
-    newElement.className = '';
+    let newResignElement = resign_button.cloneNode(true);
+    resign_button.parentNode.replaceChild(newResignElement, resign_button);
+    newResignElement.className = '';
+
+    let draw_button = document.getElementById("draw_button");
+    let newDrawElement = draw_button.cloneNode(true);
+    draw_button.parentNode.replaceChild(newDrawElement, draw_button);
+    newDrawElement.className = '';
 }
 
 // Function to color the board with alternating colors
@@ -840,6 +847,58 @@ function renderResignButton(tableSocket, state) {
             if (isHoldingButton) {  // Only clear the timer if the button was being held
                 if (resignTimer) {
                     this.clearTimeout(resignTimer);  // Cancel the resignation if the mouse was released before the timer ended
+                }
+            }
+        });
+    }
+}
+
+function renderDrawButton(tableSocket, state) {
+    // Check if the user is either the white or black player, and if there is at least one previous move.
+    // Also, ensure that the current board is the latest one and no winner has been determined yet.
+    if (
+        (state.user === state.white_player || state.user === state.black_player) &&  // Verify user is a player in the game
+        state.prev_boards_id_moves.length > 0 &&  // Ensure there are previous moves
+        state.board_id === state.prev_boards_id_moves[state.prev_boards_id_moves.length - 1][0] &&  // Confirm this is the latest board
+        state.winner == null  // Ensure no winner has been declared yet
+        ) {
+        const drawButton = document.getElementById("draw_button");  // Get the draw button element from the DOM
+        drawButton.classList.add("active");  // Add 'active' class to make the button visible or enabled
+        
+        // Check if the current user is the white player
+        if (state.user === state.white_player) {
+            if (state.white_draw) {  // If the white player has already requested a draw
+                drawButton.classList.add("player_draw_request");  // Indicate the player's draw request
+            } else if (state.black_draw) {  // If the black player has requested a draw
+                drawButton.classList.add("opponent_draw_request");  // Indicate the opponent's draw request
+            }
+        // Check if the current user is the black player
+        } else if (state.user === state.black_player) {
+            if (state.black_draw) {  // If the black player has already requested a draw
+                drawButton.classList.add("player_draw_request");  // Indicate the player's draw request
+            } else if (state.white_draw) {  // If the white player has requested a draw
+                drawButton.classList.add("opponent_draw_request");  // Indicate the opponent's draw request
+            }
+        }
+
+        const timeout = 1500;  // Set the timeout duration (1.5 seconds) for holding the button
+        let drawTimer;  // Variable to store the timer
+        let isHoldingButton;  // Flag to track if the button is being held
+
+        // Listen for the 'mousedown' event when the player starts holding down the draw button
+        drawButton.addEventListener("mousedown", function() {
+            isHoldingButton = true;  // Set the flag to true, indicating the button is being held
+            drawTimer = setTimeout(function() {
+                // After 1.5 seconds, execute the resignation by calling updateState with draw=true
+                updateState(tableSocket, null, null, null, null, null, null, null, true);
+            }, timeout);  // Timer runs after the timeout duration
+        });
+
+        // Listen for the 'mouseup' event when the player releases the button
+        window.addEventListener("mouseup", function() {
+            if (isHoldingButton) {  // Only clear the timer if the button was being held
+                if (drawTimer) {
+                    this.clearTimeout(drawTimer);  // Cancel the draw proposition if the mouse was released before the timer ended
                 }
             }
         });
