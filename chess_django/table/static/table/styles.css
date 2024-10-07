@@ -122,7 +122,7 @@
     height: 96vh;
 }
 
-.grid {
+#grid {
     position: relative;
     display: grid;
     grid-template-rows: repeat(18, minmax(0, var(--square-size)));
@@ -151,10 +151,22 @@
     grid-row: 1;
 }
 
+.rotated #black_player,
+.rotated #black_captured,
+.rotated #black_time {
+    grid-row: 18;
+}
+
 #white_player,
 #white_captured,
 #white_time {
     grid-row: 18;
+}
+
+.rotated #white_player,
+.rotated #white_captured,
+.rotated #white_time {
+    grid-row: 1;
 }
 
 #black_player,
@@ -478,7 +490,7 @@ td {
 }
 
 @media (min-aspect-ratio: 16/9) and (max-height: 600px) {
-    .grid {
+    #grid {
         grid-template-columns: repeat(23, minmax(0, var(--square-size)));
     }
 
@@ -498,7 +510,7 @@ td {
 }
 
 @media (min-aspect-ratio: 22/9) and (max-height: 600px) {
-    .grid {
+    #grid {
         grid-template-columns: repeat(25, minmax(0, var(--square-size)));
     }
 
@@ -522,7 +534,7 @@ td {
         height: fit-content;
     }
     
-    .grid {
+    #grid {
         grid-template-rows: repeat(30, minmax(0, var(--square-size)));
         grid-template-columns: repeat(16, minmax(0, var(--square-size)));
     }
@@ -702,14 +714,37 @@ td.checking {
 #square00 {
     border-bottom-right-radius: var(--border-radius);
 }
+
+.rotated #square00 {
+    border-bottom-right-radius: 0px;
+    border-top-left-radius: var(--border-radius);
+}
+
 #square07 {
     border-bottom-left-radius: var(--border-radius);
 }
+
+.rotated #square07 {
+    border-bottom-left-radius: 0px;
+    border-top-right-radius: var(--border-radius);
+}
+
 #square70 {
     border-top-right-radius: var(--border-radius);
 }
+
+.rotated #square70 {
+    border-top-right-radius: 0px;
+    border-bottom-left-radius: var(--border-radius);
+}
+
 #square77 {
     border-top-left-radius: var(--border-radius);
+}
+
+.rotated #square77 {
+    border-top-left-radius: 0px;
+    border-bottom-right-radius: var(--border-radius);
 }
 
 .movingPiece {
@@ -795,13 +830,13 @@ td.checking {
 
 /* .rotate {
     transform: rotate(180deg);
-}
+} */
 
-.rotate .pieceImage {
+/* .rotate td {
     transform: rotate(-180deg);
-}
+} */
 
-.rotate .player-time {
+/* .rotate .player-time {
     transform: rotate(-180deg);
 } */
 

@@ -30,6 +30,7 @@ function setupWebSocket() {
 
 function updateUI(tableSocket, state) {
     clearBoard();  // Clear the board of pieces and listeners
+    rotateBoard(state);
     colorBoard();  // Color the board
     showPlayers(state);  // Update player names
     showTimes(state);  // Update player times
@@ -71,6 +72,32 @@ function clearBoard() {
     }
     clearPrevMovesTable();
     clearResignDrawButtons();
+    document.getElementById("grid").className = '';
+}
+
+function rotateBoard(state) {
+    if (
+        state.black_player === state.user &&
+        state.white_player_ready && state.black_player_ready
+        ) {
+        document.getElementById("grid").classList.add("rotated");
+
+        const table = document.getElementById("chess-board");
+        table.innerHTML = '';
+    
+        const new_table = document.createElement("tbody");
+    
+        for (let i = 0; i < 8; i++) {
+            const row_element = document.createElement("tr");
+            for (let j = 0; j < 8; j++) {
+                const column_element = document.createElement("td");
+                column_element.id = `square${i}${j}`;
+                row_element.appendChild(column_element);
+            }
+            new_table.appendChild(row_element);
+        }
+        table.appendChild(new_table);
+    }
 }
 
 function clearPrevMovesTable() {
@@ -404,8 +431,8 @@ function setBoardMoveListeners() {
 // Function to render the board based on the current state
 function renderBoard(tableSocket, state) {
     // Define the symbols for the letters and numbers on the chessboard
-    const symbols_letters = {"00": "h", "01": "g", "02": "f", "03": "e", "04": "d", "05": "c", "06": "b", "07": "a"};
-    const symbols_numbers = {"07": "1", "17": "2", "27": "3", "37": "4", "47": "5", "57": "6", "67": "7", "77": "8"};
+    const symbols_letters = {"0": "h", "1": "g", "2": "f", "3": "e", "4": "d", "5": "c", "6": "b", "7": "a"};
+    const symbols_numbers = {"0": "1", "1": "2", "2": "3", "3": "4", "4": "5", "5": "6", "6": "7", "7": "8"};
 
     // Points for each type of piece
     const points = {"pawn": 1, "bishop": 3, "knight": 3, "rook": 5, "queen": 9};
@@ -419,14 +446,29 @@ function renderBoard(tableSocket, state) {
         for (let col = 0; col < 8; col++) {
             const square = document.querySelector(`#square${row}${col}`);
             
-            // Add letter symbols at the bottom of the board (for row 0)
-            if (row == 0) {
-                addSymbolLetters(square, row, col, symbols_letters);
-            }
-            
-            // Add number symbols at the right of the board (for column 7)
-            if (col == 7) {
-                addSymbolNumbers(square, row, col, symbols_numbers);
+            if (
+                state.black_player === state.user &&
+                state.white_player_ready && state.black_player_ready
+                ) {
+                // Add letter symbols at the bottom of the board (for row 0)
+                if (row == 7) {
+                    addSymbolLetters(square, row, col, symbols_letters);
+                }
+                
+                // Add number symbols at the right of the board (for column 7)
+                if (col == 0) {
+                    addSymbolNumbers(square, row, col, symbols_numbers);
+                }
+            } else {
+                // Add letter symbols at the bottom of the board (for row 0)
+                if (row == 0) {
+                    addSymbolLetters(square, row, col, symbols_letters);
+                }
+                
+                // Add number symbols at the right of the board (for column 7)
+                if (col == 7) {
+                    addSymbolNumbers(square, row, col, symbols_numbers);
+                }
             }
             
             // Setup events for each square
@@ -452,7 +494,7 @@ function addSymbolLetters(square, row, col, symbols_letters) {
     square.classList.add("square");  // Ensure square has the "square" class
     let bottomRightSymbol = document.createElement("div");  // Create a div for the letter symbol
     bottomRightSymbol.classList.add("bottom_right_symbol");  // Add the class to position the symbol
-    bottomRightSymbol.textContent = symbols_letters[`${row}${col}`];  // Set the letter symbol as content
+    bottomRightSymbol.textContent = symbols_letters[`${col}`];  // Set the letter symbol as content
     square.appendChild(bottomRightSymbol);  // Append the symbol to the square
 }
 
@@ -461,7 +503,7 @@ function addSymbolNumbers(square, row, col, symbols_numbers) {
     square.classList.add("square");  // Ensure square has the "square" class
     let topLeftSymbol = document.createElement("div");  // Create a div for the number symbol
     topLeftSymbol.classList.add("top_left_symbol");  // Add the class to position the symbol
-    topLeftSymbol.textContent = symbols_numbers[`${row}${col}`];  // Set the number symbol as content
+    topLeftSymbol.textContent = symbols_numbers[`${row}`];  // Set the number symbol as content
     square.appendChild(topLeftSymbol);  // Append the symbol to the square
 }
 
