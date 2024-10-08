@@ -311,6 +311,13 @@ function setButtonState(tableSocket, state, config) {
         readyButton.classList.add("hidden");
         unreadyButton.classList.add("hidden");
     }
+
+    // Hide sit button to ensure a user cannot join the same table second time
+    if (player === "white" && state.black_player === state.user) {
+        sitButton.classList.add("hidden");
+    } else if (player === "black" && state.white_player === state.user) {
+        sitButton.classList.add("hidden");
+    }
 }
 
 // Function to reset a button by removing all listeners

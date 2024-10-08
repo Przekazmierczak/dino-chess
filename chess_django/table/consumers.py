@@ -317,6 +317,11 @@ class TableConsumer(AsyncWebsocketConsumer):
         await self.send_game_state_to_room_group(message)
         
     async def handle_user_action(self, current_game, user, text_data_json):
+        # Ensure a user cannot join the same table second time
+        if (text_data_json["black_player"] != None and user == current_game.white or
+            text_data_json["white_player"] != None and user == current_game.black):
+            return
+        
         # Update player states in the database
         await push_players_state_to_db(current_game, user, text_data_json)
         await self.send_message_to_lobby()
