@@ -785,7 +785,8 @@ td.checking {
 }
 
 #modal_promotion,
-#modal_winner {
+#modal_winner,
+#modal_not_logged {
     display: none;
     background-color: white;
     border-radius: 8px;
@@ -798,7 +799,8 @@ td.checking {
 #modal_winner.show,
 #modal_background_start.show,
 #modal_background_promotion.show,
-#modal_background_winner.show {
+#modal_background_winner.show,
+#modal_not_logged.show {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -827,22 +829,6 @@ td.checking {
 #winner {
     font-size: min(var(--square-size), 35px);
 }
-
-/* .rotate {
-    transform: rotate(180deg);
-} */
-
-/* .rotate td {
-    transform: rotate(-180deg);
-} */
-
-/* .rotate .player-time {
-    transform: rotate(-180deg);
-} */
-
-/* .container2 {
-    display: grid;
-} */
 
 .hidden {
     visibility: hidden;

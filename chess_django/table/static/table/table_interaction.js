@@ -44,6 +44,7 @@ function updateUI(tableSocket, state) {
     playMoveSound(state);  // Play sound related to the last move
     renderResignButton(tableSocket, state);  // Show or update the "Resign" button depending on the game state
     renderDrawButton(tableSocket, state);  // Show or update the "Draw" button depending on the game state
+    renderNotLoggedModal(state);  // Render NotLoggedModal for guest user
     console.log("received updated board");
 }
 
@@ -55,7 +56,7 @@ function reloadUI(tableSocket, state) {
     renderBoard(tableSocket, state);  // Re-render the board when theme changes
     renderPrevMoves(tableSocket, state);  // Re-render the previous moves made in the game
     renderResignButton(tableSocket, state);  // Re-render the "Resign" button depending on the game state
-    renderDrawButton(tableSocket, state);  // Re-render the "Draw" button depending on the game state
+    renderDrawButton(tableSocket, state);  // Display NotLoggedModal when the user is not logged in
 }
 
 // Function to clear the board of pieces and listeners
@@ -73,6 +74,7 @@ function clearBoard() {
     clearPrevMovesTable();
     clearResignDrawButtons();
     document.getElementById("grid").className = '';
+    document.getElementById("modal_not_logged").className = '';
 }
 
 function rotateBoard(state) {
@@ -261,7 +263,12 @@ function setButtonState(tableSocket, state, config) {
     const unreadyButton = resetButton(unready);
     
     // Configure buttons based on the player's role and readiness
-    if (
+    if (!state.user) {
+        sitButton.classList.add("hidden");
+        standButton.classList.add("hidden");
+        readyButton.classList.add("hidden");
+        unreadyButton.classList.add("hidden");
+    } else if (
         player === "white" && state.white_player === "Player 1" ||
         player === "black" && state.black_player === "Player 2"
     ) {
@@ -313,9 +320,9 @@ function setButtonState(tableSocket, state, config) {
     }
 
     // Hide sit button to ensure a user cannot join the same table second time
-    if (player === "white" && state.black_player === state.user) {
+    if (state.user && player === "white" && state.black_player === state.user) {
         sitButton.classList.add("hidden");
-    } else if (player === "black" && state.white_player === state.user) {
+    } else if (state.user && player === "black" && state.white_player === state.user) {
         sitButton.classList.add("hidden");
     }
 }
@@ -951,5 +958,13 @@ function renderDrawButton(tableSocket, state) {
                 }
             }
         });
+    }
+}
+
+function renderNotLoggedModal(state) {
+    // Check if the user is not logged in, and either white or black player is not ready
+    if (!state.user && (!state.white_player_ready || !state.black_player_ready)) {
+        // Show the "Not Logged" modal by adding the 'show' class
+        document.getElementById("modal_not_logged").classList.add("show");
     }
 }

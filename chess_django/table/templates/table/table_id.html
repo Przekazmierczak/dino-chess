@@ -21,7 +21,6 @@
                 <span id="resign_button"><i class='bx bx-flag'></i><span>Resign</span></span>
             </div>
             <div id="black_player" class="player"></div>
-            {% if user.is_authenticated %}
             <div id="black_player_sit_button" class="hidden">
                 <div class="button_black">Sit</div>
             </div>
@@ -34,7 +33,6 @@
             <div id="black_player_unready_button" class="hidden">
                 <div class="button_black">Unready</div>
             </div>
-            {% endif %}
             <div id="black_captured"></div>
             <div id="black_time" class="time"></div>
             <table id="chess-board">
@@ -48,7 +46,6 @@
             </table>
             <div class="movingPiece"></div>
             <div id="white_player" class="player"></div>
-            {% if user.is_authenticated %}
             <div id="white_player_sit_button" class="hidden">
                 <div class="button_white">Sit</div>
             </div>
@@ -61,7 +58,6 @@
             <div id="white_player_unready_button" class="hidden">
                 <div class="button_white">Unready</div>
             </div>
-            {% endif %}
             <div id="white_captured"></div>
             <div id="white_time" class="time"></div>
             <div id="modal_promotion">
@@ -77,17 +73,14 @@
             <div id="modal_winner">
                 <h1 id="winner"></h1>
             </div>
+            <div id="modal_not_logged">
+                <h1 id="not_logged">Log In to join the game</h1>
+            </div>
         </div>
     </div>
     <div id="modal_background_start"></div>
     <div id="modal_background_promotion"></div>
     <div id="modal_background_winner"></div>
-    
-    <!-- BUTTONS REMOVE LATER-->
-    <!-- <div class="container2">
-        <button type="button" id="button_rotate">Rotate</button>
-        <button type="button" id="button_dino">Change to dino!</button>
-    </div> -->
     
     {{ table_id|json_script:"table_id" }}
     {% endblock %}
