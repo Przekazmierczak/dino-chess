@@ -26,6 +26,8 @@
     --theme-toggle-background: rgb(44, 23, 19);
     --sidebar-dino-theme-url: var(--sidebar-dino_black-theme-url);
     --sidebar-classic-theme-url: var(--sidebar-classic_white-theme-url);
+
+    --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 :root.classic-mode {
@@ -61,7 +63,8 @@
 }
 
 * {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: var(--font-family);
+    font-weight: 400;
     padding: 0;
     margin: 0;
     box-sizing: border-box;

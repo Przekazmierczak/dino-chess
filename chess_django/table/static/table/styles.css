@@ -120,6 +120,7 @@
     justify-content: center;
     align-items: center;
     height: 96vh;
+    font-size: min(0.65 * var(--square-size), 22px);
 }
 
 #grid {
@@ -135,7 +136,6 @@
 #white_captured, #white_time {
     display: flex;
     align-items: center;
-    font-size: min(var(--square-size), 20px);
     color: var(--ready-player);
     z-index: 25;
 }
@@ -197,7 +197,6 @@
     min-width: min(calc(8 * var(--square-size)), 100px);
     text-decoration: none;
     border-radius: var(--button-radius);
-    font-size: min(var(--square-size), 20px);
     margin-bottom: var(--button-radius);
     white-space: nowrap;
     cursor: pointer;
@@ -288,7 +287,6 @@
     justify-content: center;
     color: white;
     z-index: 15;
-    font-size: min(var(--square-size), 22px);
 }
 
 #prev_moves_button,
@@ -305,7 +303,6 @@
     justify-content: center;
     align-items: center;
     color: white;
-    font-size: min(var(--square-size), 18px);
     background-color: gray;
     border-radius: 0.8rem;
     margin-left: 3px;
@@ -393,7 +390,6 @@
     grid-column: 17 / 22;
     color: white;
     z-index: 15;
-    font-size: min(var(--square-size), 22px);
     overflow: auto;
 }
 
@@ -662,7 +658,6 @@ td.checking {
 .top_left_symbol {
     position: absolute;
     user-select: none;
-    font-size: min(calc(var(--square-size) / 1.7), 22px);
     font-family: system-ui, sans-serif;
 }
 
@@ -787,8 +782,10 @@ td.checking {
 #modal_promotion,
 #modal_winner,
 #modal_not_logged {
+    /* font-size: min(0.30 * var(--square-size), 10px); */
+    background-color: var(--primary-bg-color);
+    color: var(--text-color);
     display: none;
-    background-color: white;
     border-radius: 8px;
     grid-row: 9 / 11;
     grid-column: 5 / 13;
@@ -824,10 +821,6 @@ td.checking {
 
 .modal_td_light {
     background-color: var(--light-square);
-}
-
-#winner {
-    font-size: min(var(--square-size), 35px);
 }
 
 .hidden {

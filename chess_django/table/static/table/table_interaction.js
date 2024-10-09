@@ -57,6 +57,7 @@ function reloadUI(tableSocket, state) {
     renderPrevMoves(tableSocket, state);  // Re-render the previous moves made in the game
     renderResignButton(tableSocket, state);  // Re-render the "Resign" button depending on the game state
     renderDrawButton(tableSocket, state);  // Display NotLoggedModal when the user is not logged in
+    renderNotLoggedModal(state);  // Render NotLoggedModal for guest user
 }
 
 // Function to clear the board of pieces and listeners
@@ -353,21 +354,40 @@ function updateState(tableSocket, player, playerState, readyState, move, promoti
 
 // Function to display the winner modal
 function displayWinner(state) {
+    // Check if the state object contains a winner
     if (state.winner) {
+        // Get the modal element for displaying the winner
         const modalWinner = document.getElementById("modal_winner");
+        // Add the "show" class to make the modal visible
         modalWinner.classList.add("show");
 
+        // Get the modal background element (used for click outside to close)
         const modalBackground = document.getElementById("modal_background_winner");
+        // Add the "show" class to the background to display it
         modalBackground.classList.add("show");
 
+        // Get the HTML element where the winner's message will be shown
         const htmlWinner = document.getElementById("winner");
+
+        // Check if the game was a draw
         if (state.winner === "draw") {
+            // If it's a draw, display the draw message in the modal
             htmlWinner.innerHTML = `<p>It's a draw!</p>`;
         } else {
-            htmlWinner.innerHTML = `<p>${state.winner} has won!</p>`;
+            // If there's a winner, check if it's the white player
+            if (state.winner === "white") {
+                // Display the white player's name as the winner
+                htmlWinner.innerHTML = `<p>${state.white_player} has won!</p>`;
+            } else {
+                // Otherwise, display the black player's name as the winner
+                htmlWinner.innerHTML = `<p>${state.black_player} has won!</p>`;
+
+            }
         }
 
+        // Add an event listener to the background so that clicking it will close the modal
         modalBackground.addEventListener("click", function() {
+            // Remove the "show" class from both the modal and background to hide them
             modalWinner.classList.remove("show");
             modalBackground.classList.remove("show");
         })
