@@ -99,6 +99,20 @@
             </div>
             <ul>
                 <li>
+                    {% if user.game %}
+                    <a class="sidebar-button" href="{% url 'current' %}">
+                    {% endif %}
+                    {% if not user.game %}
+                    <a class="sidebar-button inactive" href="{% url 'current' %}">
+                    {% endif %}
+                        <i class='bx bx-navigation'></i>
+                        <span class="nav-item">Active</span>
+                    </a>
+                    <span class="tooltip">Active</span>
+                </li>
+            </ul>
+            <ul>
+                <li>
                     <a class="sidebar-button" href="{% url 'logout' %}">
                         <i class="bx bx-log-out" ></i>
                         <span class="nav-item">Log Out</span>

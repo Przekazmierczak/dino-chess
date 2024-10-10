@@ -34,6 +34,8 @@ class TableConsumer(AsyncWebsocketConsumer):
         current_game = await get_game_from_database(self.table_id)
         user = self.scope["user"].username
         prev_boards_id_moves = current_game.boards
+        game_test = await sync_to_async(lambda: self.scope["user"].game)()
+        print(game_test)
 
         # Get player usernames or default names
         white_player = current_game.white.username if current_game.white else "Player 1"
@@ -476,17 +478,26 @@ def push_new_board_to_database(table_id, updated_board, turn, castling, enpassan
 
 @sync_to_async
 def push_winner_to_database(table_id, winner):
-    # Save the new board state to the database
-    game = Game.objects.get(pk=table_id)
-
     if winner:
+        # Save the new board state to the database
+        game = Game.objects.get(pk=table_id)
+
         # Map the winner value to 'w' for white, 'b' for black, or 'd' for draw
         db_winner = {"white": "w", "black": "b"}.get(winner, "d")
         # Assign the mapped winner to the game's winner field
         game.winner = db_winner
 
-    # Save the updated game state in the database
-    game.save()
+        # Save the updated game state in the database
+        game.save()
+
+        # Remove the game from both players
+        white = game.white # Retrieve white player (User object)
+        white.game = None # Clear the game field for white player
+        white.save() # Save the changes to the database
+
+        black = game.black # Retrieve black player (User object)
+        black.game = None # Clear the game field for black player
+        black.save() # Save the changes to the database
 
 @sync_to_async
 def push_draw_request_to_database(table_id, player, request):
@@ -503,23 +514,44 @@ def push_draw_request_to_database(table_id, player, request):
 @sync_to_async
 def push_players_state_to_db(game, user, data):
     # Update player states and initialize a new board if both players are ready
-    if data["white_player"]:
-        game.white = user
-    elif data["black_player"]:
-        game.black = user
-    elif data["white_player"] == False:
-        game.white = None
-    elif data["black_player"] == False:
-        game.black = None
+    if data["white_player"] or data["black_player"]:
+        # Associate the user with the current game
+        user.game = game
+        user.save()  # Save the updated user data
+
+        # Add game to the User
+        if data["white_player"]:
+            game.white = user
+        else:
+            game.black = user
+
+    # If white or black player selection is set to False (indicating a player is removed)
+    elif data["white_player"] == False or data["black_player"] == False:
+        # Associate the user with the current game
+        user.game = None
+        user.save()  # Save the updated user data
+
+        # Remove the game from the User
+        if data["white_player"] == False:
+            game.white = None
+        else:
+            game.black = None
+
+    # Check if white or black player is marked as ready
     elif data["white_player_ready"]:
+        # If white player is ready, set their readiness to True
         game.white_ready = True
     elif data["black_player_ready"]:
+        # If black player is ready, set their readiness to True
         game.black_ready = True
     elif data["white_player_ready"] == False:
+        # If white player is no longer ready, set their readiness to False
         game.white_ready = False
     elif data["black_player_ready"] == False:
+        # If black player is no longer ready, set their readiness to False
         game.black_ready = False
 
+    # If both players are ready, initialize a new starting board for the game
     if game.white_ready and game.black_ready:
         # Initialize starting board
         starting_board = [

@@ -19,3 +19,10 @@ def create_table(request):
 
     table_id = f"{new_game.id}"
     return redirect("table", table_id=table_id)
+
+def current(request):
+    if request.user.is_authenticated and request.user.game:
+        table_id = f"{request.user.game.id}"
+        return redirect("table", table_id=table_id)
+    else:
+        return redirect("lobby_index")

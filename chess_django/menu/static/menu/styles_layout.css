@@ -182,6 +182,12 @@
     color: var(--hover-text-color);
 }
 
+#sidebar ul li a.inactive {
+    color: gray;
+    pointer-events: none;
+    user-select: none;
+}
+
 #sidebar ul li a i {
     min-width: 50px;
     text-align: center;
