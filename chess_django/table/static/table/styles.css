@@ -782,7 +782,6 @@ td.checking {
 #modal_promotion,
 #modal_winner,
 #modal_not_logged {
-    /* font-size: min(0.30 * var(--square-size), 10px); */
     background-color: var(--primary-bg-color);
     color: var(--text-color);
     display: none;
@@ -799,6 +798,7 @@ td.checking {
 #modal_background_winner.show,
 #modal_not_logged.show {
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
 }
@@ -829,4 +829,8 @@ td.checking {
 
 .lock-screen {
     touch-action: none;
+}
+
+#login_link {
+    font-size: min(0.4 * var(--square-size), 17px);
 }

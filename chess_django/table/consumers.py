@@ -34,8 +34,6 @@ class TableConsumer(AsyncWebsocketConsumer):
         current_game = await get_game_from_database(self.table_id)
         user = self.scope["user"].username
         prev_boards_id_moves = current_game.boards
-        game_test = await sync_to_async(lambda: self.scope["user"].game)()
-        print(game_test)
 
         # Get player usernames or default names
         white_player = current_game.white.username if current_game.white else "Player 1"
