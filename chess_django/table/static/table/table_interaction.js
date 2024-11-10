@@ -519,8 +519,8 @@ function renderBoard(tableSocket, state) {
     }
     
     // Update the displayed captured points
-    document.getElementById("white_captured").innerHTML = white_captured["sum"];
-    document.getElementById("black_captured").innerHTML = black_captured["sum"];
+    document.getElementById("white_captured").innerHTML = white_captured["pawn"];
+    document.getElementById("black_captured").innerHTML = black_captured["pawn"];
 }
 
 // Function to add letter symbols to the bottom-right of the squares (for the letter coordinates)

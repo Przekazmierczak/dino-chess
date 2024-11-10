@@ -1,6 +1,7 @@
 :root {
     --primary-bg-color: #4B2E1A;
     --text-color: white;
+    /* --text-color: #e3fcce; */
     --hover-bg-color: white;
     --hover-text-color: #12171e;
     --sidebar-width: 80px;
@@ -127,6 +128,18 @@
     pointer-events: none;
 }
 
+#logo {
+    width: 165px;
+    height: 45px;
+}
+
+#logo_menu {
+    width: 90vw;
+    height: 25vw;
+    max-width: 700px; 
+    max-height: 160px;
+}
+
 #topbar-logo {
     height: 30px;
     justify-content: flex-end;
@@ -136,11 +149,6 @@
 #sidebar.active #sidebar-logo {
     opacity: 1;
     pointer-events: auto;
-}
-
-#sidebar-logo i {
-    font-size: 2rem;
-    margin-right: 5px;
 }
 
 #sidebar-user {
