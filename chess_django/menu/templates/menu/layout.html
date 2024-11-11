@@ -23,6 +23,9 @@
                 --background-url: url("{% static 'images/background.png' %}");
                 --modal-url: url("{% static 'images/modal2.png' %}");
                 --sidebar-background-url: url("{% static 'images/sidebar_background.png' %}");
+
+                --classic-logo: url("{% static 'images/classic_logo.png' %}");
+                --dino-logo: url("{% static 'images/dino_logo.png' %}");
                 
                 --sidebar-dino_white-theme-url: url("{% static 'images/dino_white.png' %}");
                 --sidebar-dino_black-theme-url: url("{% static 'images/dino_black.png' %}");
@@ -62,16 +65,11 @@
     </head>
     <body>
         <div id="topbar">
-            <div id="topbar-logo">
-                <i class="bx bxs-chess"></i>
-                <span>DinoChess</span>
-            </div>
+            <div id="topbar-logo"></div>
         </div>
         <div id="sidebar">
             <div id="sidebar-top">
-                <a id="sidebar-logo" href="{% url 'menu_index' %}">
-                    <img id="logo" src="{% static 'table/logo.png' %}" alt="DinoChess">
-                </a>
+                <a id="sidebar-logo" href="{% url 'menu_index' %}"></a>
                 <i class="bx bx-menu" id="btn"></i>
             </div>
             <ul>

@@ -1,7 +1,6 @@
 :root {
     --primary-bg-color: #4B2E1A;
     --text-color: white;
-    /* --text-color: #e3fcce; */
     --hover-bg-color: white;
     --hover-text-color: #12171e;
     --sidebar-width: 80px;
@@ -17,6 +16,8 @@
 
     --last-move-dark-square: rgb(165, 107, 40);
     --last-move-light-square: rgb(255, 222, 159);
+
+    --logo: var(--dino-logo);
 
     --white-player-button: #9db286;
     --black-player-button: #d68f52;
@@ -40,6 +41,8 @@
 
     --last-move-dark-square: rgb(40, 133, 148);
     --last-move-light-square: rgb(128, 223, 223);
+
+    --logo: var(--classic-logo);
 
     --white-player-button: white;
     --black-player-button: rgb(44, 44, 44);
@@ -85,9 +88,11 @@
 }
 
 #topbar {
+    display: flex;
     height: 40px;
     width: 100vw;
     visibility: hidden;
+    justify-content: flex-end;
 }
 
 #sidebar {
@@ -113,37 +118,23 @@
 
 #topbar-logo,
 #sidebar-logo {
-    color: var(--text-color);
-    display: flex;
-    width: 100%;
-    align-items: center;
-    text-decoration: none;
+    background-image: var(--logo);
+    background-size: cover;
 }
 
 #sidebar-logo {
-    font-size: 19px;
-    height: 50px;
+    display: flex;
+    height: 40px;
     opacity: 0;
-    max-width: 130px;
+    max-width: 135px;
     pointer-events: none;
-}
-
-#logo {
-    width: 165px;
-    height: 45px;
-}
-
-#logo_menu {
-    width: 90vw;
-    height: 25vw;
-    max-width: 700px; 
-    max-height: 160px;
 }
 
 #topbar-logo {
     height: 30px;
+    width: 110px;
     justify-content: flex-end;
-    opacity: 1;
+    margin-right: 10px;
 }
 
 #sidebar.active #sidebar-logo {
@@ -314,6 +305,15 @@
     min-height: 100vh;
     top: 0;
     padding: 0.5rem;
+}
+
+#logo_menu {
+    width: 90vw;
+    height: 25vw;
+    max-width: 600px; 
+    max-height: 160px;
+    background-image: var(--logo);
+    background-size: cover;
 }
 
 .layout-buttons-container {
