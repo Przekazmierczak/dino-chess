@@ -8,8 +8,7 @@
 
 {% block body %}
     <div id="register-container">
-        <div id="register_logo">Dino Chess</div>
-
+        <div id="logo_menu"></div>
         <form action="{% url 'register' %}" method="post">
             {% csrf_token %}
             <div>
