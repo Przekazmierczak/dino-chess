@@ -74,6 +74,10 @@
     box-sizing: border-box;
 }
 
+a {
+    color: #87CEFA;
+}
+
 #topbar,
 #sidebar {
     position: fixed;
