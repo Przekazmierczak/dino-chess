@@ -37,6 +37,17 @@ def check_game_timeout(game_id, turn, total_moves, board_json):
         # Save the game state with the winner
         game.save()
 
+        # Remove the game from both players
+        white = game.white # Retrieve white player (User object)
+        if white.game == game:
+            white.game = None # Clear the game field for white player
+            white.save() # Save the changes to the database
+
+        black = game.black # Retrieve black player (User object)
+        if black.game == game:
+            black.game = None # Clear the game field for black player
+            black.save() # Save the changes to the database
+
         # Construct the message with the updated game state
         message = {
             "white_player": game.white.username,

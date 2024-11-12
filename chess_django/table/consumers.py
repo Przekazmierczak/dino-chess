@@ -243,7 +243,7 @@ class TableConsumer(AsyncWebsocketConsumer):
         else:
             winner = None
         
-        await push_winner_to_database(self.table_id, winner)
+        await sync_to_async(push_winner_to_database)(current_game, winner)
 
         # Construct and send the game state message to the room group
         message = construct_game_state_message(
@@ -287,7 +287,7 @@ class TableConsumer(AsyncWebsocketConsumer):
                 white_draw = False
             else:  # Otherwise, proceed with the draw request logic
                 if current_game.black_draw:  # If black has already requested a draw, declare the game a draw
-                    await push_winner_to_database(self.table_id, "draw")
+                    await sync_to_async(push_winner_to_database)(current_game, "draw")
                     winner = "draw"
                 else:  # If black hasn't requested, set white's draw request to True
                     await push_draw_request_to_database(self.table_id, "white", True)
@@ -300,7 +300,7 @@ class TableConsumer(AsyncWebsocketConsumer):
                 black_draw = False
             else:  # Otherwise, proceed with the draw request logic
                 if current_game.white_draw:  # If white has already requested a draw, declare the game a draw
-                    await push_winner_to_database(self.table_id, "draw")
+                    await sync_to_async(push_winner_to_database)(current_game, "draw")
                     winner = "draw"
                 else:  # If white hasn't requested, set black's draw request to True
                     await push_draw_request_to_database(self.table_id, "black", True)
@@ -466,20 +466,15 @@ def push_new_board_to_database(table_id, updated_board, turn, castling, enpassan
         checking = checking
     )
 
-    if winner:
-        db_winner = {"white": "w", "black": "b"}.get(winner, "d")
-        game.winner = db_winner
+    push_winner_to_database(game, winner)
+
     game.boards.append((board.id, last_move, moved_piece))
     game.save()
 
     return board.id
 
-@sync_to_async
-def push_winner_to_database(table_id, winner):
+def push_winner_to_database(game, winner):
     if winner:
-        # Save the new board state to the database
-        game = Game.objects.get(pk=table_id)
-
         # Map the winner value to 'w' for white, 'b' for black, or 'd' for draw
         db_winner = {"white": "w", "black": "b"}.get(winner, "d")
         # Assign the mapped winner to the game's winner field
