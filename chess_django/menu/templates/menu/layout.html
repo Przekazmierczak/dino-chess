@@ -59,6 +59,8 @@
                 --dino-black-knight: url("{% static 'table/pieces_images/dKnight_black.png' %}");
                 --dino-black-queen: url("{% static 'table/pieces_images/dQueen_black.png' %}");
                 --dino-black-king: url("{% static 'table/pieces_images/dKing_black.png' %}");
+
+                --dino-king-bones: url("{% static 'table/pieces_images/dKing_bones.png' %}");
             }
         </style>
         
@@ -163,7 +165,7 @@
             }
         };
 
-        window.addEventListener('load', handleResize);
+        handleResize();
         window.addEventListener('resize', handleResize);
 
         btn.onclick = function () {
