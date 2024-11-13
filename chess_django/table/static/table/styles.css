@@ -43,6 +43,24 @@
     --black-king: var(--classic-black-king);
 }
 
+:root.white-winner:not(.classic-mode) {
+    --black-pawn: var(--dino-bones-pawn);
+    --black-rook: var(--dino-bones-rook);
+    --black-bishop: var(--dino-bones-bishop);
+    --black-knight: var(--dino-bones-knight);
+    --black-queen: var(--dino-bones-queen);
+    --black-king: var(--dino-bones-king);
+}
+
+:root.black-winner:not(.classic-mode) {
+    --white-pawn: var(--dino-bones-pawn);
+    --white-rook: var(--dino-bones-rook);
+    --white-bishop: var(--dino-bones-bishop);
+    --white-knight: var(--dino-bones-knight);
+    --white-queen: var(--dino-bones-queen);
+    --white-king: var(--dino-bones-king);
+}
+
 @media (max-width: 1300px) {
     :root {
         --square-size: min(5.5vh, 5.2vw);

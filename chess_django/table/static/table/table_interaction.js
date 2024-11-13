@@ -369,6 +369,9 @@ function displayWinner(state) {
         // Get the HTML element where the winner's message will be shown
         const htmlWinner = document.getElementById("winner");
 
+        // Get the root HTML element to add classes indicating the winner
+        const htmlElement = document.documentElement;
+
         // Check if the game was a draw
         if (state.winner === "draw") {
             // If it's a draw, display the draw message in the modal
@@ -378,10 +381,15 @@ function displayWinner(state) {
             if (state.winner === "white") {
                 // Display the white player's name as the winner
                 htmlWinner.innerHTML = `<p>${state.white_player} has won!</p>`;
+                
+                // Add a class to style the page indicating white as the winner - change images to bones
+                htmlElement.classList.add("white-winner");
             } else {
                 // Otherwise, display the black player's name as the winner
                 htmlWinner.innerHTML = `<p>${state.black_player} has won!</p>`;
 
+                // Add a class to style the page indicating black as the winner - change images to bones
+                htmlElement.classList.add("black-winner");
             }
         }
 
@@ -390,6 +398,10 @@ function displayWinner(state) {
             // Remove the "show" class from both the modal and background to hide them
             modalWinner.classList.remove("show");
             modalBackground.classList.remove("show");
+
+            // Remove any winner styling classes from the root element
+            htmlElement.classList.remove("white-winner");
+            htmlElement.classList.remove("black-winner");
         })
     }
 }
