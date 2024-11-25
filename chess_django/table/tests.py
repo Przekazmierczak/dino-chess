@@ -11,7 +11,7 @@ from asgiref.sync import sync_to_async
 import json
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
-from .consumers import TableConsumer
+from .consumers import TableConsumer, construct_game_state_message
 from django.contrib.auth.models import AnonymousUser
 
 from . import pieces
@@ -1061,214 +1061,260 @@ class TableConsumerTestCase4(TestCase):
         consumer.channel_name = "test_channel"
 
         # Create a mock board representing the initial state of the game
-        mock_start_board = MagicMock()
-        mock_start_board.total_moves = 0
-        mock_start_board.board = json.dumps([["R", "N", "B", "K", "Q", "B", "N", "R"],
-                                            ["P", "P", "P", "P", "P", "P", "P", "P"],
-                                            [None, None, None, None, None, None, None, None],
-                                            [None, None, None, None, None, None, None, None],
-                                            [None, None, None, None, None, None, None, None],
-                                            [None, None, None, None, None, None, None, None],
-                                            ["p", "p", "p", "p", "p", "p", "p", "p"],
-                                            ["r", "n", "b", "k", "q", "b", "n", "r"]])
-        mock_start_board.turn = "white"
-        mock_start_board.castling = "KQkq"
-        mock_start_board.enpassant = "__"
-        mock_start_board.soft_moves = 0
+        consumer.mock_start_board = MagicMock()
+        consumer.mock_start_board.total_moves = 0
+        consumer.mock_start_board.board = json.dumps([["R", "N", "B", "K", "Q", "B", "N", "R"],
+                                                      ["P", "P", "P", "P", "P", "P", "P", "P"],
+                                                      [None, None, None, None, None, None, None, None],
+                                                      [None, None, None, None, None, None, None, None],
+                                                      [None, None, None, None, None, None, None, None],
+                                                      [None, None, None, None, None, None, None, None],
+                                                      ["p", "p", "p", "p", "p", "p", "p", "p"],
+                                                      ["r", "n", "b", "k", "q", "b", "n", "r"]])
+        consumer.mock_start_board.turn = "white"
+        consumer.mock_start_board.castling = "KQkq"
+        consumer.mock_start_board.enpassant = "__"
+        consumer.mock_start_board.soft_moves = 0
+
+        consumer.started = started
 
         # Mock async methods that will be called during the tests
-        consumer.push_players_state_to_db = AsyncMock()
-        consumer.if_game_started = MagicMock(return_value=started)
-        consumer.get_latest_board_from_database = AsyncMock(return_value=mock_start_board)
+        # consumer.push_players_state_to_db = AsyncMock()
+        # consumer.if_game_started = MagicMock(return_value=started)
+        # consumer.get_latest_board_from_database = AsyncMock(return_value=mock_start_board)
         consumer.send_game_state_to_room_group = AsyncMock()
 
         return consumer
     
-    # @pytest.mark.asyncio
-    # async def test_handle_user_action_when_both_players_ready(self):
-    #     """
-    #     Test handle_user_action to ensure it processes correctly and updates the game state.
-    #     """
-    #     # Mock game state with both players ready and no winner
-    #     mock_game = MagicMock()
-    #     mock_game.white = MagicMock(username="test_user")
-    #     mock_game.black = MagicMock(username="black_player")
-    #     mock_game.white_ready = True
-    #     mock_game.black_ready = True
-    #     mock_game.winner = None
+    @pytest.mark.asyncio
+    async def test_handle_user_action_when_both_players_ready(self):
+        """
+        Test handle_user_action to ensure it processes correctly and updates the game state.
+        """
+        # Mock game state with both players ready and no winner
+        mock_game = MagicMock()
+        mock_game.white = MagicMock(username="test_user")
+        mock_game.black = MagicMock(username="black_player")
+        mock_game.white_ready = True
+        mock_game.black_ready = True
+        mock_game.winner = None
         
-    #     # Mock the input data that would be received from the WebSocket
-    #     mock_text_data = {'white_player': None,
-    #                       'black_player': None,
-    #                       'white_player_ready': True,
-    #                       'black_player_ready': None,
-    #                       'move': None,
-    #                       'promotion': None}
-    #     mock_text_data_json = json.dumps(mock_text_data)     
+        # Mock the input data that would be received from the WebSocket
+        mock_text_data = {'white_player': None,
+                          'black_player': None,
+                          'white_player_ready': True,
+                          'black_player_ready': None,
+                          'move': None,
+                          'promotion': None}
 
-    #     # Patch the Board class and check_game_timeout to control its behavior in the test
-    #     with patch('table.pieces.Board') as MockBoard, patch('table.tasks.check_game_timeout.apply_async'):
-    #         MockBoard.return_value.create_json_class.return_value = ("correct_class", None, None)
+        # Patch the Board class and check_game_timeout to control its behavior in the test
+        with (patch('table.pieces.Board') as MockBoard, patch('table.tasks.check_game_timeout.apply_async'),
+              patch('table.consumers.push_players_state_to_db') as push_players_state_to_db,
+              patch('table.consumers.if_game_started') as if_game_started,
+              patch('table.consumers.get_latest_board_from_database') as get_latest_board_from_database):
 
-    #         # Setup consumers
-    #         consumer = await self.setup_consumer(True)
+            # Setup consumers
+            consumer = await self.setup_consumer(True)
+
+            MockBoard.return_value.create_json_class.return_value = ("correct_class", None, None)
+            if_game_started.return_value = consumer.started
+            get_latest_board_from_database.return_value = consumer.mock_start_board
+
+            # Call the handle_user_action method
+            await consumer.handle_user_action(mock_game, consumer.scope["user"], mock_text_data)
+
+            # Assert that the database method to update player state was called correctly
+            push_players_state_to_db.assert_called_once_with(
+                mock_game,
+                consumer.scope["user"],
+                mock_text_data,
+            )
+        
+            # Verify the message sent to the WebSocket room group
+            message = consumer.send_game_state_to_room_group.call_args[0][0]
+            assert message['white_player'] == 'test_user'
+            assert message['black_player'] == 'black_player'
+            assert message['white_player_ready'] == True
+            assert message['black_player_ready'] == True
+            assert message['winner'] == None
+            assert message['board'] is not None
+            assert message['turn'] == 'white'
+            assert message['checking'] == None
+            assert message['total_moves'] == 0
+            assert message['soft_moves'] == 0
+
+    @pytest.mark.asyncio
+    async def test_handle_user_action_when_player_missing(self):
+        """
+        Test handle_user_action to ensure it processes correctly and updates the game state.
+        """
+        # Mock game state with only one player ready and no winner
+        mock_game = MagicMock()
+        mock_game.white = MagicMock(username="test_user")
+        mock_game.black = None
+        mock_game.white_ready = True
+        mock_game.black_ready = False
+        mock_game.winner = None
+        
+        # Mock the input data that would be received from the WebSocket
+        mock_text_data = {'white_player': None,
+                          'black_player': None,
+                          'white_player_ready': True,
+                          'black_player_ready': None,
+                          'move': None,
+                          'promotion': None}
+
+        # Patch the BoardSimplify class to control its behavior in the test
+        with (patch('table.pieces.Board') as MockBoard, patch('table.tasks.check_game_timeout.apply_async'),
+              patch('table.consumers.push_players_state_to_db') as push_players_state_to_db,
+              patch('table.consumers.if_game_started') as if_game_started,
+              patch('table.consumers.get_latest_board_from_database') as get_latest_board_from_database):
             
-    #         # Call the handle_user_action method
-    #         await consumer.handle_user_action(mock_game, consumer.scope["user"], mock_text_data_json)
+            # Setup consumers
+            consumer = await self.setup_consumer(False)
 
-    #         # Assert that the database method to update player state was called correctly
-    #         consumer.push_players_state_to_db.assert_called_once_with(
-    #             mock_game,
-    #             consumer.scope["user"],
-    #             mock_text_data_json,
-    #         )
-        
-    #         # Verify the message sent to the WebSocket room group
-    #         message = consumer.send_game_state_to_room_group.call_args[0][0]
-    #         assert message['white_player'] == 'test_user'
-    #         assert message['black_player'] == 'black_player'
-    #         assert message['white_player_ready'] == True
-    #         assert message['black_player_ready'] == True
-    #         assert message['winner'] == None
-    #         assert message['board'] is not None
-    #         assert message['turn'] == 'white'
-    #         assert message['checking'] == None
-    #         assert message['total_moves'] == 0
-    #         assert message['soft_moves'] == 0
-
-    # @pytest.mark.asyncio
-    # async def test_handle_user_action_when_player_missing(self):
-    #     """
-    #     Test handle_user_action to ensure it processes correctly and updates the game state.
-    #     """
-    #     # Mock game state with only one player ready and no winner
-    #     mock_game = MagicMock()
-    #     mock_game.white = MagicMock(username="test_user")
-    #     mock_game.black = None
-    #     mock_game.white_ready = True
-    #     mock_game.black_ready = False
-    #     mock_game.winner = None
-        
-    #     # Mock the input data that would be received from the WebSocket
-    #     mock_text_data = {'white_player': None,
-    #                       'black_player': None,
-    #                       'white_player_ready': True,
-    #                       'black_player_ready': None,
-    #                       'move': None,
-    #                       'promotion': None}
-    #     mock_text_data_json = json.dumps(mock_text_data)     
-
-    #     # Patch the BoardSimplify class to control its behavior in the test
-    #     with patch('table.pieces.boardSimplify') as MockBoardSimplify:
-    #         MockBoardSimplify.return_value = "correct_class"
-
-    #         # Setup consumers
-    #         consumer = await self.setup_consumer(False)
+            MockBoard.return_value.create_json_class.return_value = ("correct_class", None, None)
+            if_game_started.return_value = consumer.started
+            get_latest_board_from_database.return_value = consumer.mock_start_board
             
-    #         # Call the handle_user_action method
-    #         await consumer.handle_user_action(mock_game, consumer.scope["user"], mock_text_data_json)
+            # Call the handle_user_action method
+            await consumer.handle_user_action(mock_game, consumer.scope["user"], mock_text_data)
 
-    #         # Assert that the database method to update player state was called correctly
-    #         consumer.push_players_state_to_db.assert_called_once_with(
-    #             mock_game,
-    #             consumer.scope["user"],
-    #             mock_text_data_json,
-    #         )
+            # Assert that the database method to update player state was called correctly
+            push_players_state_to_db.assert_called_once_with(
+                mock_game,
+                consumer.scope["user"],
+                mock_text_data,
+            )
         
-    #         # Verify the message sent to WebSocket room group
-    #         message = consumer.send_game_state_to_room_group.call_args[0][0]
-    #         assert message['white_player'] == 'test_user'
-    #         assert message['black_player'] == 'Player 2'
-    #         assert message['white_player_ready'] == True
-    #         assert message['black_player_ready'] == False
-    #         assert message['winner'] == None
-    #         assert message['board'] is not None
-    #         assert message['turn'] == None
-    #         assert message['checking'] == None
-    #         assert message['total_moves'] == 0
-    #         assert message['soft_moves'] == 0
+            # Verify the message sent to WebSocket room group
+            message = consumer.send_game_state_to_room_group.call_args[0][0]
+            assert message['white_player'] == 'test_user'
+            assert message['black_player'] == 'Player 2'
+            assert message['white_player_ready'] == True
+            assert message['black_player_ready'] == False
+            assert message['winner'] == None
+            assert message['board'] is not None
+            assert message['turn'] == None
+            assert message['checking'] == None
+            assert message['total_moves'] == 0
+            assert message['soft_moves'] == 0
 
-# class TableConsumerTestCase5(TestCase):
+class TableConsumerTestCase5(TestCase):
 
-#     def test_construct_game_state_message(self):
-#         """
-#         Test construct_game_state_message to ensure it returns the correct dictionary.
-#         """
-#         # Create an instance of your consumer
-#         consumer = TableConsumer()
+    @pytest.mark.asyncio
+    async def test_send_new_game_state(self):
+        """
+        Test send_new_game_state to ensure it sends the correct game state message to WebSocket.
+        """
+        # Create an instance of your consumer
+        consumer = TableConsumer()
         
-#         # Call the handle_user_action method
-#         game_state_message = consumer.construct_game_state_message(
-#             'white_player', 'black_player', True,
-#             True, None, 'correct board',
-#             'white', None, 0, 0, 900, 900)
+        # Mock async methods
+        consumer.send_game_state_to_websocket = AsyncMock()
+        
+        # Prepare test data
+        event = {
+            'white_player': 'white_player',
+            'black_player': 'black_player',
+            'white_player_ready': True,
+            'black_player_ready': True,
+            'winner': None,
+            'board_id': 1,
+            'board': "correct board",
+            'turn': 'white',
+            'checking': None,
+            'total_moves': 0,
+            'soft_moves': 0,
+            'white_time_left': None,
+            'black_time_left': None,
+            'last_move': None,
+            'prev_boards_id_moves': [],
+            'play_audio': False,
+            'white_draw': False,
+            'black_draw': False,
+        }
+
+        expected_message = {
+            'white_player': event['white_player'],
+            'black_player': event['black_player'],
+            'white_player_ready': event['white_player_ready'],
+            'black_player_ready': event['black_player_ready'],
+            'winner': event['winner'],
+            'board_id': event['board_id'],
+            'board': event['board'],
+            'turn': event['turn'],
+            'checking': event['checking'],
+            'total_moves': event['total_moves'],
+            'soft_moves': event['soft_moves'],
+            'white_time_left': event["white_time_left"],
+            'black_time_left': event["black_time_left"],
+            'last_move': event["last_move"],
+            'prev_boards_id_moves': event["prev_boards_id_moves"],
+            'play_audio': event["play_audio"],
+            'white_draw': event["white_draw"],
+            'black_draw': event["black_draw"],
+        }
+        construct_game_state_message.return_value = expected_message
+        
+        # Execute the method under test
+        await consumer.send_new_game_state(event)
+
+        # Verify that the correct message is sent to the WebSocket
+        message = consumer.send_game_state_to_websocket.call_args[0][0]
+        assert message == expected_message
+
+class TableConsumerTestCase6(TestCase):
+
+    def test_construct_game_state_message(self):
+        """
+        Test construct_game_state_message to ensure it returns the correct dictionary.
+        """
+        white_player = 'white_player'
+        black_player = 'black_player'
+        white_ready = True
+        black_ready = True
+        winner = None
+        board_id = 1
+        board = 'correct board'
+        turn = 'white'
+        checking = None
+        total_moves = 0
+        soft_moves = 0
+        white_time_left = 900
+        black_time_left = 900
+        last_move = None
+        prev_boards_id_moves = []
+        play_audio = False
+        white_draw = True
+        black_draw = False
+
+        # Call the handle_user_action method
+        game_state_message = construct_game_state_message(
+            white_player, black_player, white_ready,
+            black_ready, winner, board_id, board, turn,
+            checking, total_moves, soft_moves,
+            white_time_left, black_time_left, last_move,
+            prev_boards_id_moves, play_audio, white_draw, black_draw)
     
-#         # Verify the message sent to WebSocket room group
-#         assert game_state_message['white_player'] == 'white_player'
-#         assert game_state_message['black_player'] == 'black_player'
-#         assert game_state_message['white_player_ready'] == True
-#         assert game_state_message['black_player_ready'] == True
-#         assert game_state_message['winner'] == None
-#         assert game_state_message['board'] is not None
-#         assert game_state_message['turn'] == 'white'
-#         assert game_state_message['checking'] == None
-#         assert game_state_message['total_moves'] == 0
-#         assert game_state_message['soft_moves'] == 0
-#         assert game_state_message['white_time_left'] == 900
-#         assert game_state_message['black_time_left'] == 900
-
-# class TableConsumerTestCase6(TestCase):
-
-#     @pytest.mark.asyncio
-#     async def test_send_new_game_state(self):
-#         """
-#         Test send_new_game_state to ensure it sends the correct game state message to WebSocket.
-#         """
-#         # Create an instance of your consumer
-#         consumer = TableConsumer()
-        
-#         # Prepare test data
-#         event = {
-#             'white_player': 'white_player',
-#             'black_player': 'black_player',
-#             'white_player_ready': True,
-#             'black_player_ready': True,
-#             'winner': None,
-#             'board': "correct board",
-#             'turn': 'white',
-#             'checking': None,
-#             'total_moves': 0,
-#             'soft_moves': 0,
-#             'white_time_left': None,
-#             'black_time_left': None,
-#             'created_at': None
-#         }
-
-#         # Mock async methods
-#         consumer.send_game_state_to_websocket = AsyncMock()
-#         expected_message = {
-#             'white_player': event['white_player'],
-#             'black_player': event['black_player'],
-#             'white_player_ready': event['white_player_ready'],
-#             'black_player_ready': event['black_player_ready'],
-#             'winner': event['winner'],
-#             'board': event['board'],
-#             'turn': event['turn'],
-#             'checking': event['checking'],
-#             'total_moves': event['total_moves'],
-#             'soft_moves': event['soft_moves'],
-#             'white_time_left': event["white_time_left"],
-#             'black_time_left': event["black_time_left"],
-#             'created_at': event["created_at"]
-#         }
-#         consumer.construct_game_state_message = AsyncMock(return_value=expected_message)
-        
-#         # Execute the method under test
-#         await consumer.send_new_game_state(event)
-
-#         # Verify that the correct message is sent to the WebSocket
-#         message = await consumer.send_game_state_to_websocket.call_args[0][0]
-#         assert message == expected_message
+        # Verify the message sent to WebSocket room group
+        assert game_state_message['white_player'] == white_player
+        assert game_state_message['black_player'] == black_player
+        assert game_state_message['white_player_ready'] == white_ready
+        assert game_state_message['black_player_ready'] == black_ready
+        assert game_state_message['winner'] == winner
+        assert game_state_message['board'] is not None
+        assert game_state_message['turn'] == turn
+        assert game_state_message['checking'] == checking
+        assert game_state_message['total_moves'] == total_moves
+        assert game_state_message['soft_moves'] == soft_moves
+        assert game_state_message['white_time_left'] == white_time_left
+        assert game_state_message['black_time_left'] == black_time_left
+        assert game_state_message['last_move'] == last_move
+        assert game_state_message['prev_boards_id_moves'] == prev_boards_id_moves
+        assert game_state_message['play_audio'] == play_audio
+        assert game_state_message['white_draw'] == white_draw
+        assert game_state_message['black_draw'] == black_draw
 
 # class TableConsumerTestCase7(TestCase):
 
