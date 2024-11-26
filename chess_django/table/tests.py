@@ -11,7 +11,9 @@ from asgiref.sync import sync_to_async
 import json
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
-from .consumers import TableConsumer, construct_game_state_message
+from .consumers import (TableConsumer, construct_game_state_message, get_game_from_database,
+                        get_latest_board_from_database, get_prev_boards_from_database, push_new_board_to_database,
+                        push_players_state_to_db, if_game_started, is_threefold_repetition)
 from django.contrib.auth.models import AnonymousUser
 
 from . import pieces
@@ -1316,136 +1318,137 @@ class TableConsumerTestCase6(TestCase):
         assert game_state_message['white_draw'] == white_draw
         assert game_state_message['black_draw'] == black_draw
 
-# class TableConsumerTestCase7(TestCase):
+class TableConsumerTestCase7(TestCase):
 
-#     async def setup_consumer(self):
-#         # Create two users for the game
-#         user1 = await sync_to_async(User.objects.create)(
-#             username="white_player"
-#         )
+    async def setup_consumer(self):
+        # Create two users for the game
+        user1 = await sync_to_async(User.objects.create)(
+            username="white_player"
+        )
 
-#         user2 = await sync_to_async(User.objects.create)(
-#             username="black_player"
-#         )
+        user2 = await sync_to_async(User.objects.create)(
+            username="black_player"
+        )
 
-#         # Set up a game in the test database
-#         game = await sync_to_async(Game.objects.create)(
-#             winner = None,
-#             started = True,
-#             white = user1,
-#             black = user2,
-#             white_ready = True,
-#             black_ready = True,
-#         )
+        # Set up a game in the test database
+        game = await sync_to_async(Game.objects.create)(
+            winner = None,
+            started = True,
+            white = user1,
+            black = user2,
+            white_ready = True,
+            black_ready = True,
+        )
 
-#         # Instantiate TableConsumer
-#         consumer = TableConsumer()
-#         consumer.table_id = 1
+        # Instantiate TableConsumer
+        consumer = TableConsumer()
+        consumer.table_id = 1
 
-#         # Add a boards to the game
-#         await sync_to_async(Board.objects.create)(
-#             game=game,
-#             total_moves=0,
-#             board=json.dumps([
-#                 ["R", "N", "B", "K", "Q", "B", "N", "R"],
-#                 ["P", "P", "P", "P", "P", "P", "P", "P"],
-#                 [None, None, None, None, None, None, None, None],
-#                 [None, None, None, None, None, None, None, None],
-#                 [None, None, None, None, None, None, None, None],
-#                 [None, None, None, None, None, None, None, None],
-#                 ["p", "p", "p", "p", "p", "p", "p", "p"],
-#                 ["r", "n", "b", "k", "q", "b", "n", "r"]
-#             ]),
-#             turn="w",
-#             castling="KQkq",
-#             enpassant="__",
-#             soft_moves=0
-#         )
+        # Add a boards to the game
+        await sync_to_async(Board.objects.create)(
+            game=game,
+            total_moves=0,
+            board=json.dumps([
+                ["R", "N", "B", "K", "Q", "B", "N", "R"],
+                ["P", "P", "P", "P", "P", "P", "P", "P"],
+                [None, None, None, None, None, None, None, None],
+                [None, None, None, None, None, None, None, None],
+                [None, None, None, None, None, None, None, None],
+                [None, None, None, None, None, None, None, None],
+                ["p", "p", "p", "p", "p", "p", "p", "p"],
+                ["r", "n", "b", "k", "q", "b", "n", "r"]
+            ]),
+            turn="w",
+            castling="KQkq",
+            enpassant="__",
+            soft_moves=0
+        )
 
-#         await sync_to_async(Board.objects.create)(
-#             game=game,
-#             total_moves=0,
-#             board=json.dumps([
-#                 ["R", "N", "B", "K", "Q", "B", "N", "R"],
-#                 [None, "P", "P", "P", "P", "P", "P", "P"],
-#                 ["P", None, None, None, None, None, None, None],
-#                 [None, None, None, None, None, None, None, None],
-#                 [None, None, None, None, None, None, None, None],
-#                 [None, None, None, None, None, None, None, None],
-#                 ["p", "p", "p", "p", "p", "p", "p", "p"],
-#                 ["r", "n", "b", "k", "q", "b", "n", "r"]
-#             ]),
-#             turn="b",
-#             castling="KQkq",
-#             enpassant="__",
-#             soft_moves=1
-#         )
+        await sync_to_async(Board.objects.create)(
+            game=game,
+            total_moves=0,
+            board=json.dumps([
+                ["R", "N", "B", "K", "Q", "B", "N", "R"],
+                [None, "P", "P", "P", "P", "P", "P", "P"],
+                ["P", None, None, None, None, None, None, None],
+                [None, None, None, None, None, None, None, None],
+                [None, None, None, None, None, None, None, None],
+                [None, None, None, None, None, None, None, None],
+                ["p", "p", "p", "p", "p", "p", "p", "p"],
+                ["r", "n", "b", "k", "q", "b", "n", "r"]
+            ]),
+            turn="b",
+            castling="KQkq",
+            enpassant="__",
+            soft_moves=1
+        )
 
-#         return consumer, game
+        return consumer, game
 
-    # @pytest.mark.asyncio
-    # async def test_get_game_from_database(self):
-    #     """
-    #     Test get_game_from_database to ensure it retrieves the correct game state from the database.
-    #     """
-    #     consumer, game = await self.setup_consumer()
+    @pytest.mark.asyncio
+    async def test_get_game_from_database(self):
+        """
+        Test get_game_from_database to ensure it retrieves the correct game state from the database.
+        """
+        consumer, game = await self.setup_consumer()
 
-    #     # Call the method and test it
-    #     result = await consumer.get_game_from_database()
+        # Call the method and test it
+        result = await get_game_from_database(consumer.table_id)
 
-    #     # Assertions
-    #     assert result.pk == game.pk
-    #     assert result.winner == None
-    #     assert result.started == True
-    #     assert result.white.username == "white_player"
-    #     assert result.white_ready == True
-    #     assert result.black_ready == True
+        # Assertions
+        assert result.pk == game.pk
+        assert result.winner == None
+        assert result.started == True
+        assert result.white.username == "white_player"
+        assert result.black.username == "black_player"
+        assert result.white_ready == True
+        assert result.black_ready == True
 
-    # @pytest.mark.asyncio
-    # async def test_get_latest_board_from_database(self):
-    #     """
-    #     Test get_latest_board_from_database to ensure it retrieves the correct board state from the database.
-    #     """
-    #     consumer, game = await self.setup_consumer()
+    @pytest.mark.asyncio
+    async def test_get_latest_board_from_database(self):
+        """
+        Test get_latest_board_from_database to ensure it retrieves the correct board state from the database.
+        """
+        consumer, game = await self.setup_consumer()
 
-    #     # Call the method and test it
-    #     result = await consumer.get_latest_board_from_database(game)
+        # Call the method and test it
+        result = await get_latest_board_from_database(game)
 
-    #     # Assertions
-    #     assert result.pk == 2
-    #     assert result.total_moves == 0
-    #     assert result.board is not None
-    #     assert result.turn == "black"
-    #     assert result.castling == "KQkq"
-    #     assert result.enpassant == "__"
-    #     assert result.soft_moves == 1
+        # Assertions
+        assert result.pk == 2
+        assert result.total_moves == 0
+        assert result.board is not None
+        assert result.turn == "black"
+        assert result.castling == "KQkq"
+        assert result.enpassant == "__"
+        assert result.soft_moves == 1
 
-    # @pytest.mark.asyncio
-    # async def test_get_prev_boards_from_database(self):
-    #     """
-    #     Test get_prev_boards_from_databasee to ensure it retrieves the correct boards state from the database.
-    #     """
-    #     consumer, game = await self.setup_consumer()
+    @pytest.mark.asyncio
+    async def test_get_prev_boards_from_database(self):
+        """
+        Test get_prev_boards_from_databasee to ensure it retrieves the correct boards state from the database.
+        """
+        consumer, game = await self.setup_consumer()
 
-    #     # Call the method and test it
-    #     result = await consumer.get_prev_boards_from_database(game)
+        # Call the method and test it
+        result = await get_prev_boards_from_database(game)
 
-    #     # Assertions
-    #     assert isinstance(result, list)
-    #     assert result[0].pk == 1
-    #     assert result[1].pk == 2
-    #     assert result[0].total_moves == 0
-    #     assert result[1].total_moves == 0
-    #     assert result[0].board is not None
-    #     assert result[1].board is not None
-    #     assert result[0].turn == "w"
-    #     assert result[1].turn == "b"
-    #     assert result[0].castling == "KQkq"
-    #     assert result[1].castling == "KQkq"
-    #     assert result[0].enpassant == "__"
-    #     assert result[1].enpassant == "__"
-    #     assert result[0].soft_moves == 0
-    #     assert result[1].soft_moves == 1
+        # Assertions
+        assert isinstance(result, list)
+        assert result[0].pk == 1
+        assert result[1].pk == 2
+        assert result[0].total_moves == 0
+        assert result[1].total_moves == 0
+        assert result[0].board is not None
+        assert result[1].board is not None
+        assert result[0].turn == "w"
+        assert result[1].turn == "b"
+        assert result[0].castling == "KQkq"
+        assert result[1].castling == "KQkq"
+        assert result[0].enpassant == "__"
+        assert result[1].enpassant == "__"
+        assert result[0].soft_moves == 0
+        assert result[1].soft_moves == 1
 
 class TableConsumerTestCase8(TestCase):
 
@@ -1475,97 +1478,107 @@ class TableConsumerTestCase8(TestCase):
 
         return consumer, game
     
-    # @pytest.mark.asyncio
-    # async def test_push_new_board_to_database_with_no_winner(self):
-    #     """
-    #     Test the push_new_board_to_database method of TableConsumer.
-    #     """
-    #     consumer, game = await self.setup_consumer()
+    @pytest.mark.asyncio
+    async def test_push_new_board_to_database_with_no_winner(self):
+        """
+        Test the push_new_board_to_database method of TableConsumer.
+        """
+        consumer, game = await self.setup_consumer()
 
-    #     updated_board = json.dumps([
-    #         ["R", "N", "B", "K", "Q", "B", "N", "R"],
-    #         ["P", "P", "P", "P", "P", "P", "P", "P"],
-    #         [None, None, None, None, None, None, None, None],
-    #         [None, None, None, None, None, None, None, None],
-    #         [None, None, None, None, None, None, None, None],
-    #         [None, None, None, None, None, None, None, None],
-    #         ["p", "p", "p", "p", "p", "p", "p", "p"],
-    #         ["r", "n", "b", "k", "q", "b", "n", "r"]
-    #     ])
-    #     turn = "b"
-    #     castling = "KQkq"
-    #     enpassant = "__"
-    #     winner = None
-    #     total_moves = 0
-    #     soft_moves = 0
-    #     white_time_left = timedelta(minutes=15)
-    #     black_time_left = timedelta(minutes=15)
+        updated_board = json.dumps([
+            ["R", "N", "B", "K", "Q", "B", "N", "R"],
+            ["P", "P", "P", "P", "P", "P", "P", "P"],
+            [None, None, None, None, None, None, None, None],
+            [None, None, None, None, None, None, None, None],
+            [None, None, None, None, None, None, None, None],
+            [None, None, None, None, None, None, None, None],
+            ["p", "p", "p", "p", "p", "p", "p", "p"],
+            ["r", "n", "b", "k", "q", "b", "n", "r"]
+        ])
+        turn = "b"
+        castling = "KQkq"
+        enpassant = "__"
+        winner = None
+        total_moves = 0
+        soft_moves = 0
+        white_time_left = timedelta(minutes=15)
+        black_time_left = timedelta(minutes=15)
+        last_move = "1212"
+        moved_piece = "pawn"
+        checking = []
 
-    #     # Call the method and test it
-    #     await consumer.push_new_board_to_database(
-    #         updated_board, turn, castling, enpassant, winner, total_moves, soft_moves, white_time_left, black_time_left
-    #     )
+        # Call the method and test it
+        await push_new_board_to_database(
+            consumer.table_id, updated_board, turn, castling, enpassant, winner, total_moves, soft_moves, white_time_left, black_time_left, last_move, moved_piece, checking
+        )
 
-    #     current_board = await sync_to_async(Board.objects.filter(game=game).latest)('id')
+        current_board = await sync_to_async(Board.objects.filter(game=game).latest)('id')
 
-    #     # Assertions
-    #     assert json.loads(current_board.board) == updated_board
-    #     assert current_board.turn == turn
-    #     assert current_board.castling == castling
-    #     assert current_board.enpassant == enpassant
-    #     assert current_board.total_moves == total_moves
-    #     assert current_board.soft_moves == soft_moves
-    #     assert current_board.white_time_left == white_time_left
-    #     assert current_board.black_time_left == black_time_left
+        # Assertions
+        assert json.loads(current_board.board) == updated_board
+        assert current_board.turn == turn
+        assert current_board.castling == castling
+        assert current_board.enpassant == enpassant
+        assert current_board.total_moves == total_moves
+        assert current_board.soft_moves == soft_moves
+        assert current_board.white_time_left == white_time_left
+        assert current_board.black_time_left == black_time_left
+        assert current_board.last_move == last_move
+        assert current_board.checking == checking
 
-    #     game = await sync_to_async(Game.objects.get)(pk=game.id)
-    #     assert game.winner == None
+        game = await sync_to_async(Game.objects.get)(pk=game.id)
+        assert game.winner == None
 
-    # @pytest.mark.asyncio
-    # async def test_push_new_board_to_database_with_winner(self):
-    #     """
-    #     Test the push_new_board_to_database method of TableConsumer.
-    #     """
-    #     consumer, game = await self.setup_consumer()
+    @pytest.mark.asyncio
+    async def test_push_new_board_to_database_with_winner(self):
+        """
+        Test the push_new_board_to_database method of TableConsumer.
+        """
+        consumer, game = await self.setup_consumer()
 
-    #     updated_board = json.dumps([
-    #         ["R", "N", "B", "K", "Q", "B", "N", "R"],
-    #         ["P", "P", "P", "P", "P", "P", "P", "P"],
-    #         [None, None, None, None, None, None, None, None],
-    #         [None, None, None, None, None, None, None, None],
-    #         [None, None, None, None, None, None, None, None],
-    #         [None, None, None, None, None, None, None, None],
-    #         ["p", "p", "p", "p", "p", "p", "p", "p"],
-    #         ["r", "n", "b", "k", "q", "b", "n", "r"]
-    #     ])
-    #     turn = "b"
-    #     castling = "KQkq"
-    #     enpassant = "__"
-    #     winner = "draw"
-    #     total_moves = 0
-    #     soft_moves = 0
-    #     white_time_left = timedelta(minutes=15)
-    #     black_time_left = timedelta(minutes=15)
+        updated_board = json.dumps([
+            ["R", "N", "B", "K", "Q", "B", "N", "R"],
+            ["P", "P", "P", "P", "P", "P", "P", "P"],
+            [None, None, None, None, None, None, None, None],
+            [None, None, None, None, None, None, None, None],
+            [None, None, None, None, None, None, None, None],
+            [None, None, None, None, None, None, None, None],
+            ["p", "p", "p", "p", "p", "p", "p", "p"],
+            ["r", "n", "b", "k", "q", "b", "n", "r"]
+        ])
+        turn = "b"
+        castling = "KQkq"
+        enpassant = "__"
+        winner = "draw"
+        total_moves = 0
+        soft_moves = 0
+        white_time_left = timedelta(minutes=15)
+        black_time_left = timedelta(minutes=15)
+        last_move = "1212"
+        moved_piece = "pawn"
+        checking = []
 
-    #     # Call the method and test it
-    #     await consumer.push_new_board_to_database(
-    #         updated_board, turn, castling, enpassant, winner, total_moves, soft_moves, white_time_left, black_time_left
-    #     )
+        # Call the method and test it
+        await push_new_board_to_database(
+            consumer.table_id, updated_board, turn, castling, enpassant, winner, total_moves, soft_moves, white_time_left, black_time_left, last_move, moved_piece, checking
+        )
 
-    #     current_board = await sync_to_async(Board.objects.filter(game=game).latest)('id')
+        current_board = await sync_to_async(Board.objects.filter(game=game).latest)('id')
 
-    #     # Assertions
-    #     assert json.loads(current_board.board) == updated_board
-    #     assert current_board.turn == turn
-    #     assert current_board.castling == castling
-    #     assert current_board.enpassant == enpassant
-    #     assert current_board.total_moves == total_moves
-    #     assert current_board.soft_moves == soft_moves
-    #     assert current_board.white_time_left == white_time_left
-    #     assert current_board.black_time_left == black_time_left
+        # Assertions
+        assert json.loads(current_board.board) == updated_board
+        assert current_board.turn == turn
+        assert current_board.castling == castling
+        assert current_board.enpassant == enpassant
+        assert current_board.total_moves == total_moves
+        assert current_board.soft_moves == soft_moves
+        assert current_board.white_time_left == white_time_left
+        assert current_board.black_time_left == black_time_left
+        assert current_board.last_move == last_move
+        assert current_board.checking == checking
 
-    #     game = await sync_to_async(Game.objects.get)(pk=game.pk)
-    #     assert game.winner == "d"
+        game = await sync_to_async(Game.objects.get)(pk=game.pk)
+        assert game.winner == "d"
 
 class TableConsumerTestCase9(TestCase):
 
@@ -1581,198 +1594,194 @@ class TableConsumerTestCase9(TestCase):
             black_ready = black_ready,
         )
 
-        # Instantiate TableConsumer
-        consumer = TableConsumer()
-        consumer.table_id = 1
-
-        return consumer, game
+        return game
     
-    # @pytest.mark.asyncio
-    # async def test_push_players_state_to_db_add_player(self):
-    #     """
-    #     Test adding a player to the game.
-    #     """
-    #     # Create users for the game
-    #     user1 = await sync_to_async(User.objects.create)(username="white_player")
+    @pytest.mark.asyncio
+    async def test_push_players_state_to_db_add_player(self):
+        """
+        Test adding a player to the game.
+        """
+        # Create users for the game
+        user1 = await sync_to_async(User.objects.create)(username="white_player")
 
-    #     consumer, game = await self.setup_consumer(None, None, False, False)
+        game = await self.setup_consumer(None, None, False, False)
 
-    #     # Mock the input data that would be received from the WebSocket
-    #     mock_text_data = {
-    #         'white_player': True,
-    #         'black_player': None,
-    #         'white_player_ready': None,
-    #         'black_player_ready': None,
-    #         'move': None,
-    #         'promotion': None
-    #     }
+        # Mock the input data that would be received from the WebSocket
+        mock_text_data = {
+            'white_player': True,
+            'black_player': None,
+            'white_player_ready': None,
+            'black_player_ready': None,
+            'move': None,
+            'promotion': None
+        }
 
-    #     # Call the method and test it
-    #     await consumer.push_players_state_to_db(game, user1, mock_text_data)
+        # Call the method and test it
+        await push_players_state_to_db(game, user1, mock_text_data)
+        game = await sync_to_async(Game.objects.get)(pk=game.pk)
 
-    #     # Assertions
-    #     game = await sync_to_async(Game.objects.get)(pk=game.pk)
-    #     assert await sync_to_async(lambda: game.white)() == user1
-    #     assert game.black == None
-    #     assert game.white_ready == False
-    #     assert game.black_ready == False
+        # Assertions
+        assert await sync_to_async(lambda: game.white)() == user1
+        assert game.black == None
+        assert game.white_ready == False
+        assert game.black_ready == False
 
-    #     # Check if the function creates a board
-    #     try:
-    #         current_board = await sync_to_async(Board.objects.filter(game=game).latest)('id')
-    #         assert current_board is None
-    #     except Board.DoesNotExist:
-    #         assert True
+        # Check if the function creates a board
+        try:
+            current_board = await sync_to_async(Board.objects.filter(game=game).latest)('id')
+            assert current_board is None
+        except Board.DoesNotExist:
+            assert True
 
-    # @pytest.mark.asyncio
-    # async def test_push_players_state_to_db_remove_player(self):
-    #     """
-    #     Test removing a player from the game.
-    #     """
-    #     # Create users for the game
-    #     user1 = await sync_to_async(User.objects.create)(username="white_player")
+    @pytest.mark.asyncio
+    async def test_push_players_state_to_db_remove_player(self):
+        """
+        Test removing a player from the game.
+        """
+        # Create users for the game
+        user1 = await sync_to_async(User.objects.create)(username="white_player")
 
-    #     consumer, game = await self.setup_consumer(user1, None, False, False)
+        game = await self.setup_consumer(user1, None, False, False)
 
-    #     # Mock the input data that would be received from the WebSocket
-    #     mock_text_data = {
-    #         'white_player': False,
-    #         'black_player': None,
-    #         'white_player_ready': None,
-    #         'black_player_ready': None,
-    #         'move': None,
-    #         'promotion': None
-    #     }
+        # Mock the input data that would be received from the WebSocket
+        mock_text_data = {
+            'white_player': False,
+            'black_player': None,
+            'white_player_ready': None,
+            'black_player_ready': None,
+            'move': None,
+            'promotion': None
+        }
 
-    #     # Call the method and test it
-    #     await consumer.push_players_state_to_db(game, user1, mock_text_data)
+        # Call the method and test it
+        await push_players_state_to_db(game, user1, mock_text_data)
+        game = await sync_to_async(Game.objects.get)(pk=game.pk)
 
-    #     # Assertions
-    #     game = await sync_to_async(Game.objects.get)(pk=game.pk)
-    #     assert game.white == None
-    #     assert game.black == None
-    #     assert game.white_ready == False
-    #     assert game.black_ready == False
+        # Assertions
+        assert game.white == None
+        assert game.black == None
+        assert game.white_ready == False
+        assert game.black_ready == False
 
-    #     # Check if the function creates a board
-    #     try:
-    #         current_board = await sync_to_async(Board.objects.filter(game=game).latest)('id')
-    #         assert current_board is None
-    #     except Board.DoesNotExist:
-    #         assert True
+        # Check if the function creates a board
+        try:
+            current_board = await sync_to_async(Board.objects.filter(game=game).latest)('id')
+            assert current_board is None
+        except Board.DoesNotExist:
+            assert True
 
-    # @pytest.mark.asyncio
-    # async def test_push_players_state_to_db_player_ready(self):
-    #     """
-    #     Test setting a player as ready.
-    #     """
-    #     # Create users for the game
-    #     user1 = await sync_to_async(User.objects.create)(username="white_player")
+    @pytest.mark.asyncio
+    async def test_push_players_state_to_db_player_ready(self):
+        """
+        Test setting a player as ready.
+        """
+        # Create users for the game
+        user1 = await sync_to_async(User.objects.create)(username="white_player")
 
-    #     consumer, game = await self.setup_consumer(user1, None, False, False)
+        game = await self.setup_consumer(user1, None, False, False)
 
-    #     # Mock the input data that would be received from the WebSocket
-    #     mock_text_data = {
-    #         'white_player': None,
-    #         'black_player': None,
-    #         'white_player_ready': True,
-    #         'black_player_ready': None,
-    #         'move': None,
-    #         'promotion': None
-    #     }
+        # Mock the input data that would be received from the WebSocket
+        mock_text_data = {
+            'white_player': None,
+            'black_player': None,
+            'white_player_ready': True,
+            'black_player_ready': None,
+            'move': None,
+            'promotion': None
+        }
 
-    #     # Call the method and test it
-    #     await consumer.push_players_state_to_db(game, user1, mock_text_data)
+        # Call the method and test it
+        await push_players_state_to_db(game, user1, mock_text_data)
+        game = await sync_to_async(Game.objects.get)(pk=game.pk)
 
-    #     # Assertions
-    #     game = await sync_to_async(Game.objects.get)(pk=game.pk)
-    #     assert await sync_to_async(lambda: game.white)() == user1
-    #     assert game.black == None
-    #     assert game.white_ready == True
-    #     assert game.black_ready == False
+        # Assertions
+        assert await sync_to_async(lambda: game.white)() == user1
+        assert game.black == None
+        assert game.white_ready == True
+        assert game.black_ready == False
 
-    #     # Check if the function creates a board
-    #     try:
-    #         current_board = await sync_to_async(Board.objects.filter(game=game).latest)('id')
-    #         assert current_board is None
-    #     except Board.DoesNotExist:
-    #         assert True
+        # Check if the function creates a board
+        try:
+            current_board = await sync_to_async(Board.objects.filter(game=game).latest)('id')
+            assert current_board is None
+        except Board.DoesNotExist:
+            assert True
 
-    # @pytest.mark.asyncio
-    # async def test_push_players_state_to_db_player_unready(self):
-    #     """
-    #     Test setting a player as not ready.
-    #     """
-    #     # Create users for the game
-    #     user1 = await sync_to_async(User.objects.create)(username="white_player")
+    @pytest.mark.asyncio
+    async def test_push_players_state_to_db_player_unready(self):
+        """
+        Test setting a player as not ready.
+        """
+        # Create users for the game
+        user1 = await sync_to_async(User.objects.create)(username="white_player")
 
-    #     consumer, game = await self.setup_consumer(user1, None, True, False)
+        game = await self.setup_consumer(user1, None, True, False)
 
-    #     # Mock the input data that would be received from the WebSocket
-    #     mock_text_data = {
-    #         'white_player': None,
-    #         'black_player': None,
-    #         'white_player_ready': False,
-    #         'black_player_ready': None,
-    #         'move': None,
-    #         'promotion': None
-    #     }
+        # Mock the input data that would be received from the WebSocket
+        mock_text_data = {
+            'white_player': None,
+            'black_player': None,
+            'white_player_ready': False,
+            'black_player_ready': None,
+            'move': None,
+            'promotion': None
+        }
 
-    #     # Call the method and test it
-    #     await consumer.push_players_state_to_db(game, user1, mock_text_data)
+        # Call the method and test it
+        await push_players_state_to_db(game, user1, mock_text_data)
 
-    #     # Assertions
-    #     game = await sync_to_async(Game.objects.get)(pk=game.pk)
-    #     assert await sync_to_async(lambda: game.white)() == user1
-    #     assert game.black == None
-    #     assert game.white_ready == False
-    #     assert game.black_ready == False
+        # Assertions
+        game = await sync_to_async(Game.objects.get)(pk=game.pk)
+        assert await sync_to_async(lambda: game.white)() == user1
+        assert game.black == None
+        assert game.white_ready == False
+        assert game.black_ready == False
 
-    #     # Check if the function creates a board
-    #     try:
-    #         current_board = await sync_to_async(Board.objects.filter(game=game).latest)('id')
-    #         assert current_board is None
-    #     except Board.DoesNotExist:
-    #         assert True
+        # Check if the function creates a board
+        try:
+            current_board = await sync_to_async(Board.objects.filter(game=game).latest)('id')
+            assert current_board is None
+        except Board.DoesNotExist:
+            assert True
 
-    # @pytest.mark.asyncio
-    # async def test_push_players_state_to_db_both_player_ready(self):
-    #     """
-    #     Test setting both players as ready and check if the board is created.
-    #     """
-    #     # Create users for the game
-    #     user1 = await sync_to_async(User.objects.create)(username="white_player")
+    @pytest.mark.asyncio
+    async def test_push_players_state_to_db_both_player_ready(self):
+        """
+        Test setting both players as ready and check if the board is created.
+        """
+        # Create users for the game
+        user1 = await sync_to_async(User.objects.create)(username="white_player")
 
-    #     user2 = await sync_to_async(User.objects.create)(username="black_player")
+        user2 = await sync_to_async(User.objects.create)(username="black_player")
 
-    #     consumer, game = await self.setup_consumer(user1, user2, True, False)
+        game = await self.setup_consumer(user1, user2, True, False)
 
-    #     # Mock the input data that would be received from the WebSocket
-    #     mock_text_data = {
-    #         'white_player': None,
-    #         'black_player': None,
-    #         'white_player_ready': None,
-    #         'black_player_ready': True,
-    #         'move': None,
-    #         'promotion': None
-    #     }
+        # Mock the input data that would be received from the WebSocket
+        mock_text_data = {
+            'white_player': None,
+            'black_player': None,
+            'white_player_ready': None,
+            'black_player_ready': True,
+            'move': None,
+            'promotion': None
+        }
 
-    #     # Call the method and test it
-    #     await consumer.push_players_state_to_db(game, user2, mock_text_data)
+        # Call the method and test it
+        await push_players_state_to_db(game, user2, mock_text_data)
 
-    #     # Assertions
-    #     game = await sync_to_async(Game.objects.get)(pk=game.pk)
-    #     assert await sync_to_async(lambda: game.white)() == user1
-    #     assert await sync_to_async(lambda: game.black)() == user2
-    #     assert game.white_ready == True
-    #     assert game.black_ready == True
+        # Assertions
+        game = await sync_to_async(Game.objects.get)(pk=game.pk)
+        assert await sync_to_async(lambda: game.white)() == user1
+        assert await sync_to_async(lambda: game.black)() == user2
+        assert game.white_ready == True
+        assert game.black_ready == True
 
-    #     # Check if the function creates a board
-    #     try:
-    #         current_board = await sync_to_async(Board.objects.filter(game=game).latest)('id')
-    #         assert current_board is not None
-    #     except Board.DoesNotExist:
-    #         assert False
+        # Check if the function creates a board
+        try:
+            current_board = await sync_to_async(Board.objects.filter(game=game).latest)('id')
+            assert current_board is not None
+        except Board.DoesNotExist:
+            assert False
 
 class TableConsumerTestCase10(TestCase):
 
@@ -1788,45 +1797,41 @@ class TableConsumerTestCase10(TestCase):
             black_ready = black_ready,
         )
 
-        # Instantiate TableConsumer
-        consumer = TableConsumer()
-        consumer.table_id = game.id
-
-        return consumer, game
+        return game
     
-    # @pytest.mark.asyncio
-    # async def test_if_game_started_true(self):
-    #     """
-    #     Test if the if_game_started method returns True when both players are ready.
-    #     """
-    #     # Create users for the game
-    #     user1 = await sync_to_async(User.objects.create)(username="white_player")
-    #     user2 = await sync_to_async(User.objects.create)(username="black_player")
+    @pytest.mark.asyncio
+    async def test_if_game_started_true(self):
+        """
+        Test if the if_game_started method returns True when both players are ready.
+        """
+        # Create users for the game
+        user1 = await sync_to_async(User.objects.create)(username="white_player")
+        user2 = await sync_to_async(User.objects.create)(username="black_player")
 
-    #     consumer, game = await self.setup_consumer(user1, user2, True, True)
+        game = await self.setup_consumer(user1, user2, True, True)
 
-    #     # Call the method and test it
-    #     result = consumer.if_game_started(game)
+        # Call the method and test it
+        result = if_game_started(game)
 
-    #     # Assertions
-    #     assert result == True
+        # Assertions
+        assert result == True
 
-    # @pytest.mark.asyncio
-    # async def test_if_game_started_false(self):
-    #     """
-    #     Test if the if_game_started method returns False when one or both players are not ready.
-    #     """
-    #     # Create users for the game
-    #     user1 = await sync_to_async(User.objects.create)(username="white_player")
-    #     user2 = await sync_to_async(User.objects.create)(username="black_player")
+    @pytest.mark.asyncio
+    async def test_if_game_started_false(self):
+        """
+        Test if the if_game_started method returns False when one or both players are not ready.
+        """
+        # Create users for the game
+        user1 = await sync_to_async(User.objects.create)(username="white_player")
+        user2 = await sync_to_async(User.objects.create)(username="black_player")
 
-    #     consumer, game = await self.setup_consumer(user1, user2, True, False)
+        game = await self.setup_consumer(user1, user2, True, False)
 
-    #     # Call the method and test it
-    #     result = consumer.if_game_started(game)
+        # Call the method and test it
+        result = if_game_started(game)
 
-    #     # Assertions
-    #     assert result == False
+        # Assertions
+        assert result == False
 
 class TableConsumerTestCase11(TestCase):
 
@@ -1849,10 +1854,6 @@ class TableConsumerTestCase11(TestCase):
             white_ready = True,
             black_ready = True,
         )
-
-        # Instantiate TableConsumer
-        consumer = TableConsumer()
-        consumer.table_id = 1
 
         # Add a boards to the game
         await sync_to_async(Board.objects.create)(
@@ -2007,62 +2008,62 @@ class TableConsumerTestCase11(TestCase):
             soft_moves=7
         )
 
-        return consumer, game
+        return game
     
-    # @pytest.mark.asyncio
-    # async def test_is_threefold_repetition_True(self):
-    #     """
-    #     Test if the is_threefold_repetition method correctly identifies a threefold repetition.
-    #     """
-    #     consumer, game = await self.setup_consumer()
+    @pytest.mark.asyncio
+    async def test_is_threefold_repetition_True(self):
+        """
+        Test if the is_threefold_repetition method correctly identifies a threefold repetition.
+        """
+        game = await self.setup_consumer()
 
-    #     prev_boards = await sync_to_async(lambda: list(Board.objects.filter(game=game)))()
+        prev_boards = await sync_to_async(lambda: list(Board.objects.filter(game=game)))()
 
-    #     next_board = [
-    #         ["R", "N", "B", "K", "Q", "B", "N", "R"],
-    #         ["P", "P", "P", "P", "P", "P", "P", "P"],
-    #         [None, None, None, None, None, None, None, None],
-    #         [None, None, None, None, None, None, None, None],
-    #         [None, None, None, None, None, None, None, None],
-    #         [None, None, None, None, None, None, None, None],
-    #         ["p", "p", "p", "p", "p", "p", "p", "p"],
-    #         ["r", "n", "b", "k", "q", "b", "n", "r"]
-    #     ]
-    #     next_castling = "KQkq"
-    #     next_enpassant = "__"
-    #     next_turn = "white"
+        next_board = [
+            ["R", "N", "B", "K", "Q", "B", "N", "R"],
+            ["P", "P", "P", "P", "P", "P", "P", "P"],
+            [None, None, None, None, None, None, None, None],
+            [None, None, None, None, None, None, None, None],
+            [None, None, None, None, None, None, None, None],
+            [None, None, None, None, None, None, None, None],
+            ["p", "p", "p", "p", "p", "p", "p", "p"],
+            ["r", "n", "b", "k", "q", "b", "n", "r"]
+        ]
+        next_castling = "KQkq"
+        next_enpassant = "__"
+        next_turn = "white"
 
-    #     # Call the method and test it
-    #     result = consumer.is_threefold_repetition(prev_boards, next_board, next_castling, next_enpassant, next_turn)
+        # Call the method and test it
+        result = is_threefold_repetition(prev_boards, next_board, next_castling, next_enpassant, next_turn)
 
-    #     # Assertions
-    #     assert result == True
+        # Assertions
+        assert result == True
 
-    # @pytest.mark.asyncio
-    # async def test_is_threefold_repetition_False(self):
-    #     """
-    #     Test if the is_threefold_repetition method correctly identifies when there is no threefold repetition.
-    #     """
-    #     consumer, game = await self.setup_consumer()
+    @pytest.mark.asyncio
+    async def test_is_threefold_repetition_False(self):
+        """
+        Test if the is_threefold_repetition method correctly identifies when there is no threefold repetition.
+        """
+        game = await self.setup_consumer()
 
-    #     prev_boards = await sync_to_async(lambda: list(Board.objects.filter(game=game)))()
+        prev_boards = await sync_to_async(lambda: list(Board.objects.filter(game=game)))()
 
-    #     next_board = [
-    #         ["R", "N", "B", "K", "Q", "B", "N", "R"],
-    #         ["P", "P", "P", "P", "P", "P", "P", "P"],
-    #         [None, None, None, None, None, None, None, None],
-    #         [None, None, None, None, None, None, None, None],
-    #         [None, None, None, None, None, None, None, None],
-    #         [None, None, "n", None, None, "n", None, None],
-    #         ["p", "p", "p", "p", "p", "p", "p", "p"],
-    #         ["r", None, "b", "k", "q", "b", None, "r"]
-    #     ]
-    #     next_castling = "KQkq"
-    #     next_enpassant = "__"
-    #     next_turn = "white"
+        next_board = [
+            ["R", "N", "B", "K", "Q", "B", "N", "R"],
+            ["P", "P", "P", "P", "P", "P", "P", "P"],
+            [None, None, None, None, None, None, None, None],
+            [None, None, None, None, None, None, None, None],
+            [None, None, None, None, None, None, None, None],
+            [None, None, "n", None, None, "n", None, None],
+            ["p", "p", "p", "p", "p", "p", "p", "p"],
+            ["r", None, "b", "k", "q", "b", None, "r"]
+        ]
+        next_castling = "KQkq"
+        next_enpassant = "__"
+        next_turn = "white"
 
-    #     # Call the method and test it
-    #     result = consumer.is_threefold_repetition(prev_boards, next_board, next_castling, next_enpassant, next_turn)
+        # Call the method and test it
+        result = is_threefold_repetition(prev_boards, next_board, next_castling, next_enpassant, next_turn)
 
-    #     # Assertions
-    #     assert result == False
+        # Assertions
+        assert result == False
