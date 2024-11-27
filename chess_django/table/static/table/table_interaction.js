@@ -280,6 +280,7 @@ function setButtonState(tableSocket, state, config) {
         unreadyButton.classList.add("hidden");
         
         sitButton.addEventListener("click", function() {
+            currentGameButton(true);  // Remove inactive class from current game button
             updateState(tableSocket, player, true, null, null, null, null, null, null);  // Sit down player
         });
     } else if (
@@ -293,6 +294,7 @@ function setButtonState(tableSocket, state, config) {
         unreadyButton.classList.add("hidden");
         
         standButton.addEventListener("click", function() {
+            currentGameButton(false);  // Add inactive class to current game button
             updateState(tableSocket, player, false, null, null, null, null, null, null);  // Stand up player
         });
         
@@ -350,6 +352,20 @@ function updateState(tableSocket, player, playerState, readyState, move, promoti
         draw: draw
     };
     tableSocket.send(JSON.stringify(update));
+}
+
+// Function to toggles the "inactive" class on the "current-game-button" element
+function currentGameButton(active) {
+    // Get the DOM element of the current-game-button
+    const gameButton = document.getElementById("current-game-button");
+
+    if (active) {
+        // Remove the "inactive" class to indicate an active state
+        gameButton.classList.remove("inactive");
+    } else {
+        // Add the "inactive" class to indicate an inactive state
+        gameButton.classList.add("inactive");
+    }
 }
 
 // Function to display the winner modal

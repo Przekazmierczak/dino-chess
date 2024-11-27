@@ -105,10 +105,10 @@
             <ul>
                 <li>
                     {% if user.game %}
-                    <a class="sidebar-button" href="{% url 'current' %}">
+                    <a id="current-game-button" class="sidebar-button" href="{% url 'current' %}">
                     {% endif %}
                     {% if not user.game %}
-                    <a class="sidebar-button inactive" href="{% url 'current' %}">
+                    <a id="current-game-button" class="sidebar-button inactive" href="{% url 'current' %}">
                     {% endif %}
                         <i class='bx bx-navigation'></i>
                         <span class="nav-item">Active</span>
