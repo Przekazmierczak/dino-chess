@@ -322,10 +322,8 @@ function setButtonState(tableSocket, state, config) {
         unreadyButton.classList.add("hidden");
     }
 
-    // Hide sit button to ensure a user cannot join the same table second time
-    if (state.user && player === "white" && state.black_player === state.user) {
-        sitButton.classList.add("hidden");
-    } else if (state.user && player === "black" && state.white_player === state.user) {
+    // Hide sit button to ensure a user cannot join two tables in same time
+    if (state.already_in_game) {
         sitButton.classList.add("hidden");
     }
 }

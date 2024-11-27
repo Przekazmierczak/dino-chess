@@ -317,9 +317,9 @@ class TableConsumer(AsyncWebsocketConsumer):
         await self.send_game_state_to_room_group(message)
         
     async def handle_user_action(self, current_game, user, text_data_json):
-        # Ensure a user cannot join the same table second time
-        if (text_data_json["black_player"] != None and user == current_game.white or
-            text_data_json["white_player"] != None and user == current_game.black):
+        # Ensure a user cannot join the table if he is already in the game
+        already_in_game = bool(self.scope["user"].game_id) # Checking game_id prevents loading the related game object from the database
+        if already_in_game and (text_data_json["white_player"] == True or text_data_json["black_player"] == True):
             return
         
         # Update player states in the database
@@ -363,8 +363,9 @@ class TableConsumer(AsyncWebsocketConsumer):
         await self.send_game_state_to_room_group(message)
 
     async def send_game_state_to_websocket(self, message):
+        already_in_game = bool(self.scope["user"].game_id) # Checking game_id prevents loading the related game object from the database
         # Send the game state to the WebSocket
-        await self.send(text_data=json.dumps({"user": self.scope["user"].username, **message}))
+        await self.send(text_data=json.dumps({"user": self.scope["user"].username, "already_in_game": already_in_game, **message}))
     
     async def send_game_state_to_room_group(self, message):
         # Send the game state to the room group
