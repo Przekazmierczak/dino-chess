@@ -363,7 +363,12 @@ class TableConsumer(AsyncWebsocketConsumer):
         await self.send_game_state_to_room_group(message)
 
     async def send_game_state_to_websocket(self, message):
-        already_in_game = bool(self.scope["user"].game_id) # Checking game_id prevents loading the related game object from the database
+        # Ensure that user is authenticated
+        if self.scope["user"].is_authenticated:
+            already_in_game = bool(self.scope["user"].game_id) # Checking game_id prevents loading the related game object from the database
+        else:
+            already_in_game = None
+            
         # Send the game state to the WebSocket
         await self.send(text_data=json.dumps({"user": self.scope["user"].username, "already_in_game": already_in_game, **message}))
     
