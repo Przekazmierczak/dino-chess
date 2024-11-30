@@ -11,6 +11,9 @@
     <div id="table-container">
         <div id="grid">
             <div id="table_number">Table: {{ table_id }}</div>
+            <div id="legend">
+                <span id="legend_button"><i class='bx bx-meteor'></i></span>
+            </div>
             <div id="prev_moves_button">
                 <span id="previous_button"><i class='bx bxs-left-arrow'></i><span>Previous</span></span>
                 <span id="next_button"><i class='bx bxs-right-arrow'></i><span>Next</span></span>
@@ -82,6 +85,9 @@
     <div id="modal_background_start"></div>
     <div id="modal_background_promotion"></div>
     <div id="modal_background_winner"></div>
+    <div id="modal_background_legend">
+        <div id="legend_image"></div>
+    </div>
     
     {{ table_id|json_script:"table_id" }}
     {% endblock %}

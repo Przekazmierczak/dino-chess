@@ -25,6 +25,26 @@
     --black-knight: var(--dino-black-knight);
     --black-queen: var(--dino-black-queen);
     --black-king: var(--dino-black-king);
+
+    --legend: var(--legend-16-9);
+}
+
+@media (min-aspect-ratio: 21/6) {
+    :root {
+        --legend: var(--legend-wide);
+    }
+}
+
+@media (max-aspect-ratio: 4/3) {
+    :root {
+        --legend: var(--legend-1-1);
+    }
+}
+
+@media (max-aspect-ratio: 12/16) {
+    :root {
+        --legend: var(--legend-narrow);
+    }
 }
 
 :root.classic-mode {
@@ -307,6 +327,37 @@
     z-index: 15;
 }
 
+#legend {
+    grid-column: 17 / 18;
+    grid-row: 2 / 3;
+    display: flex;
+    z-index: 15;
+}
+:root.classic-mode {
+    #legend {
+        display: none;
+    }
+}
+
+#legend_button {
+    width: 90%;
+    height: 90%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    border-radius: 0.8rem;
+    margin-left: 3px;
+    margin-right: 3px;
+    cursor: pointer;
+    background-color: var(--primary-bg-color);
+}
+
+#legend_button:hover {
+    background-color: white;
+    color: black;
+}
+
 #prev_moves_button,
 #resign_draw_button {
     grid-column: 17 / 22;
@@ -520,7 +571,6 @@ td {
     #resign_draw_button {
         grid-column: 17 / 24;
     }
-
 }
 
 @media (min-aspect-ratio: 22/9) and (max-height: 600px) {
@@ -574,6 +624,11 @@ td {
 
     #resign_draw_button {
         grid-row: 30 / 31;
+    }
+
+    #legend {
+        grid-column: 5 / 6;
+        grid-row: 19 / 20;
     }
 }
 
@@ -786,7 +841,8 @@ td.checking {
 
 #modal_background_start,
 #modal_background_promotion,
-#modal_background_winner {
+#modal_background_winner,
+#modal_background_legend {
     background-color: rgba(0, 0, 0, 0.3);
     position: absolute;
     display: none;
@@ -795,6 +851,11 @@ td.checking {
     height: 100%;
     width: 100%;
     z-index: 15;
+}
+
+#modal_background_legend {
+    background-color: rgba(0, 0, 0, 0.7);
+    z-index: 25;
 }
 
 #modal_promotion,
@@ -809,12 +870,27 @@ td.checking {
     z-index: 20;
 }
 
+#legend_image {
+    background-image: var(--legend);
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    width: 88%;
+    height: 90%;
+    max-width: 88%;
+    max-height: 90%;
+    position: fixed;
+    top: 5%;
+}
+
 #modal_promotion.show,
 #modal_winner.show,
 #modal_background_start.show,
 #modal_background_promotion.show,
 #modal_background_winner.show,
-#modal_not_logged.show {
+#modal_not_logged.show,
+#modal_legend.show,
+#modal_background_legend.show {
     display: flex;
     flex-direction: column;
     justify-content: center;

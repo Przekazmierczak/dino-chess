@@ -45,6 +45,7 @@ function updateUI(tableSocket, state) {
     renderResignButton(tableSocket, state);  // Show or update the "Resign" button depending on the game state
     renderDrawButton(tableSocket, state);  // Show or update the "Draw" button depending on the game state
     renderNotLoggedModal(state);  // Render NotLoggedModal for guest user
+    showLegend();
     console.log("received updated board");
 }
 
@@ -1013,4 +1014,15 @@ function renderNotLoggedModal(state) {
         // Show the "Not Logged" modal by adding the 'show' class
         document.getElementById("modal_not_logged").classList.add("show");
     }
+}
+
+function showLegend() {
+    const legend_button = document.getElementById("legend_button");
+    const modal_background_legend = document.getElementById("modal_background_legend");
+    legend_button.addEventListener("click", function() {
+        modal_background_legend.classList.add("show");
+    })
+    modal_background_legend.addEventListener("click", function() {
+        modal_background_legend.classList.remove("show");
+    })
 }
