@@ -928,3 +928,54 @@ td.checking {
 #login_link {
     font-size: min(0.4 * var(--square-size), 17px);
 }
+
+.captured_piece {
+    background-size: cover;
+    height: 95%;
+    margin-left: -15%;
+    padding: 10%;
+}
+
+.captured_piece.first {
+    margin-left: -2.5%;
+}
+
+.captured_white_pawn {
+    background-image: var(--white-pawn);
+}
+
+.captured_white_knight {
+    background-image: var(--white-knight);
+}
+
+.captured_white_bishop {
+    background-image: var(--white-bishop);
+}
+
+.captured_white_rook {
+    background-image: var(--white-rook);
+}
+
+.captured_white_queen {
+    background-image: var(--white-queen);
+}
+
+.captured_black_pawn {
+    background-image: var(--black-pawn);
+}
+
+.captured_black_knight {
+    background-image: var(--black-knight);
+}
+
+.captured_black_bishop {
+    background-image: var(--black-bishop);
+}
+
+.captured_black_rook {
+    background-image: var(--black-rook);
+}
+
+.captured_black_queen {
+    background-image: var(--black-queen);
+}

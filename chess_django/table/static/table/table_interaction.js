@@ -77,6 +77,8 @@ function clearBoard() {
     clearResignDrawButtons();
     document.getElementById("grid").className = '';
     document.getElementById("modal_not_logged").className = '';
+    document.getElementById("white_captured").innerHTML = '';
+    document.getElementById("black_captured").innerHTML = '';
 }
 
 function rotateBoard(state) {
@@ -546,8 +548,69 @@ function renderBoard(tableSocket, state) {
     }
     
     // Update the displayed captured points
-    document.getElementById("white_captured").innerHTML = white_captured["pawn"];
-    document.getElementById("black_captured").innerHTML = black_captured["pawn"];
+    updateCaptured(white_captured, black_captured);
+}
+
+// Function to update the display of captured pieces for both white and black players
+function updateCaptured (white_captured, black_captured) {
+    // Get the HTML elements where captured pieces will be displayed
+    const white_captured_element = document.getElementById("white_captured");
+    const black_captured_element = document.getElementById("black_captured");
+
+    // Adds the extra pawn after promotion
+    addPawns(white_captured);
+    addPawns(black_captured);
+
+    // Add captured white pieces to the HTML (black pieces captured by white)
+    addCapturedToHTML(white_captured["pawn"], "captured_black_pawn", white_captured_element);
+    addCapturedToHTML(white_captured["knight"], "captured_black_knight", white_captured_element);
+    addCapturedToHTML(white_captured["bishop"], "captured_black_bishop", white_captured_element);
+    addCapturedToHTML(white_captured["rook"], "captured_black_rook", white_captured_element);
+    addCapturedToHTML(white_captured["queen"], "captured_black_queen", white_captured_element);
+
+    // Add captured black pieces to the HTML (white pieces captured by black)
+    addCapturedToHTML(black_captured["pawn"], "captured_white_pawn", black_captured_element);
+    addCapturedToHTML(black_captured["knight"], "captured_white_knight", black_captured_element);
+    addCapturedToHTML(black_captured["bishop"], "captured_white_bishop", black_captured_element);
+    addCapturedToHTML(black_captured["rook"], "captured_white_rook", black_captured_element);
+    addCapturedToHTML(black_captured["queen"], "captured_white_queen", black_captured_element);
+
+    // Add a score difference indicator if white is ahead in captured points
+    if (white_captured["sum"] > black_captured["sum"]) {
+        const newDiv = document.createElement("div");
+        newDiv.innerHTML = `+${white_captured["sum"] - black_captured["sum"]}`;
+        white_captured_element.appendChild(newDiv);
+    }
+
+    // Add a score difference indicator if black is ahead in captured points
+    if (black_captured["sum"] > white_captured["sum"]) {
+        const newDiv = document.createElement("div");
+        newDiv.innerHTML = `+${black_captured["sum"] - white_captured["sum"]}`;
+        black_captured_element.appendChild(newDiv);
+    }
+}
+
+// Function to adjust the number of pawns if the player makes athe promotion
+function addPawns(list) {
+    const pieces = ["knight", "bishop", "rook", "queen"];
+    for (let piece of pieces) {
+        if (list[piece] < 0) {
+            list["pawn"] += list[piece];
+        }
+    }
+}
+
+// Function to add a specified quantity of captured pieces to the HTML
+function addCapturedToHTML(quantity, class_name, element) {
+    for (let i = 0; i < quantity; i++) {
+        const newDiv = document.createElement("div");  // Common class for captured pieces
+        newDiv.classList.add("captured_piece");
+        newDiv.classList.add(class_name);
+        if (i === 0) {
+            newDiv.classList.add("first");  // Mark the first piece for styling
+        }
+        element.appendChild(newDiv);  // Append the new piece to the specified element
+    }
 }
 
 // Function to add letter symbols to the bottom-right of the squares (for the letter coordinates)
@@ -1016,6 +1079,7 @@ function renderNotLoggedModal(state) {
     }
 }
 
+// Function to show and hide the legend modal when interacting with the legend button or background
 function showLegend() {
     const legend_button = document.getElementById("legend_button");
     const modal_background_legend = document.getElementById("modal_background_legend");
