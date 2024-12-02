@@ -102,13 +102,20 @@ a {
 #sidebar {
     height: 100vh;
     width: var(--sidebar-expanded-width);
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+}
+
+div::-webkit-scrollbar {
+    width: 1px;
 }
 
 #btn {
     position: absolute;
     color: var(--text-color);
     top: .4rem;
-    left: 50%;
+    left: 54.3%;
     font-size: 1.2rem;
     line-height: 50px;
     transform: translateX(-50%);
@@ -118,6 +125,10 @@ a {
 
 #sidebar.active #btn {
     left: 90%;
+}
+
+.bx {
+    scale: 130%;
 }
 
 #topbar-logo,
@@ -235,13 +246,19 @@ a {
 }
 
 #toggle {
-    position: absolute;
+    /* position: absolute; */
     bottom: 5%;
     left: 0%;
     width: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+@media (min-height:420px) {
+    #toggle {
+        position: absolute;
+    }
 }
 
 #theme {
