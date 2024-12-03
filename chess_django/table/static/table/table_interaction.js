@@ -562,18 +562,18 @@ function updateCaptured (white_captured, black_captured) {
     addPawns(black_captured);
 
     // Add captured white pieces to the HTML (black pieces captured by white)
-    addCapturedToHTML(white_captured["pawn"], "captured_black_pawn", white_captured_element);
-    addCapturedToHTML(white_captured["knight"], "captured_black_knight", white_captured_element);
-    addCapturedToHTML(white_captured["bishop"], "captured_black_bishop", white_captured_element);
-    addCapturedToHTML(white_captured["rook"], "captured_black_rook", white_captured_element);
-    addCapturedToHTML(white_captured["queen"], "captured_black_queen", white_captured_element);
+    addCapturedToHTML(white_captured["pawn"], "black", "pawn", white_captured_element);
+    addCapturedToHTML(white_captured["knight"], "black", "knight", white_captured_element);
+    addCapturedToHTML(white_captured["bishop"], "black", "bishop", white_captured_element);
+    addCapturedToHTML(white_captured["rook"], "black", "rook", white_captured_element);
+    addCapturedToHTML(white_captured["queen"], "black", "queen", white_captured_element);
 
     // Add captured black pieces to the HTML (white pieces captured by black)
-    addCapturedToHTML(black_captured["pawn"], "captured_white_pawn", black_captured_element);
-    addCapturedToHTML(black_captured["knight"], "captured_white_knight", black_captured_element);
-    addCapturedToHTML(black_captured["bishop"], "captured_white_bishop", black_captured_element);
-    addCapturedToHTML(black_captured["rook"], "captured_white_rook", black_captured_element);
-    addCapturedToHTML(black_captured["queen"], "captured_white_queen", black_captured_element);
+    addCapturedToHTML(black_captured["pawn"], "white", "pawn", black_captured_element);
+    addCapturedToHTML(black_captured["knight"], "white", "knight", black_captured_element);
+    addCapturedToHTML(black_captured["bishop"], "white", "bishop", black_captured_element);
+    addCapturedToHTML(black_captured["rook"], "white", "rook", black_captured_element);
+    addCapturedToHTML(black_captured["queen"], "white", "queen", black_captured_element);
 
     // Add a score difference indicator if white is ahead in captured points
     if (white_captured["sum"] > black_captured["sum"]) {
@@ -592,8 +592,7 @@ function updateCaptured (white_captured, black_captured) {
 
 // Function to adjust the number of pawns if the player makes athe promotion
 function addPawns(list) {
-    const pieces = ["knight", "bishop", "rook", "queen"];
-    for (let piece of pieces) {
+    for (let piece of ["knight", "bishop", "rook", "queen"]) {
         if (list[piece] < 0) {
             list["pawn"] += list[piece];
         }
@@ -601,11 +600,11 @@ function addPawns(list) {
 }
 
 // Function to add a specified quantity of captured pieces to the HTML
-function addCapturedToHTML(quantity, class_name, element) {
+function addCapturedToHTML(quantity, player, class_name, element) {
     for (let i = 0; i < quantity; i++) {
         const newDiv = document.createElement("div");  // Common class for captured pieces
-        newDiv.classList.add("captured_piece");
-        newDiv.classList.add(class_name);
+        newDiv.classList.add("captured_piece", "small_piece");
+        newDiv.classList.add(player, class_name);
         if (i === 0) {
             newDiv.classList.add("first");  // Mark the first piece for styling
         }
@@ -920,7 +919,7 @@ function addMove(pieceAndMove, move, pieceImage, columnLetters) {
     const pieceElement = document.createElement("span");
     pieceElement.classList.add(pieceImage[0]); // Add class for the piece type (e.g., pawn, knight)
     pieceElement.classList.add(pieceImage[1]); // Add class for the color (white/black)
-    pieceElement.classList.add("movesListPiece"); // Add class for general piece styling
+    pieceElement.classList.add("movesListPiece", "small_piece"); // Add class for general piece styling
     pieceAndMove.appendChild(pieceElement); // Append the piece span to the move details
     
     // Create a span for the decoded move (end position)

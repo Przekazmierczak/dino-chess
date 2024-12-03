@@ -26,25 +26,21 @@
     --black-queen: var(--dino-black-queen);
     --black-king: var(--dino-black-king);
 
+    --white-pawn-small: var(--dino-white-pawn);
+    --white-rook-small: var(--dino-white-rook);
+    --white-bishop-small: var(--dino-white-bishop);
+    --white-knight-small: var(--dino-white-knight);
+    --white-queen-small: var(--dino-white-queen);
+    --white-king-small: var(--dino-white-king);
+
+    --black-pawn-small: var(--dino-black-pawn);
+    --black-rook-small: var(--dino-black-rook);
+    --black-bishop-small: var(--dino-black-bishop);
+    --black-knight-small: var(--dino-black-knight);
+    --black-queen-small: var(--dino-black-queen);
+    --black-king-small: var(--dino-black-king);
+
     --legend: var(--legend-16-9);
-}
-
-@media (min-aspect-ratio: 21/6) {
-    :root {
-        --legend: var(--legend-wide);
-    }
-}
-
-@media (max-aspect-ratio: 4/3) {
-    :root {
-        --legend: var(--legend-1-1);
-    }
-}
-
-@media (max-aspect-ratio: 12/16) {
-    :root {
-        --legend: var(--legend-narrow);
-    }
 }
 
 :root.classic-mode {
@@ -54,13 +50,27 @@
     --white-knight: var(--classic-white-knight);
     --white-queen: var(--classic-white-queen);
     --white-king: var(--classic-white-king);
-
+    
     --black-pawn: var(--classic-black-pawn);
     --black-rook: var(--classic-black-rook);
     --black-bishop: var(--classic-black-bishop);
     --black-knight: var(--classic-black-knight);
     --black-queen: var(--classic-black-queen);
     --black-king: var(--classic-black-king);
+    
+    --white-pawn-small: var(--classic-white-pawn);
+    --white-rook-small: var(--classic-white-rook);
+    --white-bishop-small: var(--classic-white-bishop);
+    --white-knight-small: var(--classic-white-knight);
+    --white-queen-small: var(--classic-white-queen);
+    --white-king-small: var(--classic-white-king);
+    
+    --black-pawn-small: var(--classic-black-pawn);
+    --black-rook-small: var(--classic-black-rook);
+    --black-bishop-small: var(--classic-black-bishop);
+    --black-knight-small: var(--classic-black-knight);
+    --black-queen-small: var(--classic-black-queen);
+    --black-king-small: var(--classic-black-king);
 }
 
 :root.white-winner:not(.classic-mode) {
@@ -81,6 +91,24 @@
     --white-king: var(--dino-bones-king);
 }
 
+@media (min-aspect-ratio: 21/6) {
+    :root {
+        --legend: var(--legend-wide);
+    }
+}
+
+@media (max-aspect-ratio: 4/3) {
+    :root {
+        --legend: var(--legend-1-1);
+    }
+}
+
+@media (max-aspect-ratio: 12/16) {
+    :root {
+        --legend: var(--legend-narrow);
+    }
+}
+
 @media (max-width: 1300px) {
     :root {
         --square-size: min(5.5vh, 5.2vw);
@@ -93,64 +121,36 @@
     }
 }
 
-.white.pawn {
-    background-image: var(--white-pawn);
-    background-size: cover;
-}
+.white.pawn { background-image: var(--white-pawn); }
+.white.rook { background-image: var(--white-rook); }
+.white.bishop { background-image: var(--white-bishop); }
+.white.knight { background-image: var(--white-knight); }
+.white.queen { background-image: var(--white-queen); }
+.white.king { background-image: var(--white-king); }
+.black.pawn { background-image: var(--black-pawn); }
+.black.rook { background-image: var(--black-rook); }
+.black.bishop { background-image: var(--black-bishop); }
+.black.knight { background-image: var(--black-knight); }
+.black.queen { background-image: var(--black-queen); }
+.black.king { background-image: var(--black-king); }
 
-.white.rook {
-    background-image: var(--white-rook);
-    background-size: cover;
-}
+.white.pawn.small_piece { background-image: var(--white-pawn-small); }
+.white.rook.small_piece { background-image: var(--white-rook-small); }
+.white.bishop.small_piece { background-image: var(--white-bishop-small); }
+.white.knight.small_piece { background-image: var(--white-knight-small); }
+.white.queen.small_piece { background-image: var(--white-queen-small); }
+.white.king.small_piece { background-image: var(--white-king-small); }
+.black.pawn.small_piece { background-image: var(--black-pawn-small); }
+.black.rook.small_piece { background-image: var(--black-rook-small); }
+.black.bishop.small_piece { background-image: var(--black-bishop-small); }
+.black.knight.small_piece { background-image: var(--black-knight-small); }
+.black.queen.small_piece { background-image: var(--black-queen-small); }
+.black.king.small_piece { background-image: var(--black-king-small); }
 
-.white.bishop {
-    background-image: var(--white-bishop);
-    background-size: cover;
-}
-
-.white.knight {
-    background-image: var(--white-knight);
-    background-size: cover;
-}
-
-.white.queen {
-    background-image: var(--white-queen);
-    background-size: cover;
-}
-
-.white.king {
-    background-image: var(--white-king);
-    background-size: cover;
-}
-
-.black.pawn {
-    background-image: var(--black-pawn);
-    background-size: cover;
-}
-
-.black.rook {
-    background-image: var(--black-rook);
-    background-size: cover;
-}
-
-.black.bishop {
-    background-image: var(--black-bishop);
-    background-size: cover;
-}
-
-.black.knight {
-    background-image: var(--black-knight);
-    background-size: cover;
-}
-
-.black.queen {
-    background-image: var(--black-queen);
-    background-size: cover;
-}
-
-.black.king {
-    background-image: var(--black-king);
-    background-size: cover;
+.white,
+.black {
+    background-size: contain;
+    background-repeat: no-repeat;
 }
 
 #table-container {
@@ -214,7 +214,7 @@
 
 #black_captured,
 #white_captured {
-    grid-column: 7 / 11;
+    grid-column: 7 / 13;
 }
 
 #black_time,
@@ -497,8 +497,6 @@
     height: 110%;
     max-width: 50px;
     max-height: 50px;
-    background-size: contain;
-    background-repeat: no-repeat;
     background-position: right;
 }
 .movesListWhite .movesListMove,
@@ -930,52 +928,15 @@ td.checking {
 }
 
 .captured_piece {
-    background-size: cover;
-    height: 95%;
-    margin-left: -15%;
-    padding: 10%;
+    display: inline-block;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    margin-left: -14%;
+    margin-top: 2%;
+    padding: 9%;
 }
 
 .captured_piece.first {
     margin-left: -2.5%;
-}
-
-.captured_white_pawn {
-    background-image: var(--white-pawn);
-}
-
-.captured_white_knight {
-    background-image: var(--white-knight);
-}
-
-.captured_white_bishop {
-    background-image: var(--white-bishop);
-}
-
-.captured_white_rook {
-    background-image: var(--white-rook);
-}
-
-.captured_white_queen {
-    background-image: var(--white-queen);
-}
-
-.captured_black_pawn {
-    background-image: var(--black-pawn);
-}
-
-.captured_black_knight {
-    background-image: var(--black-knight);
-}
-
-.captured_black_bishop {
-    background-image: var(--black-bishop);
-}
-
-.captured_black_rook {
-    background-image: var(--black-rook);
-}
-
-.captured_black_queen {
-    background-image: var(--black-queen);
 }

@@ -116,7 +116,7 @@ div::-webkit-scrollbar {
     color: var(--text-color);
     top: .4rem;
     left: 54.3%;
-    font-size: 1.2rem;
+    /* font-size: 1.2rem; */
     line-height: 50px;
     transform: translateX(-50%);
     cursor: pointer;
@@ -134,14 +134,16 @@ div::-webkit-scrollbar {
 #topbar-logo,
 #sidebar-logo {
     background-image: var(--logo);
-    background-size: cover;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
 }
 
 #sidebar-logo {
     display: flex;
     height: 40px;
     opacity: 0;
-    max-width: 135px;
+    max-width: 155px;
     pointer-events: none;
 }
 
@@ -301,7 +303,7 @@ div::-webkit-scrollbar {
 .theme-dino-pic {
     width: 50%;
     background: var(--sidebar-dino-theme-url);
-    background-size: 90%;
+    background-size: contain;
     background-position: center;
     background-repeat: no-repeat;
 }
@@ -310,7 +312,7 @@ div::-webkit-scrollbar {
     width: 50%;
     left: 50%;
     background: var(--sidebar-classic-theme-url);
-    background-size: 90%;
+    background-size: contain;
     background-position: center;
     background-repeat: no-repeat;
 }
@@ -334,7 +336,8 @@ div::-webkit-scrollbar {
     max-width: 600px; 
     max-height: 160px;
     background-image: var(--logo);
-    background-size: cover;
+    background-size: contain;
+    background-repeat: no-repeat;
 }
 
 .layout-buttons-container {
