@@ -419,6 +419,7 @@ div::-webkit-scrollbar {
         left: 0;
         width: var(--width-small-screen);
         padding: 0.1rem;
+        min-height: calc(100vh - 40px);
     }
 
     #sidebar.active .ball {
