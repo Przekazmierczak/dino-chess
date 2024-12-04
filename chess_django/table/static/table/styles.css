@@ -167,6 +167,9 @@
     grid-template-rows: repeat(18, minmax(0, var(--square-size)));
     grid-template-columns: repeat(21, minmax(0, var(--square-size)));
     user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    touch-action: none;
 }
 
 #black_player, #black_captured,

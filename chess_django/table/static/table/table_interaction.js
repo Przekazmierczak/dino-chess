@@ -456,9 +456,13 @@ function highlightChecks(state) {
 function setBoardMoveListeners() {
     const movingPiece = document.querySelector('.movingPiece');
     const board = document.getElementById("chess-board");
+    const grid = document.getElementById("grid");
     
     // Prevent default behavior on dragstart to manage custom dragging
     board.addEventListener('dragstart', (event) => event.preventDefault());
+    if (window.matchMedia('(pointer: coarse)').matches) {
+        grid.addEventListener('contextmenu', (event) => event.preventDefault());
+    }
     
     // Handle mouse or touch release event
     function handleEndDrag() {
@@ -998,23 +1002,31 @@ function renderResignButton(tableSocket, state) {
         let resignTimer;  // Variable to store the timer
         let isHoldingButton;  // Flag to track if the button is being held
 
-        // Listen for the 'mousedown' event when the player starts holding down the resign button
-        resignButton.addEventListener("mousedown", function() {
+        // Listen for the 'mousedown' event or the 'touchstart' event when the player starts holding down the resign button
+        function resignStart() {
             isHoldingButton = true;  // Set the flag to true, indicating the button is being held
             resignTimer = setTimeout(function() {
                 // After 1.5 seconds, execute the resignation by calling updateState with resign=true
                 updateState(tableSocket, null, null, null, null, null, null, true, null);
             }, timeout);  // Timer runs after the timeout duration
-        });
+        };
 
-        // Listen for the 'mouseup' event when the player releases the button
-        window.addEventListener("mouseup", function() {
+        // Listen for the 'mousedown' event or the 'touchstart' event when the player releases the button
+        function resignStop(e) {
             if (isHoldingButton) {  // Only clear the timer if the button was being held
                 if (resignTimer) {
-                    this.clearTimeout(resignTimer);  // Cancel the resignation if the mouse was released before the timer ended
+                    clearTimeout(resignTimer);  // Cancel the resignation if the mouse was released before the timer ended
                 }
+                e.preventDefault();
+                isHoldingButton = false;
             }
-        });
+        };
+        
+        // Add resign listeners
+        resignButton.addEventListener("mousedown", resignStart);
+        resignButton.addEventListener("touchstart", resignStart);
+        window.addEventListener("mouseup", resignStop);
+        resignButton.addEventListener("touchend", resignStop);
     }
 }
 
@@ -1050,23 +1062,31 @@ function renderDrawButton(tableSocket, state) {
         let drawTimer;  // Variable to store the timer
         let isHoldingButton;  // Flag to track if the button is being held
 
-        // Listen for the 'mousedown' event when the player starts holding down the draw button
-        drawButton.addEventListener("mousedown", function() {
+        // Listen for the 'mousedown' event or the 'touchstart' event when the player starts holding down the draw button
+        function drawStart() {
             isHoldingButton = true;  // Set the flag to true, indicating the button is being held
             drawTimer = setTimeout(function() {
                 // After 1.5 seconds, execute the resignation by calling updateState with draw=true
                 updateState(tableSocket, null, null, null, null, null, null, null, true);
             }, timeout);  // Timer runs after the timeout duration
-        });
+        };
 
-        // Listen for the 'mouseup' event when the player releases the button
-        window.addEventListener("mouseup", function() {
+        // Listen for the 'mouseup' event or the 'touchend' event when the player releases the button
+        function drawStop(e) {
             if (isHoldingButton) {  // Only clear the timer if the button was being held
                 if (drawTimer) {
-                    this.clearTimeout(drawTimer);  // Cancel the draw proposition if the mouse was released before the timer ended
+                    clearTimeout(drawTimer);  // Cancel the draw proposition if the mouse was released before the timer ended
                 }
+                e.preventDefault();
+                isHoldingButton = false;
             }
-        });
+        };
+
+        // Add draw listeners
+        drawButton.addEventListener("mousedown", drawStart);
+        drawButton.addEventListener("touchstart", drawStart);
+        window.addEventListener("mouseup", drawStop);
+        drawButton.addEventListener("touchend", drawStop);
     }
 }
 
