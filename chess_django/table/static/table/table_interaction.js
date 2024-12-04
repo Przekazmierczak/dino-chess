@@ -1,8 +1,8 @@
 let moveListeners = {};  // To store event listeners for moves
 let intervalId;  // To manage interval for timers
 let isDragging = false;  // Flag to track if a piece is being dragged
-let draggedPiece = {};
-var move_sound;
+let draggedPiece = {};  // Object to store the dragged piece details
+var move_sound;  // Variable to hold the sound for move actions
 
 // Runs when the DOM content is fully loaded
 document.addEventListener('DOMContentLoaded', function () {
@@ -23,14 +23,14 @@ function setupWebSocket() {
     // Handle incoming messages from the server
     tableSocket.onmessage = function(e) {
         state = JSON.parse(e.data); // Parse the received game state
-        console.log(state)
+        console.log(state);  // Log the received state for debugging
         updateUI(tableSocket, state);
     };
 }
 
 function updateUI(tableSocket, state) {
     clearBoard();  // Clear the board of pieces and listeners
-    rotateBoard(state);
+    rotateBoard(state);  // Rotate the board for the black player
     colorBoard();  // Color the board
     showPlayers(state);  // Update player names
     showTimes(state);  // Update player times
@@ -45,8 +45,8 @@ function updateUI(tableSocket, state) {
     renderResignButton(tableSocket, state);  // Show or update the "Resign" button depending on the game state
     renderDrawButton(tableSocket, state);  // Show or update the "Draw" button depending on the game state
     renderNotLoggedModal(state);  // Render NotLoggedModal for guest user
-    showLegend();
-    console.log("received updated board");
+    showLegend();  // Show the game legend
+    console.log("Received updated board");
 }
 
 function reloadUI(tableSocket, state) {
@@ -81,7 +81,9 @@ function clearBoard() {
     document.getElementById("black_captured").innerHTML = '';
 }
 
+// Function to rotate the board
 function rotateBoard(state) {
+    // Rotate the board if the current user is the black player and both players are ready
     if (
         state.black_player === state.user &&
         state.white_player_ready && state.black_player_ready
@@ -89,43 +91,51 @@ function rotateBoard(state) {
         document.getElementById("grid").classList.add("rotated");
 
         const table = document.getElementById("chess-board");
-        table.innerHTML = '';
-    
+        table.innerHTML = '';  // Clear the old table
+            
+        // Create a new table body
         const new_table = document.createElement("tbody");
-    
+        
+        // Loop through rows and columns to build the new table
         for (let i = 0; i < 8; i++) {
             const row_element = document.createElement("tr");
             for (let j = 0; j < 8; j++) {
                 const column_element = document.createElement("td");
-                column_element.id = `square${i}${j}`;
-                row_element.appendChild(column_element);
+                column_element.id = `square${i}${j}`;  // Set the ID of each square
+                row_element.appendChild(column_element);  // Append the square to the row
             }
-            new_table.appendChild(row_element);
+            new_table.appendChild(row_element);  // Append the row to the table body
         }
-        table.appendChild(new_table);
+        table.appendChild(new_table);  // Append the new table body to the board
     }
 }
 
+// Function to clear the table of previous moves (used for move history)
 function clearPrevMovesTable() {
-    document.getElementById("prev_moves").innerHTML = "";
+    document.getElementById("prev_moves").innerHTML = "";  // Clear the previous moves section
 
+    // Clone the previous button to reset it
     let previous_button = document.getElementById("previous_button");
     let newElement = previous_button.cloneNode(true);
     previous_button.parentNode.replaceChild(newElement, previous_button);
     newElement.className = '';
 
+    // Clone the next button to reset it
     let next_button = document.getElementById("next_button");
     newElement = next_button.cloneNode(true);
     next_button.parentNode.replaceChild(newElement, next_button);
     newElement.className = '';
 }
 
+// Function to clear the resign and draw buttons
 function clearResignDrawButtons() {
+    // Clone the resign button to reset it
     let resign_button = document.getElementById("resign_button");
     let newResignElement = resign_button.cloneNode(true);
     resign_button.parentNode.replaceChild(newResignElement, resign_button);
     newResignElement.className = '';
 
+    // Clone the resign button to reset it
     let draw_button = document.getElementById("draw_button");
     let newDrawElement = draw_button.cloneNode(true);
     draw_button.parentNode.replaceChild(newDrawElement, draw_button);
@@ -1002,7 +1012,7 @@ function renderResignButton(tableSocket, state) {
         let resignTimer;  // Variable to store the timer
         let isHoldingButton;  // Flag to track if the button is being held
 
-        // Listen for the 'mousedown' event or the 'touchstart' event when the player starts holding down the resign button
+        // Function to handle the start of holding the resign button (mousedown or touchstart)
         function resignStart() {
             isHoldingButton = true;  // Set the flag to true, indicating the button is being held
             resignTimer = setTimeout(function() {
@@ -1011,7 +1021,7 @@ function renderResignButton(tableSocket, state) {
             }, timeout);  // Timer runs after the timeout duration
         };
 
-        // Listen for the 'mousedown' event or the 'touchstart' event when the player releases the button
+        // Function to handle the release of the resign button (mouseup or touchend)
         function resignStop(e) {
             if (isHoldingButton) {  // Only clear the timer if the button was being held
                 if (resignTimer) {
@@ -1022,9 +1032,11 @@ function renderResignButton(tableSocket, state) {
             }
         };
         
-        // Add resign listeners
+        // Add event listeners for starting to hold the button (mousedown or touchstart)
         resignButton.addEventListener("mousedown", resignStart);
         resignButton.addEventListener("touchstart", resignStart);
+
+        // Add event listeners for releasing the button (mouseup or touchend)
         window.addEventListener("mouseup", resignStop);
         resignButton.addEventListener("touchend", resignStop);
     }
@@ -1062,7 +1074,7 @@ function renderDrawButton(tableSocket, state) {
         let drawTimer;  // Variable to store the timer
         let isHoldingButton;  // Flag to track if the button is being held
 
-        // Listen for the 'mousedown' event or the 'touchstart' event when the player starts holding down the draw button
+        // Function to handle the start of holding the draw button (mousedown or touchstart)
         function drawStart() {
             isHoldingButton = true;  // Set the flag to true, indicating the button is being held
             drawTimer = setTimeout(function() {
@@ -1071,7 +1083,7 @@ function renderDrawButton(tableSocket, state) {
             }, timeout);  // Timer runs after the timeout duration
         };
 
-        // Listen for the 'mouseup' event or the 'touchend' event when the player releases the button
+        // Function to handle the release of the draw button (mouseup or touchend)
         function drawStop(e) {
             if (isHoldingButton) {  // Only clear the timer if the button was being held
                 if (drawTimer) {
@@ -1082,9 +1094,11 @@ function renderDrawButton(tableSocket, state) {
             }
         };
 
-        // Add draw listeners
+        // Add event listeners for starting to hold the button (mousedown or touchstart)
         drawButton.addEventListener("mousedown", drawStart);
         drawButton.addEventListener("touchstart", drawStart);
+
+        // Add event listeners for releasing the button (mouseup or touchend)
         window.addEventListener("mouseup", drawStop);
         drawButton.addEventListener("touchend", drawStop);
     }
@@ -1102,9 +1116,11 @@ function renderNotLoggedModal(state) {
 function showLegend() {
     const legend_button = document.getElementById("legend_button");
     const modal_background_legend = document.getElementById("modal_background_legend");
+
     legend_button.addEventListener("click", function() {
         modal_background_legend.classList.add("show");
     })
+    
     modal_background_legend.addEventListener("click", function() {
         modal_background_legend.classList.remove("show");
     })
