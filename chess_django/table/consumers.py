@@ -5,6 +5,7 @@ from channels.layers import get_channel_layer
 from asgiref.sync import sync_to_async
 
 from .models import Game, Board
+from menu.models import User
 from . import pieces
 from .tasks import check_game_timeout, computer_move
 
@@ -318,7 +319,8 @@ class TableConsumer(AsyncWebsocketConsumer):
         
     async def handle_user_action(self, current_game, user, text_data_json):
         # Ensure a user cannot join the table if he is already in the game
-        already_in_game = bool(self.scope["user"].game_id) # Checking game_id prevents loading the related game object from the database
+        refreshed_user = await sync_to_async(User.objects.get)(id=self.scope["user"].id)
+        already_in_game = bool(refreshed_user.game_id)  # True if game_id is not None or False otherwise
         if already_in_game and (text_data_json["white_player"] == True or text_data_json["black_player"] == True):
             return
         
