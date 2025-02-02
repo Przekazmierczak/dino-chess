@@ -8,3 +8,6 @@ chess_django/db.sqlite3
 chess_django/menu/__pycache__/
 chess_django/table/__pycache__/
 chess_django/chess_django/__pycache__/
+
+# Ignore .env
+.env

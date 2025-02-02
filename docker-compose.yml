@@ -1,0 +1,46 @@
+version: '3'
+
+services:
+  # Redis service
+  redis:
+    image: redis
+    container_name: redis
+    ports:
+      - "6379:6379"  # Expose Redis on port 6379
+    networks:
+      - backend
+
+  # Django service
+  django:
+    build: .  # Build from Dockerfile in current directory
+    container_name: django
+    command: python chess_django/manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/app  # Mount the current directory to /app in the container
+    env_file:  # Load .env file
+      - .env
+    ports:
+      - "8000:8000"  # Expose Django on port 8000
+    depends_on:
+      - redis  # Ensure Redis starts first
+    environment:
+      - REDIS_HOST=redis  # Set Redis hostname as environment variable
+    networks:
+      - backend
+
+  # Celery worker service
+  celery:
+    build: .
+    command: celery -A chess_django worker --pool=solo -l info
+    working_dir: /app/chess_django
+    volumes:
+      - .:/app
+    depends_on:
+      - redis
+      - django  # Ensures Django web service is up before Celery starts
+    networks:
+      - backend
+
+networks:
+  backend:
+    driver: bridge  # Custom network for communication between containers

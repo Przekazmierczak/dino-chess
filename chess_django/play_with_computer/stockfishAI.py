@@ -3,7 +3,7 @@ from stockfish import Stockfish
 
 # Define the path to the Stockfish executable by navigating up three levels from the current file's directory
 absolute_path = Path(__file__).resolve().parent.parent.parent
-stockfish_loc = absolute_path / 'stockfish' / 'stockfish-windows-x86-64-avx2.exe'
+stockfish_loc = absolute_path / 'stockfish' / 'stockfish-ubuntu-x86-64-modern'
 
 class Computer:
     def __init__(self, board, turn, castling, enpassant, soft_moves, total_moves, user):
