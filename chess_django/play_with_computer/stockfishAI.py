@@ -10,7 +10,7 @@ class Computer:
         # Map user difficulty to corresponding ELO rating
         difficulty = {
             "Easy_Computer": (50, 1),       # Low ELO for easy difficulty
-            "Medium_Computer": (1200, 3),   # Moderate ELO for medium difficulty
+            "Medium_Computer": (1200, 4),   # Moderate ELO for medium difficulty
             "Hard_Computer": (1600, 8),    # High ELO for hard difficulty
             "Impossible_Computer": (None, None) # No limit for the hardest difficulty
         }
@@ -76,7 +76,7 @@ class Computer:
         return ("").join(fen)  # Return the final FEN string
     
     def best_move(self):
-        best_move = self.stockfish.get_best_move(1) if self.elo else self.stockfish.get_best_move() # Reduce stockfish strength
+        best_move = self.stockfish.get_best_move()
 
         promotion = best_move[4] if len(best_move) > 4 else None  # Check if the move involves a promotion
         move = [[], []]
