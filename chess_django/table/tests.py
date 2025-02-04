@@ -1057,7 +1057,7 @@ class TableConsumerTestCase4(TestCase):
         consumer.scope = {
             "type": "websocket",
             "url_route": {"kwargs": {"table_id": 1}},
-            "user": MagicMock(username="test_user")
+            "user": MagicMock(username="test_user", game_id=1)
         }
         consumer.channel_layer = MagicMock()
         consumer.channel_name = "test_channel"
@@ -1081,14 +1081,14 @@ class TableConsumerTestCase4(TestCase):
         consumer.started = started
 
         # Mock async methods that will be called during the tests
-        # consumer.push_players_state_to_db = AsyncMock()
-        # consumer.if_game_started = MagicMock(return_value=started)
-        # consumer.get_latest_board_from_database = AsyncMock(return_value=mock_start_board)
+        consumer.push_players_state_to_db = AsyncMock()
+        consumer.if_game_started = MagicMock(return_value=started)
+        consumer.get_latest_board_from_database = AsyncMock(return_value=consumer.mock_start_board)
         consumer.send_game_state_to_room_group = AsyncMock()
 
         return consumer
     
-    @pytest.mark.asyncio
+    # @pytest.mark.asyncio
     async def test_handle_user_action_when_both_players_ready(self):
         """
         Test handle_user_action to ensure it processes correctly and updates the game state.
@@ -1113,7 +1113,8 @@ class TableConsumerTestCase4(TestCase):
         with (patch('table.pieces.Board') as MockBoard, patch('table.tasks.check_game_timeout.apply_async'),
               patch('table.consumers.push_players_state_to_db') as push_players_state_to_db,
               patch('table.consumers.if_game_started') as if_game_started,
-              patch('table.consumers.get_latest_board_from_database') as get_latest_board_from_database):
+              patch('table.consumers.get_latest_board_from_database') as get_latest_board_from_database,
+              patch('menu.models.User.objects.get') as get_user):
 
             # Setup consumers
             consumer = await self.setup_consumer(True)
@@ -1121,6 +1122,7 @@ class TableConsumerTestCase4(TestCase):
             MockBoard.return_value.create_json_class.return_value = ("correct_class", None, None)
             if_game_started.return_value = consumer.started
             get_latest_board_from_database.return_value = consumer.mock_start_board
+            get_user.return_value = consumer.scope["user"]
 
             # Call the handle_user_action method
             await consumer.handle_user_action(mock_game, consumer.scope["user"], mock_text_data)
@@ -1170,7 +1172,8 @@ class TableConsumerTestCase4(TestCase):
         with (patch('table.pieces.Board') as MockBoard, patch('table.tasks.check_game_timeout.apply_async'),
               patch('table.consumers.push_players_state_to_db') as push_players_state_to_db,
               patch('table.consumers.if_game_started') as if_game_started,
-              patch('table.consumers.get_latest_board_from_database') as get_latest_board_from_database):
+              patch('table.consumers.get_latest_board_from_database') as get_latest_board_from_database,
+              patch('menu.models.User.objects.get') as get_user):
             
             # Setup consumers
             consumer = await self.setup_consumer(False)
@@ -1178,6 +1181,7 @@ class TableConsumerTestCase4(TestCase):
             MockBoard.return_value.create_json_class.return_value = ("correct_class", None, None)
             if_game_started.return_value = consumer.started
             get_latest_board_from_database.return_value = consumer.mock_start_board
+            get_user.return_value = consumer.scope["user"]
             
             # Call the handle_user_action method
             await consumer.handle_user_action(mock_game, consumer.scope["user"], mock_text_data)
