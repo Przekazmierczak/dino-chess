@@ -1,5 +1,5 @@
 # Use the official Python runtime image
-FROM python:3.11.3
+FROM python:3.11.3-slim
  
 # Create the app directory
 RUN mkdir /app
@@ -7,7 +7,6 @@ RUN mkdir /app
 # Set the working directory inside the container
 WORKDIR /app
  
-# Set environment variables 
 # Prevents Python from writing pyc files to disk
 ENV PYTHONDONTWRITEBYTECODE=1
 #Prevents Python from buffering stdout and stderr
@@ -19,11 +18,17 @@ RUN pip install --upgrade pip
 # Copy the Django project  and install dependencies
 COPY requirements.txt  /app/
  
-# run this command to install all dependencies 
+# Run this command to install all dependencies 
 RUN pip install --no-cache-dir -r requirements.txt
  
 # Copy the Django project to the container
 COPY . /app/
+
+# Create a new user
+RUN adduser --disabled-password --gecos "" celeryuser
+
+# Set the user to run the Celery worker
+USER celeryuser
  
 # Expose the Django port
 EXPOSE 8000

@@ -5,9 +5,11 @@ stockfish/
 chess_django/db.sqlite3
 
 # Ignore __pycache__ directories
-chess_django/menu/__pycache__/
-chess_django/table/__pycache__/
-chess_django/chess_django/__pycache__/
+**/__pycache__/
+*.pyc
+
+# Ignore staticfiles
+chess_django/staticfiles/
 
 # Ignore .env
 .env
