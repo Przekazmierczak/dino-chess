@@ -12,7 +12,7 @@ services:
 
   # Django service
   django:
-    build: .  # Build from Dockerfile in current directory
+    image: 471112844549.dkr.ecr.eu-central-1.amazonaws.com/dino-chess:django-latest
     container_name: django
     command: >
       sh -c "gunicorn chess_django.wsgi:application --bind 0.0.0.0:8000 &
@@ -34,7 +34,7 @@ services:
 
   # Celery worker service
   celery:
-    build: .
+    image: 471112844549.dkr.ecr.eu-central-1.amazonaws.com/dino-chess:celery-latest
     command: celery -A chess_django worker --pool=prefork --concurrency=2 -l info
     working_dir: /app/chess_django
     volumes:
@@ -47,8 +47,7 @@ services:
 
   # Nginx service
   nginx:
-    build:
-      context: ./nginx  # Path to the directory containing the Nginx Dockerfile and nginx.conf
+    image: 471112844549.dkr.ecr.eu-central-1.amazonaws.com/dino-chess:nginx-latest
     container_name: nginx
     volumes:
       - ./chess_django/staticfiles:/app/chess_django/staticfiles  # Mount the static files

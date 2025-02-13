@@ -8,6 +8,10 @@ app = Celery('chess_django')
 app.config_from_object('django.conf:settings', namespace='CELERY')
 app.autodiscover_tasks()
 
+app.conf.update(
+    broker_connection_retry_on_startup=True,
+)
+
 @app.task(bind=True)
 def debug_task(self):
     print(f'Request: {self.request!r}')

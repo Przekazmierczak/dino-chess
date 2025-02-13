@@ -25,10 +25,13 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . /app/
 
 # Create a new user
-RUN adduser --disabled-password --gecos "" celeryuser
+RUN adduser --disabled-password --gecos "" djangouser
 
-# Set the user to run the Celery worker
-USER celeryuser
+# Set the correct ownership and permissions for the database
+RUN chown -R djangouser:djangouser /app/chess_django
+
+# Set the user to djangouser
+USER djangouser
  
 # Expose the Django port
 EXPOSE 8000
