@@ -12,7 +12,7 @@ chess_django/db.sqlite3
 chess_django/staticfiles/
 
 # Ignore .env
-.env
+*.env
 
 # Ignore .pem
-.pem
+*.pem
