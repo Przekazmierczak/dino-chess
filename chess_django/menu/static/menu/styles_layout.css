@@ -74,6 +74,15 @@
     box-sizing: border-box;
 }
 
+body {
+    position: relative;
+    background: var(--background-url);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
+
 a {
     color: #87CEFA;
 }
@@ -319,10 +328,6 @@ div::-webkit-scrollbar {
 
 #main-content {
     position: relative;
-    background: var(--background-url);
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
     left: var(--sidebar-expanded-width);
     width: var(--width-big-screen);
     min-height: 100vh;

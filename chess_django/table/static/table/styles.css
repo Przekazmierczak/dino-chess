@@ -169,7 +169,6 @@
     user-select: none;
     -webkit-touch-callout: none;
     -webkit-user-select: none;
-    touch-action: none;
 }
 
 #black_player, #black_captured,
@@ -463,6 +462,8 @@
     color: white;
     z-index: 15;
     overflow: auto;
+    margin-top: 5%;
+    margin-bottom: 5%;
 }
 
 .moves_container {
