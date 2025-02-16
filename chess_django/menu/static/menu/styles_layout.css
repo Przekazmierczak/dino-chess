@@ -34,7 +34,7 @@
 
 :root.classic-mode {
     --primary-bg-color: #12171e;
-    --classic-background-color: rgb(54, 54, 54);
+    --background-url: rgb(54, 54, 54);
     
     --dark-square: rgb(105, 140, 180);
     --light-square: rgb(194, 213, 225);
@@ -55,10 +55,6 @@
     --theme-toggle-background: rgb(54, 54, 54);
     --sidebar-dino-theme-url: var(--sidebar-dino_white-theme-url);
     --sidebar-classic-theme-url: var(--sidebar-classic_black-theme-url);
-
-    #main-content {
-        background: var(--classic-background-color);
-    }
 
     #topbar,
     #sidebar {
@@ -373,7 +369,7 @@ div::-webkit-scrollbar {
     color: black;
 }
 
-@media (max-width: 1300px) {
+@media (max-width: 1500px) {
     #sidebar {
         width: var(--sidebar-width);
         transition: all var(--transition-speed) ease;

@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const viewportWidth = window.innerWidth;  // Get the current width of the viewport
         
         // If the viewport width is less than 1300px, remove 'active' class from sidebar to hide it
-        if (viewportWidth < 1300) {
+        if (viewportWidth < 1500) {
             sidebar.classList.remove('active')
         } else {
             // If the viewport is wider, add the 'active' class to show the sidebar

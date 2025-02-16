@@ -467,6 +467,8 @@
 }
 
 .moves_container {
+    margin-top: 3%;
+    margin-bottom: 3%;
     display: flex;
 }
 
@@ -481,6 +483,7 @@
 .movesListWhite,
 .movesListBlack {
     flex: 1 1 40%;
+    align-items: center;
     display: flex;
     cursor: pointer;
 }
@@ -497,8 +500,8 @@
 .movesListWhite .movesListPiece,
 .movesListBlack .movesListPiece {
     flex: 1 1 40%;
-    width: 110%;
-    height: 110%;
+    width: 150%;
+    height: 150%;
     max-width: 50px;
     max-height: 50px;
     background-position: right;
@@ -594,7 +597,7 @@ td {
     }
 }
 
-@media (max-aspect-ratio: 12/9) {
+@media (max-aspect-ratio: 12/9.0001) {
     #table-container {
         align-items: flex-start;
         height: fit-content;

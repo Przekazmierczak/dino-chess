@@ -11,7 +11,6 @@
         <div id="logo_menu"></div>
         <div><a class="layout-buttons" href="{% url 'lobby_index' %}">Play other players</a></div>
         <div><a class="layout-buttons" href="{% url 'computer_index' %}">Play the computer</a></div>
-        <div><a class="layout-buttons"> Play against youself</a></div>
         {% if not user.is_authenticated %}
             <div><a class="layout-buttons" href="{% url 'login' %}">Log In</a></div>
             <div><a class="layout-buttons" href="{% url 'register' %}">Register</a></div>
