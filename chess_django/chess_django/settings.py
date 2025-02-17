@@ -27,6 +27,9 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = bool(int(os.getenv('DEBUG', 0)))
 
+# Determine Redis host based on environment
+REDIS_HOST = "127.0.0.1" if DEBUG else os.environ.get('REDIS_HOST', 'redis')
+
 ALLOWED_HOSTS = ['*']
 
 
@@ -146,11 +149,11 @@ else:
         "default": {
             "BACKEND": "channels_redis.core.RedisChannelLayer",
             "CONFIG": {
-                "hosts": [(os.environ.get('REDIS_HOST', 'redis'), 6379)],
+                "hosts": [(REDIS_HOST, 6379)],
             },
         },
     }
 
 # Celery
-CELERY_BROKER_URL = 'redis://redis:6379/0'
-CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
+CELERY_BROKER_URL = f'redis://{REDIS_HOST}:6379/0'
+CELERY_RESULT_BACKEND = f'redis://{REDIS_HOST}:6379/0'
