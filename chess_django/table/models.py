@@ -5,6 +5,7 @@ from datetime import timedelta
 # Create your models here.
 class Game(models.Model):
     winner = models.CharField(max_length=1, null=True, choices=[(None, 'None'), ('w', 'white'), ('b', 'black'), ('d', 'draw')], default=None)
+    finished_at = models.DateTimeField(null=True, blank=True)
     started = models.BooleanField(default=False)
     white = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='white_games')
     white_ready = models.BooleanField(default=False)
