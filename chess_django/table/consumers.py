@@ -487,6 +487,8 @@ def push_winner_to_database(game, winner):
         db_winner = {"white": "w", "black": "b"}.get(winner, "d")
         # Assign the mapped winner to the game's winner field
         game.winner = db_winner
+        # Assign the current time to the game's finished_at field
+        game.finished_at = datetime.utcnow()
 
         # Save the updated game state in the database
         game.save()
