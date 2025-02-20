@@ -1,0 +1,59 @@
+{% extends "menu/layout.html" %}
+{% load static %}
+
+{% block head %}
+    <title>DinoChess - History</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'menu/styles_user.css' %}">
+    <!-- <script src="{% static 'lobby/lobby_interaction.js' %}"></script> -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var table = document.getElementById("historyTable");
+            for (var i = 0, row; row = table.rows[i]; i++) {
+                // Calculate the time difference
+                var timePast = Date.now() - row.cells[0].innerHTML;
+
+                // Convert time difference into human-readable units
+                var days = Math.floor(timePast/86400000);
+                if (days > 0) {
+                    updateCellWithTime(days, "day", row);
+                    continue;
+                }
+
+                var hours = Math.floor(timePast/3600000);
+                if (hours > 0) {
+                    updateCellWithTime(hours, "hour", row);
+                    continue;
+                }
+
+                var minutes = Math.floor(timePast/60000);
+                if (minutes > 0) {
+                    updateCellWithTime(minutes, "minute", row);
+                    continue;
+                }
+
+                // Default case for seconds
+                row.cells[0].innerHTML = "Few seconds ago";
+            }
+
+            function updateCellWithTime(quantity, unit, row) {
+                row.cells[0].innerHTML = `${quantity} ${unit}${(quantity == 1) ? "": "s"} ago`;
+            }
+        });
+    </script>
+{% endblock %}
+
+{% block body %}
+<div id="history-container">
+    <div id="previous-games">
+        <table id="historyTable">
+            {% for game in games %}
+            <tr class=winner_{{game.winner}} onclick="window.location='{% url 'table' game.id %}'">
+                <td>{{game.finished_at}}</td>
+                <td>{{game.white}}</td>
+                <td>{{game.black}}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+</div>
+{% endblock %}

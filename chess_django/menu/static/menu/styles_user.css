@@ -1,0 +1,54 @@
+#history-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+}
+
+#history-container td {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 70vw;
+    max-width: 150px;
+    min-width: 30px;
+    margin: 0.8rem auto;
+}
+
+#history-container tr {
+    display: flex;
+    /* background-color: var(--primary-bg-color); */
+    color: white;
+    text-decoration: none;
+    border-radius: 0.8rem;
+    font-size: 18px;
+    margin-bottom: 0.8rem;
+    cursor: pointer;
+}
+
+.winner_w {
+    background-color: #4a7f4a;
+}
+
+.winner_l {
+    background-color: #bd5743;
+}
+
+.winner_d {
+    background-color: #4c6898;
+}
+
+#history-container tr:hover {
+    background-color: white;
+    color: black;
+}
+
+@media (max-width: 576px) {
+    #history-container tr {
+        flex-direction: column;
+    }
+    #history-container td {
+        max-width: 300px;
+        height: 5px;
+    }
+}
