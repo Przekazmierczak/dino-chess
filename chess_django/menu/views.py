@@ -89,17 +89,11 @@ def user(request):
     userGames = list(Game.objects.filter((Q(white=user) | Q (black=user)) & Q(finished_at__isnull=False)).order_by('-finished_at'))
     for i in range(len(userGames)):
         userGames[i].finished_at = int(userGames[i].finished_at.timestamp() * 1000)
-        
+
         if userGames[i].winner == "w":
-            if user == userGames[i].white:
-                userGames[i].winner = "w"
-            else:
-                userGames[i].winner = "l"
+            userGames[i].winner = "w" if user == userGames[i].white else "l"
         if userGames[i].winner == "b":
-            if user == userGames[i].white:
-                userGames[i].winner = "l"
-            else:
-                userGames[i].winner = "w"
+            userGames[i].winner = "l" if user == userGames[i].white else "w"
         
     games = {'games': userGames}
     return render(request, "menu/user.html", games)

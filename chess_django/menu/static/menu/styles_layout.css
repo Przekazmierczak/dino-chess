@@ -171,10 +171,14 @@ div::-webkit-scrollbar {
 }
 
 #sidebar-user p {
+    opacity: 0;
+}
+
+#sidebar-user a {
     color: var(--text-color);
+    text-decoration: none;
     margin-left: 1rem;
     font-weight: 600;
-    opacity: 0;
 }
 
 #sidebar.active #sidebar-user p {

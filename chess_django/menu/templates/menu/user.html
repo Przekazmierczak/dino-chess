@@ -43,8 +43,23 @@
 {% endblock %}
 
 {% block body %}
+<div id="user-container">
+    <div id="grid">
+        <div id="avatar"></div>
+        <div id="nick">
+            {{user.username}}
+        </div>
+        <div id="stats">
+            <div>Created: {{user.date_joined|date:"m-d-Y"}}</div>
+            <div>Last seen: Online</div>
+        </div>
+        <div id="change_avatar">Change avatar</div>
+        <a id="logout" href="{% url 'logout' %}">Log Out</a>
+    </div>
+</div>
 <div id="history-container">
     <div id="previous-games">
+        <div id="game-history-text">Game history:</div>
         <table id="historyTable">
             {% for game in games %}
             <tr class=winner_{{game.winner}} onclick="window.location='{% url 'table' game.id %}'">
