@@ -4,42 +4,7 @@
 {% block head %}
     <title>DinoChess - History</title>
     <link rel="stylesheet" type="text/css" href="{% static 'menu/styles_user.css' %}">
-    <!-- <script src="{% static 'lobby/lobby_interaction.js' %}"></script> -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            var table = document.getElementById("historyTable");
-            for (var i = 0, row; row = table.rows[i]; i++) {
-                // Calculate the time difference
-                var timePast = Date.now() - row.cells[0].innerHTML;
-
-                // Convert time difference into human-readable units
-                var days = Math.floor(timePast/86400000);
-                if (days > 0) {
-                    updateCellWithTime(days, "day", row);
-                    continue;
-                }
-
-                var hours = Math.floor(timePast/3600000);
-                if (hours > 0) {
-                    updateCellWithTime(hours, "hour", row);
-                    continue;
-                }
-
-                var minutes = Math.floor(timePast/60000);
-                if (minutes > 0) {
-                    updateCellWithTime(minutes, "minute", row);
-                    continue;
-                }
-
-                // Default case for seconds
-                row.cells[0].innerHTML = "Few seconds ago";
-            }
-
-            function updateCellWithTime(quantity, unit, row) {
-                row.cells[0].innerHTML = `${quantity} ${unit}${(quantity == 1) ? "": "s"} ago`;
-            }
-        });
-    </script>
+    <script src="{% static 'menu/user_interaction.js' %}"></script>
 {% endblock %}
 
 {% block body %}
@@ -53,8 +18,19 @@
             <div>Created: {{user.date_joined|date:"m-d-Y"}}</div>
             <div>Last seen: Online</div>
         </div>
-        <div id="change_avatar">Change avatar</div>
+        <div id="avatar-select">
+            <select>
+                <option value="0">Switch Avatar</option>
+                <option value="1">Pawn</option>
+                <option value="2">Rook</option>
+                <option value="3">Knight</option>
+                <option value="4">Bishop</option>
+                <option value="5">Queen</option>
+                <option value="6">King</option>
+            </select>
+        </div>
         <a id="logout" href="{% url 'logout' %}">Log Out</a>
+        <a id="change-pass" href="{% url 'logout' %}">Change password</a>
     </div>
 </div>
 <div id="history-container">
