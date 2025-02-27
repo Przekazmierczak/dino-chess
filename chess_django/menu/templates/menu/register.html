@@ -28,8 +28,9 @@
             {% endif %}
             <input id="register_button" type="submit" value="Register">
         </form>
-        
-        Already have an account? <a href="{% url 'login' %}">Log In here.</a>
+        <div>Already have an account?</div>
+        <a href="{% url 'login' %}">Log In here.</a>
+        <div>*Email Address is not required</div>
     </div>
 
 {% endblock %}
