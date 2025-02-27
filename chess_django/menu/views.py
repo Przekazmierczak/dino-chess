@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 
 from django.shortcuts import render
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.db import IntegrityError
@@ -97,3 +97,43 @@ def user(request):
         
     games = {'games': userGames}
     return render(request, "menu/user.html", games)
+
+def change_password(request):
+    if request.method == "POST":
+        # Check current password
+        current_password = request.POST["currect_password"]
+        if not request.user.check_password(current_password):
+            return render(request, "menu/changepassword.html", {
+                "message": "Invalid current password."
+            })
+        
+        # Ensure password matches confirmation
+        new_password = request.POST["new_password"]
+        new_confirmation = request.POST["new_confirmation"]
+        if new_password != new_confirmation:
+            return render(request, "menu/changepassword.html", {
+                "message": "Passwords must match."
+            })
+        
+        # Ensure current password doesnt match new password
+        if new_password == current_password:
+            return render(request, "menu/changepassword.html", {
+                "message": "New password cannot be the same as the current password."
+            })
+        
+        # Ensure password is enough length
+        if (len(new_password) <= 5):
+            return render(request, "menu/changepassword.html", {
+                "message": "Passwords is too short."
+            })
+        
+        # Change the password
+        request.user.set_password(new_password)
+        request.user.save()
+
+        # Update session to prevent logout after password change
+        update_session_auth_hash(request, request.user)
+
+        return HttpResponseRedirect(reverse("user"))
+    else:
+        return render(request, "menu/changepassword.html")
