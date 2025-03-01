@@ -10,7 +10,7 @@
 {% block body %}
 <div id="user-container">
     <div id="grid">
-        <div id="avatar"></div>
+        <div id="avatar" class="knight"></div>
         <div id="nick">
             {{user.username}}
         </div>
@@ -20,13 +20,13 @@
         </div>
         <div id="avatar-select">
             <select>
-                <option value="0">Switch Avatar</option>
-                <option value="1">Pawn</option>
-                <option value="2">Rook</option>
-                <option value="3">Knight</option>
-                <option value="4">Bishop</option>
-                <option value="5">Queen</option>
-                <option value="6">King</option>
+                <option value="">Switch Avatar</option>
+                <option value="pawn">Pawn</option>
+                <option value="rook">Rook</option>
+                <option value="knight">Knight</option>
+                <option value="bishop">Bishop</option>
+                <option value="queen">Queen</option>
+                <option value="king">King</option>
             </select>
         </div>
         <a id="logout" href="{% url 'logout' %}">Log Out</a>

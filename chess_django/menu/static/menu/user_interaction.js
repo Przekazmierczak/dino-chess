@@ -1,3 +1,8 @@
+function changeAvatar(value) {
+    document.querySelector("#avatar").classList = "";
+    document.querySelector("#avatar").classList.add(value);
+}
+
 document.addEventListener('DOMContentLoaded', function () {
     var table = document.getElementById("historyTable");
     for (var i = 0, row; row = table.rows[i]; i++) {
@@ -76,6 +81,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     options[siblingNode].removeAttribute("class");
                     }
                     this.setAttribute("class", "same-as-selected");
+
+                    changeAvatar(selectElement[optionIndex].value);
+
                     break;
                 }
             }
