@@ -6,3 +6,4 @@ from table.models import Game
 class User(AbstractUser):
     game = models.ForeignKey(Game, on_delete=models.SET_NULL, null=True)
     username = models.CharField(max_length=19, unique=True)
+    avatar = models.CharField(max_length=10, default="pawn")
