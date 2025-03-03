@@ -1,10 +1,11 @@
-from datetime import datetime, timezone
-
 from django.shortcuts import render
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.db import IntegrityError
+
+import json
+from django.http import JsonResponse
 
 from table.models import Game
 from django.db.models import Q
@@ -86,21 +87,32 @@ def register(request):
     
 def user(request):
     user = request.user
+
+    # Fetch all games where the logged-in user is either the white or black player,
+    # and the game has finished (finished_at is not null). The games are ordered
+    # by their finish time in descending order (most recent first).
     userGames = list(Game.objects.filter((Q(white=user) | Q (black=user)) & Q(finished_at__isnull=False)).order_by('-finished_at'))
+
+    # Loop through the user's games to modify their attributes for the frontend
     for i in range(len(userGames)):
+        # Convert the game's finish time to a JavaScript-compatible timestamp (milliseconds since epoch)
         userGames[i].finished_at = int(userGames[i].finished_at.timestamp() * 1000)
 
+        # Determine whether the logged-in user won or lost the game
         if userGames[i].winner == "w":
             userGames[i].winner = "w" if user == userGames[i].white else "l"
         if userGames[i].winner == "b":
             userGames[i].winner = "l" if user == userGames[i].white else "w"
-        
+    
+    # Prepare the games data to be passed to the template
     games = {'games': userGames}
+
+    # Render the template "menu/user.html" with the processed games data
     return render(request, "menu/user.html", games)
 
 def change_password(request):
     if request.method == "POST":
-        # Check current password
+        # Check current password'
         current_password = request.POST["currect_password"]
         if not request.user.check_password(current_password):
             return render(request, "menu/changepassword.html", {
@@ -137,3 +149,29 @@ def change_password(request):
         return HttpResponseRedirect(reverse("user"))
     else:
         return render(request, "menu/changepassword.html")
+
+def save_avatar(request):
+    if request.method == "POST":
+        try:
+            body = json.loads(request.body)
+            avatar = body.get('avatar')
+
+            # Check if the 'avatar' data is present in the request body
+            if not avatar:
+                # If no avatar data is provided, return a 400 Bad Request response
+                return JsonResponse({'message': 'No avatar provided!'}, status=400)
+
+            # Update the user's avatar field with the provided data
+            request.user.avatar = avatar
+            request.user.save()
+
+            # Return a success response with a 201 Created status code
+            return JsonResponse({'message': 'Avatar saved successfully!'}, status=201)
+        
+        # Handle database integrity errors, such as unique constraint violations
+        except IntegrityError:
+            return JsonResponse({'message': 'Avatar could not be saved due to integrity issues!'}, status=500)
+        
+        # Handle any other exceptions that may occur during the process
+        except Exception as e:
+            return JsonResponse({'message': f'An error occurred: {str(e)}'}, status=500)

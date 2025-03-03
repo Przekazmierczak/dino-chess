@@ -10,7 +10,7 @@
 {% block body %}
 <div id="user-container">
     <div id="grid">
-        <div id="avatar" class="knight"></div>
+        <div id="avatar" class={{user.avatar}}></div>
         <div id="nick">
             {{user.username}}
         </div>
@@ -19,6 +19,8 @@
             <div>Last seen: Online</div>
         </div>
         <div id="avatar-select">
+            {% csrf_token %}
+            <div id="save-avatar-url" data-url="{% url 'saveavatar' %}"></div>
             <select>
                 <option value="">Switch Avatar</option>
                 <option value="pawn">Pawn</option>
