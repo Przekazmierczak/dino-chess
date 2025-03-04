@@ -117,8 +117,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Function to change the avatar's appearance based on the selected value
     function changeAvatar(value) {
-        document.querySelector("#avatar").classList = "";
-        document.querySelector("#avatar").classList.add(value);
+        const userAvatar = document.querySelector("#avatar");
+        const sideBarAvatar = document.querySelector("#sidebar-avatar");
+
+        userAvatar.classList = "";
+        userAvatar.classList.add(`avatar-${value}`);
+
+        sideBarAvatar.classList = "";
+        sideBarAvatar.classList.add(`avatar-${value}`);
     }
 
     // Function to save the selected avatar to the server

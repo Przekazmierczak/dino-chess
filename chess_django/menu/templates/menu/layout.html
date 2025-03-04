@@ -105,13 +105,10 @@
             </ul>
             {% if user.is_authenticated %}
             <div id="sidebar-user">
-                <div>
-                    <p>
-                        <a href="{% url 'user' %}">
-                            {{ user.username }}
-                        </a>
-                    </p>
-                </div>
+                <a href="{% url 'user' %}">
+                    <div id="sidebar-avatar" class="avatar-{{ user.avatar }}"></div>
+                    <p>{{ user.username }}</p>
+                </a>
             </div>
             <ul>
                 <li>

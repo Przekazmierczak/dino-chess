@@ -30,6 +30,14 @@
     --sidebar-classic-theme-url: var(--sidebar-classic_white-theme-url);
 
     --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+    --pawn: var(--dino-white-pawn);
+    --rook: var(--dino-white-rook);
+    --knight: var(--dino-white-knight);
+    --bishop: var(--dino-white-bishop);
+    --queen: var(--dino-white-queen);
+    --king: var(--dino-white-king);
+    --avatar-background: rgb(255, 232, 189);
 }
 
 :root.classic-mode {
@@ -55,6 +63,14 @@
     --theme-toggle-background: rgb(54, 54, 54);
     --sidebar-dino-theme-url: var(--sidebar-dino_white-theme-url);
     --sidebar-classic-theme-url: var(--sidebar-classic_black-theme-url);
+
+    --pawn: var(--classic-white-pawn);
+    --rook: var(--classic-white-rook);
+    --knight: var(--classic-white-knight);
+    --bishop: var(--classic-white-bishop);
+    --queen: var(--classic-white-queen);
+    --king: var(--classic-white-king);
+    --avatar-background: rgb(146, 146, 146);
 
     #topbar,
     #sidebar {
@@ -166,7 +182,6 @@ div::-webkit-scrollbar {
 
 #sidebar-user {
     display: flex;
-    align-items: center;
     margin: 1rem 0;
 }
 
@@ -175,6 +190,7 @@ div::-webkit-scrollbar {
 }
 
 #sidebar-user a {
+    display: flex;
     color: var(--text-color);
     text-decoration: none;
     margin-left: 1rem;
@@ -183,6 +199,38 @@ div::-webkit-scrollbar {
 
 #sidebar.active #sidebar-user p {
     opacity: 1;
+}
+
+#sidebar-avatar {
+    display: flex;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-color: var(--avatar-background);
+    border: white solid 1px;
+    border-radius: 50%;
+    width: 25px;
+    height: 25px;
+    margin-right: 5px;
+}
+
+.avatar-pawn {
+    background-image: var(--pawn);
+}
+.avatar-rook {
+    background-image: var(--rook);
+}
+.avatar-knight {
+    background-image: var(--knight);
+}
+.avatar-bishop {
+    background-image: var(--bishop);
+}
+.avatar-queen {
+    background-image: var(--queen);
+}
+.avatar-king {
+    background-image: var(--king);
 }
 
 #sidebar ul li {

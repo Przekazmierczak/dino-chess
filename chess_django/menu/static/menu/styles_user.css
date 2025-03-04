@@ -1,22 +1,5 @@
 :root {
     --square-size: 45px;
-    --pawn: var(--dino-white-pawn);
-    --rook: var(--dino-white-rook);
-    --knight: var(--dino-white-knight);
-    --bishop: var(--dino-white-bishop);
-    --queen: var(--dino-white-queen);
-    --king: var(--dino-white-king);
-    --avatar-background: rgb(255, 232, 189);
-}
-
-:root.classic-mode {
-    --pawn: var(--classic-white-pawn);
-    --rook: var(--classic-white-rook);
-    --knight: var(--classic-white-knight);
-    --bishop: var(--classic-white-bishop);
-    --queen: var(--classic-white-queen);
-    --king: var(--classic-white-king);
-    --avatar-background: rgb(146, 146, 146);
 }
 
 #user-container {
@@ -45,25 +28,6 @@
     background-color: var(--avatar-background);
     border: var(--primary-bg-color) solid 5px;
     border-radius: 50%;
-}
-
-.pawn {
-    background-image: var(--pawn);
-}
-.rook {
-    background-image: var(--rook);
-}
-.knight {
-    background-image: var(--knight);
-}
-.bishop {
-    background-image: var(--bishop);
-}
-.queen {
-    background-image: var(--queen);
-}
-.king {
-    background-image: var(--king);
 }
 
 #nick {
