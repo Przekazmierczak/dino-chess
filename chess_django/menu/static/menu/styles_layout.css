@@ -195,6 +195,7 @@ div::-webkit-scrollbar {
     text-decoration: none;
     margin-left: 1rem;
     font-weight: 600;
+    white-space: nowrap;
 }
 
 #sidebar.active #sidebar-user p {
@@ -211,6 +212,8 @@ div::-webkit-scrollbar {
     border-radius: 50%;
     width: 25px;
     height: 25px;
+    min-width: 25px;
+    min-height: 25px;
     margin-right: 5px;
 }
 
