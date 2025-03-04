@@ -9,10 +9,10 @@ class Computer:
     def __init__(self, board, turn, castling, enpassant, soft_moves, total_moves, user):
         # Map user difficulty to corresponding ELO rating
         difficulty = {
-            "Easy_Computer": (50, 1),       # Low ELO for easy difficulty
-            "Medium_Computer": (1200, 4),   # Moderate ELO for medium difficulty
-            "Hard_Computer": (1600, 8),    # High ELO for hard difficulty
-            "Impossible_Computer": (None, None) # No limit for the hardest difficulty
+            "Easy AI": (50, 1),       # Low ELO for easy difficulty
+            "Medium AI": (1200, 4),   # Moderate ELO for medium difficulty
+            "Hard AI": (1600, 8),    # High ELO for hard difficulty
+            "Impossible AI": (None, None) # No limit for the hardest difficulty
         }
         self.elo = difficulty[user][0]
         self.depth = difficulty[user][1]

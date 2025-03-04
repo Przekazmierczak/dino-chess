@@ -11,7 +11,7 @@ def create_game(request, difficulty):
     new_game = Game.objects.create()
 
     new_game.with_ai = True
-    new_game.black = User.objects.get(username=f"{difficulty}_Computer")
+    new_game.black = User.objects.get(username=f"{difficulty} AI")
     new_game.black_ready = True
     new_game.save()
 
