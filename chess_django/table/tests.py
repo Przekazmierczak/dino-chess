@@ -1239,6 +1239,8 @@ class TableConsumerTestCase5(TestCase):
             'play_audio': False,
             'white_draw': False,
             'black_draw': False,
+            'white_avatar': "correct avatar",
+            'black_avatar': "correct avatar"
         }
 
         expected_message = {
@@ -1260,6 +1262,8 @@ class TableConsumerTestCase5(TestCase):
             'play_audio': event["play_audio"],
             'white_draw': event["white_draw"],
             'black_draw': event["black_draw"],
+            'white_avatar': event["white_avatar"],
+            'black_avatar': event["black_avatar"],
         }
         construct_game_state_message.return_value = expected_message
         
@@ -1294,6 +1298,8 @@ class TableConsumerTestCase6(TestCase):
         play_audio = False
         white_draw = True
         black_draw = False
+        white_avatar = "pawn"
+        black_avatar = "king"
 
         # Call the handle_user_action method
         game_state_message = construct_game_state_message(
@@ -1301,7 +1307,8 @@ class TableConsumerTestCase6(TestCase):
             black_ready, winner, board_id, board, turn,
             checking, total_moves, soft_moves,
             white_time_left, black_time_left, last_move,
-            prev_boards_id_moves, play_audio, white_draw, black_draw)
+            prev_boards_id_moves, play_audio, white_draw, black_draw,
+            white_avatar, black_avatar)
     
         # Verify the message sent to WebSocket room group
         assert game_state_message['white_player'] == white_player
@@ -1321,6 +1328,9 @@ class TableConsumerTestCase6(TestCase):
         assert game_state_message['play_audio'] == play_audio
         assert game_state_message['white_draw'] == white_draw
         assert game_state_message['black_draw'] == black_draw
+        assert game_state_message['black_draw'] == black_draw
+        assert game_state_message['white_avatar'] == white_avatar
+        assert game_state_message['black_avatar'] == black_avatar
 
 class TableConsumerTestCase7(TestCase):
 
