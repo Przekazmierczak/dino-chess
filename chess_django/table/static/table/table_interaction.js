@@ -167,24 +167,36 @@ function colorBoard() {
 function showPlayers(state) {
     const players = [
         {
-            element: document.getElementById("white_player"),
+            player_element: document.getElementById("white_player"),
+            name_element: document.getElementById("white_name"),
+            avatar_element: document.getElementById("white_avatar"),
             time: document.getElementById("white_time"),
             name: state.white_player,
+            avatar: state.white_avatar,
             ready: state.white_player_ready
         },
         {
-            element: document.getElementById("black_player"),
+            player_element: document.getElementById("black_player"),
+            name_element: document.getElementById("black_name"),
+            avatar_element: document.getElementById("black_avatar"),
             time: document.getElementById("black_time"),
             name: state.black_player,
+            avatar: state.black_avatar,
             ready: state.black_player_ready
         }
     ];
     
     // Update each player's display
     players.forEach(player => {
-        player.element.innerHTML = `${player.name}`;
-        player.element.classList.toggle("unready", !player.ready);
+        player.name_element.innerHTML = `${player.name}`;
+        player.player_element.classList.toggle("unready", !player.ready);
         player.time.classList.toggle("unready", !player.ready);
+        player.avatar_element.classList = "";
+        if (player.avatar) {
+            player.avatar_element.classList = `avatar-${player.avatar}`;
+        } else {
+            player.avatar_element.classList = "hidden";
+        }
     });
 }
 

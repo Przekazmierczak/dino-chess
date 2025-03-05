@@ -40,6 +40,9 @@ class TableConsumer(AsyncWebsocketConsumer):
         white_player = current_game.white.username if current_game.white else "Player 1"
         black_player = current_game.black.username if current_game.black else "Player 2"
 
+        white_avatar = current_game.white.avatar if current_game.white else ""
+        black_avatar = current_game.black.avatar if current_game.black else ""
+
         # Check if the game has started
         if if_game_started(current_game):
             # Fetch the latest board state from the database
@@ -76,7 +79,8 @@ class TableConsumer(AsyncWebsocketConsumer):
             current_game.black_ready, winner, board_id, board, turn,
             checking, total_moves, soft_moves,
             white_time_left, black_time_left, last_move,
-            prev_boards_id_moves, play_audio, current_game.white_draw, current_game.black_draw
+            prev_boards_id_moves, play_audio, current_game.white_draw, current_game.black_draw,
+            white_avatar, black_avatar
             )
         await self.send_game_state_to_websocket(message)
 
@@ -117,6 +121,8 @@ class TableConsumer(AsyncWebsocketConsumer):
         prev_board = json.loads(prev_state.board)
         white_player = current_game.white.username
         black_player = current_game.black.username
+        white_avatar = current_game.white.avatar
+        black_avatar = current_game.black.avatar
         prev_boards_id_moves = current_game.boards
 
         # Create the new board state
@@ -180,7 +186,8 @@ class TableConsumer(AsyncWebsocketConsumer):
             current_game.black_ready, winner, new_board_id, board, turn,
             checking, total_moves, soft_moves,
             white_time_left, black_time_left, last_move,
-            prev_boards_id_moves, True, current_game.white_draw, current_game.black_draw
+            prev_boards_id_moves, True, current_game.white_draw, current_game.black_draw,
+            white_avatar, black_avatar
             )
         await self.send_game_state_to_room_group(message)
 
@@ -191,6 +198,10 @@ class TableConsumer(AsyncWebsocketConsumer):
         # Extract the usernames of the white and black players from the game object
         white_player = current_game.white.username
         black_player = current_game.black.username
+
+
+        white_avatar = current_game.white.avatar
+        black_avatar = current_game.black.avatar
 
         # Fetch the list of previous boards and their associated moves from the game object
         previous_boards_and_moves = current_game.boards
@@ -214,7 +225,8 @@ class TableConsumer(AsyncWebsocketConsumer):
             current_game.black_ready, None, board_id, simplified_board, latest_board_state .turn,
             requested_board_data.checking, latest_board_state .total_moves, latest_board_state .soft_moves,
             white_time_left, black_time_left, requested_board_data .last_move,
-            previous_boards_and_moves, True, False, False
+            previous_boards_and_moves, True, False, False,
+            white_avatar, black_avatar
             )
         await self.send_game_state_to_websocket(message)
     
@@ -225,6 +237,9 @@ class TableConsumer(AsyncWebsocketConsumer):
         # Get the usernames of the white and black players
         white_player = current_game.white.username
         black_player = current_game.black.username
+
+        white_avatar = current_game.white.avatar
+        black_avatar = current_game.black.avatar
 
         # Load the current board state from JSON and simplify it
         current_board_json = json.loads(current_board.board)
@@ -252,7 +267,8 @@ class TableConsumer(AsyncWebsocketConsumer):
             current_game.black_ready, winner, current_board.id, board, current_board.turn,
             current_board.checking, current_board.total_moves, current_board.soft_moves,
             white_time_left, black_time_left, current_board.last_move,
-            current_game.boards, False, False, False
+            current_game.boards, False, False, False,
+            white_avatar, black_avatar
             )
         await self.send_game_state_to_room_group(message)
 
@@ -263,6 +279,9 @@ class TableConsumer(AsyncWebsocketConsumer):
         # Get the usernames of the white and black players
         white_player = current_game.white.username
         black_player = current_game.black.username
+
+        white_avatar = current_game.white.avatar
+        black_avatar = current_game.black.avatar
 
         # Load the current board state from JSON and simplify it
         current_board_json = json.loads(current_board.board)
@@ -313,7 +332,8 @@ class TableConsumer(AsyncWebsocketConsumer):
             current_game.black_ready, winner, current_board.id, board, current_board.turn,
             current_board.checking, current_board.total_moves, current_board.soft_moves,
             white_time_left, black_time_left, current_board.last_move,
-            current_game.boards, False, white_draw, black_draw
+            current_game.boards, False, white_draw, black_draw,
+            white_avatar, black_avatar
             )
         await self.send_game_state_to_room_group(message)
         
@@ -331,6 +351,9 @@ class TableConsumer(AsyncWebsocketConsumer):
         # Get player usernames or default names
         white_player = current_game.white.username if current_game.white else "Player 1"
         black_player = current_game.black.username if current_game.black else "Player 2"
+
+        white_avatar = current_game.white.avatar if current_game.white else ""
+        black_avatar = current_game.black.avatar if current_game.black else ""
 
         # Check if the game has started
         if if_game_started(current_game):
@@ -360,7 +383,8 @@ class TableConsumer(AsyncWebsocketConsumer):
             current_game.black_ready, winner, board_id, board, turn,
             checking, total_moves, soft_moves,
             white_time_left, black_time_left, last_move,
-            [], False, current_game.white_draw, current_game.black_draw
+            [], False, current_game.white_draw, current_game.black_draw,
+            white_avatar, black_avatar
             )
         await self.send_game_state_to_room_group(message)
 
@@ -385,7 +409,8 @@ class TableConsumer(AsyncWebsocketConsumer):
             event["black_player_ready"], event["winner"], event["board_id"], event["board"], 
             event["turn"], event["checking"], event["total_moves"], event["soft_moves"],
             event["white_time_left"], event["black_time_left"], event["last_move"],
-            event["prev_boards_id_moves"], event["play_audio"], event["white_draw"], event["black_draw"]
+            event["prev_boards_id_moves"], event["play_audio"], event["white_draw"], event["black_draw"],
+            event["white_avatar"], event["black_avatar"]
         )
         await self.send_game_state_to_websocket(message)
     
@@ -402,7 +427,8 @@ def construct_game_state_message(
         black_player_ready, winner, board_id, board, turn,
         checking, total_moves, soft_moves, 
         white_time_left, black_time_left, last_move,
-        prev_boards_id_moves, play_audio, white_draw, black_draw
+        prev_boards_id_moves, play_audio, white_draw, black_draw,
+        white_avatar, black_avatar
     ):
     # Constructs a dictionary containing the game state
     return {
@@ -423,7 +449,9 @@ def construct_game_state_message(
         "prev_boards_id_moves": prev_boards_id_moves,
         "play_audio": play_audio,
         "white_draw": white_draw,
-        "black_draw": black_draw
+        "black_draw": black_draw,
+        "white_avatar": white_avatar,
+        "black_avatar": black_avatar
     }
         
 @sync_to_async
