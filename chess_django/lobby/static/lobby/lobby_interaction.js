@@ -18,6 +18,7 @@ function createTable(data) {
     // Loop through each row in the data array
     data.forEach(gameData => {
         const gameRow = document.createElement('tr');
+        gameRow.className = 'default-button';
 
         gameRow.addEventListener('click', () => {
             window.location.href = `table/${gameData[0]}/`;

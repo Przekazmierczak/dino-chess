@@ -30,6 +30,7 @@
     --sidebar-classic-theme-url: var(--sidebar-classic_white-theme-url);
 
     --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    --font-size: 15px;
 
     --pawn: var(--dino-white-pawn);
     --rook: var(--dino-white-rook);
@@ -99,6 +100,23 @@ a {
     color: #87CEFA;
 }
 
+.default-button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--primary-bg-color);
+    color: white;
+    text-decoration: none;
+    border-radius: 0.8rem;
+    font-size: var(--font-size);
+    cursor: pointer;
+}
+
+.default-button:hover {
+    background-color: var(--hover-bg-color);
+    color: var(--hover-text-color);
+}
+
 #topbar,
 #sidebar {
     position: fixed;
@@ -137,7 +155,6 @@ div::-webkit-scrollbar {
     color: var(--text-color);
     top: .4rem;
     left: 54.3%;
-    /* font-size: 1.2rem; */
     line-height: 50px;
     transform: translateX(-50%);
     cursor: pointer;
@@ -275,6 +292,7 @@ div::-webkit-scrollbar {
 .nav-item {
     white-space: nowrap;
     pointer-events: none;
+    font-size: var(--font-size)
 }
 
 #sidebar .nav-item {
@@ -403,25 +421,12 @@ div::-webkit-scrollbar {
     padding: 20px;
 }
 
-.layout-buttons {
-    display: flex;
-    justify-content: center;
-    color: white;
-    background-color: var(--primary-bg-color);
-    align-items: center;
-    text-decoration: none;
-    border-radius: 0.8rem;
+.layout-button {
     line-height: 50px;
-    font-size: 18px;
     width: 70vw;
     max-width: 400px;
     min-width: 120px;
     margin: 0.8rem auto;
-}
-
-.layout-buttons:hover {
-    background-color: white;
-    color: black;
 }
 
 @media (max-width: 1500px) {

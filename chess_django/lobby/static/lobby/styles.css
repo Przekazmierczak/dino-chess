@@ -16,19 +16,7 @@
 }
 
 #lobby-container tr {
-    display: flex;
-    color: white;
-    background-color: var(--primary-bg-color);
-    text-decoration: none;
-    border-radius: 0.8rem;
-    font-size: 18px;
     margin-bottom: 0.8rem;
-    cursor: pointer;
-}
-
-#lobby-container tr:hover {
-    background-color: white;
-    color: black;
 }
 
 .player-unready {

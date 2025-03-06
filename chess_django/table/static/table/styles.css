@@ -947,7 +947,7 @@ td.checking {
 }
 
 #login_link {
-    font-size: min(0.4 * var(--square-size), 17px);
+    font-size: min(0.4 * var(--square-size), var(--font-size));
 }
 
 .captured_piece {

@@ -129,41 +129,13 @@
 #change-pass {
     grid-row: 3 / 4;
     grid-column: 7 / 11;
-    display: flex;
-    justify-content: center;
-    align-items: center;
     margin-bottom: 5%;
-    background-color: var(--primary-bg-color);
-    color: white;
-    text-decoration: none;
-    border-radius: 0.8rem;
-    font-size: 15px;
-    cursor: pointer;
-}
-
-#change-pass:hover {
-    background-color: var(--hover-bg-color);
-    color: var(--hover-text-color);
 }
 
 #logout {
     grid-row: 4 / 5;
     grid-column: 7 / 11;
-    display: flex;
-    justify-content: center;
-    align-items: center;
     margin-bottom: 5%;
-    background-color: var(--primary-bg-color);
-    color: white;
-    text-decoration: none;
-    border-radius: 0.8rem;
-    font-size: 15px;
-    cursor: pointer;
-}
-
-#logout:hover {
-    background-color: var(--hover-bg-color);
-    color: var(--hover-text-color);
 }
 
 #history-container {
@@ -177,12 +149,16 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 50px;
+    height: 45px;
     color: white;
     background-color: rgb(75, 75, 75);
-    font-size: 18px;
+    font-size: 15px;
     margin-bottom: 0.8rem;
     border-radius: 0.8rem;
+}
+
+#load-more-button {
+    height: 45px;
 }
 
 #history-container td {
@@ -200,7 +176,7 @@
     color: white;
     text-decoration: none;
     border-radius: 0.8rem;
-    font-size: 18px;
+    font-size: 15px;
     margin-bottom: 0.8rem;
     cursor: pointer;
 }
