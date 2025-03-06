@@ -87,11 +87,14 @@ def register(request):
     
 def user(request):
     user = request.user
+    last = -1
 
     # Fetch all games where the logged-in user is either the white or black player,
     # and the game has finished (finished_at is not null). The games are ordered
     # by their finish time in descending order (most recent first).
-    userGames = list(Game.objects.filter((Q(white=user) | Q (black=user)) & Q(finished_at__isnull=False)).order_by('-finished_at'))
+    userGames = list(Game.objects.filter((Q(white=user) | Q (black=user)) & Q(finished_at__isnull=False)).order_by('-finished_at')[:4])
+    if len(userGames) > 3:
+        last = userGames[-1].id
 
     # Loop through the user's games to modify their attributes for the frontend
     for i in range(len(userGames)):
@@ -105,10 +108,10 @@ def user(request):
             userGames[i].winner = "l" if user == userGames[i].white else "w"
     
     # Prepare the games data to be passed to the template
-    games = {'games': userGames}
+    res = {'games': userGames[:3], 'last': last}
 
     # Render the template "menu/user.html" with the processed games data
-    return render(request, "menu/user.html", games)
+    return render(request, "menu/user.html", res)
 
 def change_password(request):
     if request.method == "POST":

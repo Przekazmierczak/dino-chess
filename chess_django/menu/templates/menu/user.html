@@ -31,8 +31,8 @@
                 <option value="king">King</option>
             </select>
         </div>
-        <a id="logout" href="{% url 'logout' %}">Log Out</a>
-        <a id="change-pass" href="{% url 'changepassword' %}">Change password</a>
+        <a id="logout" class="default-button" href="{% url 'logout' %}">Log Out</a>
+        <a id="change-pass" class="default-button" href="{% url 'changepassword' %}">Change password</a>
     </div>
 </div>
 <div id="history-container">
@@ -47,6 +47,9 @@
             </tr>
             {% endfor %}
         </table>
+        {% if last != -1 %}
+        <div id="load-more-button" class="default-button">Load more</div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}
