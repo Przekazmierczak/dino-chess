@@ -52,15 +52,16 @@ def register(request):
                 "message": "Username is too short."
             })
         
+        # Ensure password matches confirmation
+        password = request.POST["password"]
+        confirmation = request.POST["confirmation"]
+
         # Ensure username is not too long
         if len(password) >= 20:
             return render(request, "menu/register.html", {
                 "message": "Username is too long."
             })
-        
-        # Ensure password matches confirmation
-        password = request.POST["password"]
-        confirmation = request.POST["confirmation"]
+
         if password != confirmation:
             return render(request, "menu/register.html", {
                 "message": "Passwords must match."
