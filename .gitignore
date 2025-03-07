@@ -16,3 +16,6 @@ chess_django/staticfiles/
 
 # Ignore .pem
 *.pem
+
+# Ignore my virtual environment dictonary
+myenv/
