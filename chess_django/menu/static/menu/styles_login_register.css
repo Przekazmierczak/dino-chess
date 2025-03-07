@@ -26,26 +26,12 @@
 #login_button,
 #register_button,
 #changepassword_button {
-    display: flex;
-    color: white;
-    background-color: var(--primary-bg-color);
-    text-decoration: none;
-    border-radius: 0.8rem;
-    font-size: 18px;
     margin-bottom: 0.8rem;
     width: 80vw;
     max-width: 250px;
     min-width: 30px;
     height: 50px;
     border: 0px;
-    cursor: pointer;
-}
-
-#login_button:hover,
-#register_button:hover,
-#changepassword_button:hover {
-    background-color: white;
-    color: black;
 }
 
 #login_message,
