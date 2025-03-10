@@ -176,4 +176,30 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Event listener to close dropdowns when clicking outside
     document.addEventListener("click", closeAllSelect);
+
+    const loadMoreUrl = document.getElementById('load-more-url').getAttribute('data-url');
+
+    document.getElementById("load-more-button").addEventListener("click", function() {
+        loadGames(4, loadMoreUrl, csrf_token);
+    });
+
+    // Function to load more games
+    function loadGames(last, loadMoreUrl, csrf_token) {
+        fetch(loadMoreUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrf_token
+            },
+            body: JSON.stringify({ lastID: last })
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Success:', data.message);
+        })
+        .catch(error => {
+            console.error('Error', error);
+        })
+    }
+    
 });

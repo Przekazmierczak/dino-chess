@@ -179,3 +179,22 @@ def save_avatar(request):
         # Handle any other exceptions that may occur during the process
         except Exception as e:
             return JsonResponse({'message': f'An error occurred: {str(e)}'}, status=500)
+
+def load_more(request):
+    user = request.user
+    if request.method == "POST":
+        try:
+            body = json.loads(request.body)
+            last = body.get('lastID')
+
+            # Check if the 'avatar' data is present in the request body
+            if not last:
+                # If no avatar data is provided, return a 400 Bad Request response
+                return JsonResponse({'message': 'No ID provided!'}, status=400)
+            games = list(Game.objects.filter(id__gte=last).filter((Q(white=user) | Q(black=user)) & Q(finished_at__isnull=False)).order_by('-finished_at')[:4])
+            # Return a success response with a 201 Created status code
+            return JsonResponse({'message': str(games)}, status=201)
+        
+        # Handle any other exceptions that may occur during the process
+        except Exception as e:
+            return JsonResponse({'message': f'An error occurred: {str(e)}'}, status=500)

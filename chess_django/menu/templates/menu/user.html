@@ -48,6 +48,7 @@
             {% endfor %}
         </table>
         {% if last != -1 %}
+        <div id="load-more-url" data-url="{% url 'loadmore' %}"></div>
         <div id="load-more-button" class="default-button">Load more</div>
         {% endif %}
     </div>
