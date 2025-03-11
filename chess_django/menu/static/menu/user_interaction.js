@@ -1,43 +1,5 @@
 document.addEventListener('DOMContentLoaded', function () {
-    var table = document.getElementById("historyTable");
-    for (var i = 0, row; row = table.rows[i]; i++) {
-        // Calculate the time difference between the current time and the timestamp in the first cell of the row
-        var timePast = Date.now() - row.cells[0].innerHTML;
-
-        // Convert the time difference into human-readable units (e.g., days, hours, minutes)
-
-        // Calculate the number of days from the time difference
-        var days = Math.floor(timePast/86400000);
-        if (days > 0) {
-            // If the time difference is in days, update the cell with the corresponding text and continue to the next row
-            updateCellWithTime(days, "day", row);
-            continue;
-        }
-
-        // Calculate the number of hours from the time difference
-        var hours = Math.floor(timePast/3600000);
-        if (hours > 0) {
-            // If the time difference is in hours, update the cell with the corresponding text and continue to the next row
-            updateCellWithTime(hours, "hour", row);
-            continue;
-        }
-
-        // Calculate the number of minutes from the time difference
-        var minutes = Math.floor(timePast/60000);
-        if (minutes > 0) {
-            // If the time difference is in minutes, update the cell with the corresponding text and continue to the next row
-            updateCellWithTime(minutes, "minute", row);
-            continue;
-        }
-
-        // Default case: If the time difference is less than a minute, display "Few seconds ago"
-        row.cells[0].innerHTML = "Few seconds ago";
-    }
-
-    function updateCellWithTime(quantity, unit, row) {
-        // Append an "s" to the unit if the value is greater than 1 (e.g., "days" instead of "day")
-        row.cells[0].innerHTML = `${quantity} ${unit}${(quantity == 1) ? "": "s"} ago`;
-    }
+    // AVATAR SELECT
 
     var avatarSelectContainer, dropdownLength, dropdownElement, selectedItem, dropdownItemsContainer, dropdownOptionItem;
     // Look for any elements with the class "avatar-select":
@@ -177,13 +139,34 @@ document.addEventListener('DOMContentLoaded', function () {
     // Event listener to close dropdowns when clicking outside
     document.addEventListener("click", closeAllSelect);
 
+
+    // LOAD GAMES
+
+    // Get the URL for loading more data from the DOM element
     const loadMoreUrl = document.getElementById('load-more-url').getAttribute('data-url');
 
+    // Get references to the history table and "Load More" button elements
+    const historyTableElement = document.getElementById("historyTable");
+    const loadMoreButtonElement = document.getElementById("load-more-button");
+
+    // Base URL for navigating to individual game pages
+    const tableUrl = document.getElementById('table-url').getAttribute('data-url').slice(0, -2);
+
+    // Number of games to fetch and display at a time
+    const gamesPerBatch = 10;
+
+    // Keep track of the last game ID loaded
+    let lastGameID = -1;
+
+    // Initial load of games when the page is first loaded
+    loadGames(lastGameID, loadMoreUrl, csrf_token);
+
+    // Set up an event listener for the "Load More" button
     document.getElementById("load-more-button").addEventListener("click", function() {
-        loadGames(4, loadMoreUrl, csrf_token);
+        loadGames(lastGameID, loadMoreUrl, csrf_token);
     });
 
-    // Function to load more games
+    // Function to fetch more games from the server
     function loadGames(last, loadMoreUrl, csrf_token) {
         fetch(loadMoreUrl, {
             method: 'POST',
@@ -196,10 +179,85 @@ document.addEventListener('DOMContentLoaded', function () {
         .then(response => response.json())
         .then(data => {
             console.log('Success:', data.message);
+            createHistoryTable(historyTableElement, data.message);
+            lastGameID = data.message[data.message.length - 1]["id"];
         })
         .catch(error => {
             console.error('Error', error);
         })
     }
+
+    // Function to update the history table with new rows
+    function createHistoryTable(historyTable, gameDataRows) {
+        let length = gameDataRows.length;
+
+        // Show or hide the "Load More" button based on the number of rows received
+        if (length >= gamesPerBatch) {
+            loadMoreButtonElement.classList.remove("hidden");
+            length = gamesPerBatch;
+        } else {
+            loadMoreButtonElement.classList.add("hidden");
+        }
+
+        // Create and append rows for each data entry
+        for (let i = 0; i < length; i++) {
+            const tableRow = document.createElement("tr");
+
+            // Set custom attributes for the row
+            tableRow.setAttribute("data-id", gameDataRows[i]["id"]);
+            tableRow.setAttribute("class", `winner_${gameDataRows[i]["winner"]}`);
+            
+            // Convert the time difference to a human-readable format
+            gameDataRows[i]["time"] = convertTime(Date.now() - gameDataRows[i]["time"])
+
+            // Add table cells for each data column
+            for (const field of ["time", "white", "black"]) {
+                const tableCell = document.createElement("td");
+                tableCell.innerHTML = gameDataRows[i][field];
+                tableRow.appendChild(tableCell);
+            }
+            
+            // Add a click event to navigate to the game details page
+            tableRow.addEventListener("click", function(event) {
+                const gameId = event.target.closest("tr").getAttribute("data-id");
+                window.location.href = tableUrl + `${gameId}`;
+            });
+            
+            // Append the new row to the table
+            historyTable.appendChild(tableRow);
+        }
+    }
+
+    // Function to convert a time difference into a human-readable format
+    function convertTime(time) {
+        // Calculate the number of days from the time difference
+        const days = Math.floor(time/86400000);
+        if (days > 0) {
+            // If the time difference is in days, update the cell with the corresponding text and continue to the next row
+            return convertTimeToString(days, "day");
+        }
     
+        // Calculate the number of hours from the time difference
+        const hours = Math.floor(time/3600000);
+        if (hours > 0) {
+            // If the time difference is in hours, update the cell with the corresponding text and continue to the next row
+            return convertTimeToString(hours, "hour");
+        }
+    
+        // Calculate the number of minutes from the time difference
+        const minutes = Math.floor(time/60000);
+        if (minutes > 0) {
+            // If the time difference is in minutes, update the cell with the corresponding text and continue to the next row
+            return convertTimeToString(minutes, "minute");
+        }
+    
+        // Default case: If the time difference is less than a minute, display "Few seconds ago"
+        return "Few seconds ago";
+        
+    }
+
+    // Function to append an "s" to the unit if the value is greater than 1 (e.g., "days" instead of "day")
+    function convertTimeToString(quantity, unit) {
+        return `${quantity} ${unit}${(quantity == 1) ? "": "s"} ago`;
+    }
 });

@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.shortcuts import render
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.http import HttpResponseRedirect
@@ -87,32 +89,7 @@ def register(request):
         return render(request, "menu/register.html")
     
 def user(request):
-    user = request.user
-    last = -1
-
-    # Fetch all games where the logged-in user is either the white or black player,
-    # and the game has finished (finished_at is not null). The games are ordered
-    # by their finish time in descending order (most recent first).
-    userGames = list(Game.objects.filter((Q(white=user) | Q (black=user)) & Q(finished_at__isnull=False)).order_by('-finished_at')[:4])
-    if len(userGames) > 3:
-        last = userGames[-1].id
-
-    # Loop through the user's games to modify their attributes for the frontend
-    for i in range(len(userGames)):
-        # Convert the game's finish time to a JavaScript-compatible timestamp (milliseconds since epoch)
-        userGames[i].finished_at = int(userGames[i].finished_at.timestamp() * 1000)
-
-        # Determine whether the logged-in user won or lost the game
-        if userGames[i].winner == "w":
-            userGames[i].winner = "w" if user == userGames[i].white else "l"
-        if userGames[i].winner == "b":
-            userGames[i].winner = "l" if user == userGames[i].white else "w"
-    
-    # Prepare the games data to be passed to the template
-    res = {'games': userGames[:3], 'last': last}
-
-    # Render the template "menu/user.html" with the processed games data
-    return render(request, "menu/user.html", res)
+    return render(request, "menu/user.html")
 
 def change_password(request):
     if request.method == "POST":
@@ -181,20 +158,56 @@ def save_avatar(request):
             return JsonResponse({'message': f'An error occurred: {str(e)}'}, status=500)
 
 def load_more(request):
+    # Get the currently logged-in user
     user = request.user
+    # Number of games to retrieve at once
+    games_per_batch = 11
+
     if request.method == "POST":
         try:
             body = json.loads(request.body)
-            last = body.get('lastID')
+            # Parse the request body to retrieve the last game ID
+            last_game_id = body.get('lastID')
 
             # Check if the 'avatar' data is present in the request body
-            if not last:
-                # If no avatar data is provided, return a 400 Bad Request response
+            if not last_game_id:
                 return JsonResponse({'message': 'No ID provided!'}, status=400)
-            games = list(Game.objects.filter(id__gte=last).filter((Q(white=user) | Q(black=user)) & Q(finished_at__isnull=False)).order_by('-finished_at')[:4])
-            # Return a success response with a 201 Created status code
-            return JsonResponse({'message': str(games)}, status=201)
+            
+            # Determine the timestamp to filter games
+            if last_game_id > 0:
+                lastTime = Game.objects.get(pk=last_game_id).finished_at
+            else:
+                lastTime = datetime.utcnow()
+
+            # Retrieve games filtered by the current user, completed status, and timestamp
+            games = list(
+                Game.objects.filter(finished_at__lte=lastTime)
+                .filter((Q(white=user) | Q(black=user)) & Q(finished_at__isnull=False))
+                .order_by('-finished_at')[:games_per_batch]
+            )
+            
+            # Prepare the response data
+            game_data = []
+            for game in games:
+                # Determine whether the logged-in user won or lost the game
+                winner = game.winner
+                if game.winner == "w":
+                    winner = "w" if user == game.white else "l"
+                if game.winner == "b":
+                    winner = "l" if user == game.white else "w"
+
+                # Append game details to the response data
+                game_data.append({
+                    "id":game.id,
+                    "winner":winner,
+                    "time":int(game.finished_at.timestamp() * 1000),
+                    "white":game.white.username,
+                    "black":game.black.username
+                })
+
+            # Return the game data as a JSON response with a 201 status code
+            return JsonResponse({'message': game_data}, status=201)
         
-        # Handle any other exceptions that may occur during the process
-        except Exception as e:
-            return JsonResponse({'message': f'An error occurred: {str(e)}'}, status=500)
+        # Handle exceptions and return an error response
+        except Exception as error:
+            return JsonResponse({'message': f'An error occurred: {str(error)}'}, status=500)

@@ -38,19 +38,10 @@
 <div id="history-container">
     <div id="previous-games">
         <div id="game-history-text">Game history:</div>
-        <table id="historyTable">
-            {% for game in games %}
-            <tr class=winner_{{game.winner}} onclick="window.location='{% url 'table' game.id %}'">
-                <td>{{game.finished_at}}</td>
-                <td>{{game.white}}</td>
-                <td>{{game.black}}</td>
-            </tr>
-            {% endfor %}
-        </table>
-        {% if last != -1 %}
+        <div id="table-url" data-url="{% url 'table' 0 %}"></div>
+        <table id="historyTable"></table>
         <div id="load-more-url" data-url="{% url 'loadmore' %}"></div>
-        <div id="load-more-button" class="default-button">Load more</div>
-        {% endif %}
+        <div id="load-more-button" class="default-button hidden">Load more</div>
     </div>
 </div>
 {% endblock %}
