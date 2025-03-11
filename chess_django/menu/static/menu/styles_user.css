@@ -161,6 +161,10 @@
     height: 45px;
 }
 
+#load-more-button.hidden {
+    display: none;
+}
+
 #history-container td {
     display: flex;
     justify-content: center;

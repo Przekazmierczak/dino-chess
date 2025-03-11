@@ -238,7 +238,8 @@
     margin-right: 2%;
 }
 
-.hidden {
+#white_avatar.hidden,
+#black_avatar.hidden {
     display: none;
 }
 
