@@ -1,5 +1,5 @@
 :root {
-    --square-size: min(5.5vh, 4.5vw);
+    --square-size: min(min(5.3vh, 50px), min(4.5vw, 50px));
     --button-radius: 0.8rem;
     --text-player: rgb(255, 255, 255);
     --highlight-color: rgb(0, 100, 255);
@@ -110,7 +110,7 @@
 
 @media (max-width: 1300px) {
     :root {
-        --square-size: min(5.5vh, 5.2vw);
+        --square-size: min(5.3vh, 5.2vw);
     }
 }
 
@@ -957,7 +957,6 @@ td.checking {
     background-repeat: no-repeat;
     background-position: center;
     margin-left: -14%;
-    margin-top: 2%;
     padding: 9%;
 }
 

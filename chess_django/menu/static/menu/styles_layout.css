@@ -400,8 +400,6 @@ div::-webkit-scrollbar {
     left: var(--sidebar-expanded-width);
     width: var(--width-big-screen);
     min-height: 100vh;
-    top: 0;
-    padding: 0.5rem;
 }
 
 #logo_menu {
@@ -448,7 +446,6 @@ div::-webkit-scrollbar {
     #main-content {
         left: var(--sidebar-width);
         width: var(--width-medium-screen);
-        padding: 0.3rem;
     }
 }
 
@@ -479,7 +476,6 @@ div::-webkit-scrollbar {
         top: 40px;
         left: 0;
         width: var(--width-small-screen);
-        padding: 0.1rem;
         min-height: calc(100vh - 40px);
     }
 
