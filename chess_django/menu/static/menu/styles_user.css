@@ -1,5 +1,22 @@
 :root {
     --square-size: 45px;
+    --win-background-color: #4a7f4a;
+    --lose-background-color: #bd5743;
+    --draw-background-color: #4c6898;
+    --win-text-color: white;
+    --lose-text-color: white;
+    --draw-text-color: white;
+    --game-history-background-color: rgb(75, 75, 75);
+}
+
+:root.classic-mode {
+    --win-background-color: #202731;
+    --lose-background-color: #202731;
+    --draw-background-color: #202731;
+    --win-text-color: #bcf1bc;
+    --lose-text-color: #f1b1a4;
+    --draw-text-color: #a8c3ee;
+    --game-history-background-color: #12171e;
 }
 
 #user-container {
@@ -151,7 +168,7 @@
     align-items: center;
     height: 45px;
     color: white;
-    background-color: rgb(75, 75, 75);
+    background-color: var(--game-history-background-color);
     font-size: 15px;
     margin-bottom: 0.8rem;
     border-radius: 0.8rem;
@@ -177,7 +194,6 @@
 
 #history-container tr {
     display: flex;
-    color: white;
     text-decoration: none;
     border-radius: 0.8rem;
     font-size: 15px;
@@ -186,15 +202,18 @@
 }
 
 .winner_w {
-    background-color: #4a7f4a;
+    background-color: var(--win-background-color);
+    color: var(--win-text-color);
 }
 
 .winner_l {
-    background-color: #bd5743;
+    background-color: var(--lose-background-color);
+    color: var(--lose-text-color);
 }
 
 .winner_d {
-    background-color: #4c6898;
+    background-color: var(--draw-background-color);
+    color: var(--draw-text-color);
 }
 
 #history-container tr:hover {
