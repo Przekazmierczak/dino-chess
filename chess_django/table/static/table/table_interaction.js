@@ -51,6 +51,7 @@ function updateUI(tableSocket, state) {
 
 function reloadUI(tableSocket, state) {
     clearBoard();  // Re-clear the board of pieces and listeners
+    rotateBoard(state);  // Rotate the board for the black player
     colorBoard();  // Re-color the board
     displayLastMove(state);  // Function to display last move
     highlightChecks(state);  // Highlight checking squares
