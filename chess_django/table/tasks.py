@@ -67,7 +67,9 @@ def check_game_timeout(game_id, turn, total_moves, board_json):
             "prev_boards_id_moves": game.boards,
             "play_audio": False,
             "white_draw": False,
-            "black_draw": False
+            "black_draw": False,
+            "white_avatar": game.white.avatar,
+            "black_avatar": game.white.avatar
         }
 
         # Get the channel layer to send a message to the room group
@@ -157,7 +159,8 @@ def computer_move(game_id):
         True, winner, new_board_id, board, turn,
         checking, total_moves, soft_moves,
         white_time_left, black_time_left, last_move,
-        prev_boards_id_moves, True, game.white_draw, game.black_draw
+        prev_boards_id_moves, True, game.white_draw, game.black_draw,
+        game.white.avatar, game.black.avatar
         )
 
     # Get the channel layer to send a message to the room group
