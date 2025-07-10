@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const gamesPerBatch = 10;
     
     // Keep track of the last game ID loaded
-    let lastGameID = -1;
+    const lastGameID = { last: -1 };
 
     loadGameHistory(csrf_token, loadMoreUrl, historyTableElement, loadMoreButtonElement, tableUrl, gamesPerBatch, lastGameID);
     setupDropDownMenu(csrf_token);
@@ -33,20 +33,20 @@ function loadGameHistory(csrf_token, loadMoreUrl, historyTableElement, loadMoreB
 }
 
 // Function to fetch more games from the server
-function loadGames(last, loadMoreUrl, csrf_token, historyTableElement, loadMoreButtonElement, tableUrl, gamesPerBatch) {
+function loadGames(lastGameID, loadMoreUrl, csrf_token, historyTableElement, loadMoreButtonElement, tableUrl, gamesPerBatch) {
     fetch(loadMoreUrl, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
             'X-CSRFToken': csrf_token
         },
-        body: JSON.stringify({ lastID: last })
+        body: JSON.stringify({ lastID: lastGameID.last })
     })
     .then(response => response.json())
     .then(data => {
         console.log('Success:', data.message);
         createHistoryTable(historyTableElement, data.message, loadMoreButtonElement, tableUrl, gamesPerBatch);
-        lastGameID = data.message[data.message.length - 1]["id"];
+        lastGameID.last = data.message[data.message.length - 1]["id"];
     })
     .catch(error => {
         console.error('Error', error);
