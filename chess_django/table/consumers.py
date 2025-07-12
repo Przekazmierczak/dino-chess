@@ -172,7 +172,7 @@ class TableConsumer(AsyncWebsocketConsumer):
             return
         
         # Check if the black player is one of the AI-controlled opponents
-        computer = ["Easy_Computer", "Medium_Computer", "Hard_Computer", "Impossible_Computer"]
+        computer = ["Easy AI", "Medium AI", "Hard AI", "Impossible AI"]
         if black_player in computer and prev_state.turn == "white":
             # Schedule a task to make the AI move
             computer_move.apply_async((self.table_id,), countdown=1)

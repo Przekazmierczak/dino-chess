@@ -176,7 +176,7 @@
     display: flex;
     align-items: center;
     color: var(--text-player);
-    z-index: 25;
+    z-index: 17;
 }
 
 #black_player.unready, #black_time.unready,
@@ -854,25 +854,23 @@ td.checking {
     display: flex;
 }
 
-#modal_background_start {
-    background: var(--modal-url);
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-}
 
 #modal_background_start,
 #modal_background_promotion,
 #modal_background_winner,
 #modal_background_legend {
-    background-color: rgba(0, 0, 0, 0.3);
+    background-color: rgba(0, 0, 0, 0.4);
     position: absolute;
     display: none;
     top: 0;
     left: 0;
     height: 100%;
     width: 100%;
-    z-index: 15;
+    z-index: 18;
+}
+
+#modal_background_start {
+    z-index: 16;
 }
 
 #modal_background_legend {

@@ -137,7 +137,6 @@ class BlockTheKingMove(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.board = [[None for _ in range(ROWS)] for _ in range(COLS)]
-        cls.possible_moves = [[None for _ in range(ROWS)] for _ in range(COLS)]
         cls.turn, cls.opponents_attacks, cls.checkin_pieces, cls.pinned_pieces, cls.castling, cls.enpassant = "black", set(), {}, {}, "____", None
 
         cls.pieces_positions = [("pawn", "white", (1, 2)), ("rook", "white", (1, 5)), ("knight", "white", (0, 5)), ("bishop", "white", (2, 6)),
