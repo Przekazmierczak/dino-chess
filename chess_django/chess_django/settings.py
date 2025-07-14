@@ -30,7 +30,7 @@ DEBUG = bool(int(os.getenv('DEBUG', 0)))
 # Determine Redis host based on environment
 REDIS_HOST = "127.0.0.1" if DEBUG else os.environ.get('REDIS_HOST', 'redis')
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['dino-chess.com', 'www.dino-chess.com']
 
 
 # Application definition
@@ -157,3 +157,15 @@ else:
 # Celery
 CELERY_BROKER_URL = f'redis://{REDIS_HOST}:6379/0'
 CELERY_RESULT_BACKEND = f'redis://{REDIS_HOST}:6379/0'
+
+# HTTPS Support behind Nginx
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')  # Trust X-Forwarded-Proto from Nginx
+SECURE_SSL_REDIRECT = True  # Redirect HTTP to HTTPS in production
+SESSION_COOKIE_SECURE = True  # Use Secure cookies in production
+CSRF_COOKIE_SECURE = True  # Same for CSRF cookie
+
+# CSRF Origin Rules
+CSRF_TRUSTED_ORIGINS = [
+    "https://dino-chess.com",
+    "https://www.dino-chess.com",
+]

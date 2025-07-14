@@ -19,3 +19,6 @@ chess_django/staticfiles/
 
 # Ignore my virtual environment dictonary
 myenv/
+
+# Ignore certificate
+nginx/ssl

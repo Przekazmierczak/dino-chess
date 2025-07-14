@@ -1,4 +1,5 @@
-const lobbySocket = new WebSocket(`ws://${window.location.host}/ws/lobby/`);
+const protocol = window.location.protocol === "https:" ? "wss" : "ws";
+const lobbySocket = new WebSocket(`${protocol}://${window.location.host}/ws/lobby/`);
 
 lobbySocket.onmessage = function(e) {
     const state = JSON.parse(e.data);

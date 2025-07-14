@@ -12,7 +12,8 @@ document.addEventListener('DOMContentLoaded', function () {
 // Function to setup WebSocket connection
 function setupWebSocket() {
     const tableID = JSON.parse(document.getElementById('table_id').textContent);
-    const tableSocket = new WebSocket(`ws://${window.location.host}/ws/table/${tableID}/`);
+    const protocol = window.location.protocol === "https:" ? "wss" : "ws";
+    const tableSocket = new WebSocket(`${protocol}://${window.location.host}/ws/table/${tableID}/`);
     let state;  // Store the current state of the game
     
     // Add event listener for theme change button

@@ -51,8 +51,10 @@ services:
     container_name: nginx
     volumes:
       - ./chess_django/staticfiles:/app/chess_django/staticfiles  # Mount the static files
+      - ./nginx/ssl:/etc/nginx/ssl:ro  # Mount SSL certs as read-only
     ports:
       - "80:80"  # Expose Nginx on port 80
+      - "443:443"  # Expose Nginx on port 443
     depends_on:
       - django  # Ensure Django is running before Nginx starts
     networks:
