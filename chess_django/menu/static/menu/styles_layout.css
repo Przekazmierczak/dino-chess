@@ -139,7 +139,7 @@ a {
 }
 
 #sidebar {
-    height: 100vh;
+    height: calc(var(--real-vh, 1vh) * 100);
     width: var(--sidebar-expanded-width);
     overflow-y: auto;
     overflow-x: hidden;
@@ -399,7 +399,7 @@ div::-webkit-scrollbar {
     position: relative;
     left: var(--sidebar-expanded-width);
     width: var(--width-big-screen);
-    min-height: 100vh;
+    min-height: calc(var(--real-vh, 1vh) * 100);
 }
 
 #logo_menu {
@@ -476,7 +476,7 @@ div::-webkit-scrollbar {
         top: 40px;
         left: 0;
         width: var(--width-small-screen);
-        min-height: calc(100vh - 40px);
+        min-height: calc(calc(var(--real-vh, 1vh) * 100) - 40px);
     }
 
     #sidebar.active .ball {

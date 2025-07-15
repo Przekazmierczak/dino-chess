@@ -14,11 +14,22 @@ document.addEventListener('DOMContentLoaded', function () {
             sidebar.classList.add('active')
         }
     };
+
+    // Function to set a custom CSS variable representing 1% of the real viewport height
+    function setRealVH() {
+        // Calculate 1% of the current window's inner height
+        const vh = window.innerHeight * 0.01;
+        // Set a custom CSS variable (--real-vh)
+        document.documentElement.style.setProperty('--real-vh', `${vh}px`);
+    }
     
-    // Call handleResize function to set the initial state based on the current viewport size
+    // Call handleResize and setRealVH functions to set the initial state based on the current viewport size
     handleResize();
-    // Add an event listener for window resize to dynamically adjust sidebar visibility
+    setRealVH();
+
+    // Add an event listeners for window resize to dynamically adjust sidebar visibility
     window.addEventListener('resize', handleResize);
+    window.addEventListener('resize', setRealVH);
     
     // Set up an event listener on the button to toggle the 'active' class on the sidebar
     btn.onclick = function () {
