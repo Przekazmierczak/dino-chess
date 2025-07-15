@@ -61,7 +61,7 @@ def register(request):
         # Ensure username is not too long
         if len(password) >= 20:
             return render(request, "menu/register.html", {
-                "message": "Username is too long."
+                "message": "Passwords is too long."
             })
 
         if password != confirmation:
