@@ -22,3 +22,6 @@ myenv/
 
 # Ignore certificate
 nginx/ssl
+
+# Ignore docker-compose set for my AWS
+docker-compose-run.yml
