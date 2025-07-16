@@ -30,7 +30,8 @@ DEBUG = bool(int(os.getenv('DEBUG', 0)))
 # Determine Redis host based on environment
 REDIS_HOST = "127.0.0.1" if DEBUG else os.environ.get('REDIS_HOST', 'redis')
 
-ALLOWED_HOSTS = ['dino-chess.com', 'www.dino-chess.com']
+ALLOWED_HOSTS = ["*"]
+#ALLOWED_HOSTS = ['dino-chess.com', 'www.dino-chess.com']
 
 
 # Application definition
