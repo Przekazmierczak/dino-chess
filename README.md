@@ -1,8 +1,10 @@
 # Dino Chess - Django Chess App
 
-Dino Chess is a full-stack, real-time chess platform built with Django and powered by Stockfish AI. Whether you're facing a friend or challenging the AI, Dino Chess offers a secure, and responsive gameplay experience—deployed with Docker, hosted on AWS, and optimized through Cloudflare.
+Dino Chess is a full-stack, real-time chess platform built with Django. Whether you're facing a friend or challenging the AI, Dino Chess offers a secure, and responsive gameplay experience—deployed with Docker, hosted on AWS, and optimized through Cloudflare.
 
 #### To test the app visit: [dino-chess.com](https://dino-chess.com/)
+
+![dinochess1](https://github.com/user-attachments/assets/9cebe2ff-fb38-4cdb-a229-57f67efda104)
 
 ## Features
 
