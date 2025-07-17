@@ -79,7 +79,7 @@ Fully responsive layout using CSS media queries
 Optimized for mobile phones, tablets, and desktop screens
 Game board adjusts automatically to screen size for better user experience
 
-![dinochess3](https://github.com/user-attachments/assets/da1ca8bf-9938-48db-98e7-33615338c617)
+![dinochess3](https://github.com/user-attachments/assets/fb45b7aa-3c8d-4dc0-9ba0-c66ce81ef65c)
 
 ## Requirements
 
