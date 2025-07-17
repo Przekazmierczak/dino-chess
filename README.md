@@ -73,6 +73,8 @@ The application enforces full chess rules including:
   - Game-ending conditions
   - Full board history tracking for replay and analysis
 
+![dinochess4](https://github.com/user-attachments/assets/187bce41-3fe5-49d6-835e-1e11028904b5)
+
 ## Responsive Design
 
 Fully responsive layout using CSS media queries
